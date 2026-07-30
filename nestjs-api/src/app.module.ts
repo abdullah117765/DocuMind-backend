@@ -5,7 +5,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import authConfig from './config/auth.config';
+import mailConfig from './config/mail.config';
+import { AuthModule } from './modules/auth/auth.module';
+import { MailModule } from './modules/mail/mail.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -13,8 +18,12 @@ import { PrismaModule } from './modules/prisma/prisma.module';
       cache: true,
       envFilePath: '.env',
       isGlobal: true,
+      load: [authConfig, mailConfig],
     }),
     PrismaModule,
+    RedisModule,
+    MailModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
