@@ -1,13 +1,24 @@
-import { ConflictException, HttpException } from '@nestjs/common';
-import { hash } from 'bcrypt';
+import {
+  ConflictException,
+  ForbiddenException,
+  HttpException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { compare, hash } from 'bcrypt';
 import { randomUUID } from 'node:crypto';
-import { User } from '../../generated/prisma/client';
+import { AuthConfiguration } from '../../config/auth.config';
+import { Session, User } from '../../generated/prisma/client';
 import { MailService } from '../mail/mail.service';
 import { RedisService } from '../redis/redis.service';
 import { UsersService } from '../users/users.service';
+import { InvalidRefreshTokenException } from './auth.exceptions';
 import { AuthService } from './auth.service';
+import { SESSION_REVOCATION_REASONS, SessionService } from './session.service';
+import { TokenService } from './token.service';
 
 jest.mock('bcrypt', () => ({
+  compare: jest.fn(),
   hash: jest.fn(),
 }));
 
@@ -17,6 +28,22 @@ jest.mock('node:crypto', () => ({
 
 describe('AuthService', () => {
   const now = new Date('2026-01-01T00:00:00.000Z');
+  const authConfiguration: AuthConfiguration = {
+    accessToken: {
+      secret: 'a'.repeat(64),
+      expiresIn: '15m',
+      issuer: 'ai-doc-intel-api',
+      audience: 'ai-doc-intel-web',
+    },
+    refreshToken: {
+      pepper: 'b'.repeat(64),
+      ttlSeconds: 30 * 24 * 60 * 60,
+    },
+    loginRateLimit: {
+      maxAttempts: 5,
+      windowSeconds: 900,
+    },
+  };
   const user: User = {
     id: '7ee81b20-3a9a-4303-b370-89abf77f1bfc',
     email: 'user@example.com',
@@ -25,16 +52,46 @@ describe('AuthService', () => {
     createdAt: now,
     updatedAt: now,
   };
+  const verifiedUser: User = {
+    ...user,
+    isVerified: true,
+  };
+  const session: Session = {
+    id: '21e7748f-bd05-46bd-b6a2-c6eb20e1204f',
+    userId: user.id,
+    deviceName: 'Chrome on Windows',
+    userAgent: 'Mozilla/5.0',
+    ipAddress: '127.0.0.1',
+    createdAt: now,
+    lastActiveAt: now,
+    expiresAt: new Date('2026-01-31T00:00:00.000Z'),
+    revokedAt: null,
+    revokeReason: null,
+  };
+  const sessionWithRefreshToken = {
+    session,
+    refreshToken: 'opaque-refresh-token',
+  };
   const verificationToken = '550e8400-e29b-41d4-a716-446655440000';
   const findByEmail = jest.fn();
+  const findById = jest.fn();
   const createUser = jest.fn();
   const markVerified = jest.fn();
   const storeVerificationToken = jest.fn();
   const getVerificationUserId = jest.fn();
   const deleteVerificationToken = jest.fn();
+  const getLoginFailureState = jest.fn();
+  const recordLoginFailure = jest.fn();
+  const clearLoginFailures = jest.fn();
   const sendVerificationEmail = jest.fn();
+  const createSession = jest.fn();
+  const rotateRefreshToken = jest.fn();
+  const revokeSession = jest.fn();
+  const createAccessToken = jest.fn();
+  const getOrThrow = jest.fn().mockReturnValue(authConfiguration);
   const usersService = {
     findByEmail,
+    findById,
     create: createUser,
     markVerified,
   } as unknown as UsersService;
@@ -42,18 +99,42 @@ describe('AuthService', () => {
     storeVerificationToken,
     getVerificationUserId,
     deleteVerificationToken,
+    getLoginFailureState,
+    recordLoginFailure,
+    clearLoginFailures,
   } as unknown as RedisService;
   const mailService = {
     sendVerificationEmail,
   } as unknown as MailService;
-  const service = new AuthService(usersService, redisService, mailService);
+  const sessionService = {
+    createSession,
+    rotateRefreshToken,
+    revokeSession,
+  } as unknown as SessionService;
+  const tokenService = {
+    createAccessToken,
+  } as unknown as TokenService;
+  const configService = {
+    getOrThrow,
+  } as unknown as ConfigService;
+  const service = new AuthService(
+    usersService,
+    redisService,
+    mailService,
+    sessionService,
+    tokenService,
+    configService,
+  );
   const hashPassword = jest.mocked(hash);
+  const comparePassword = jest.mocked(compare);
   const createRandomUuid = jest.mocked(randomUUID);
 
   beforeEach(() => {
     jest.clearAllMocks();
     findByEmail.mockResolvedValue(null);
+    findById.mockResolvedValue(verifiedUser);
     hashPassword.mockResolvedValue(user.passwordHash);
+    comparePassword.mockResolvedValue(true);
     createUser.mockResolvedValue(user);
     createRandomUuid.mockReturnValue(verificationToken);
     storeVerificationToken.mockResolvedValue(undefined);
@@ -63,6 +144,19 @@ describe('AuthService', () => {
       isVerified: true,
     });
     deleteVerificationToken.mockResolvedValue(undefined);
+    getLoginFailureState.mockResolvedValue({
+      attempts: 0,
+      retryAfterSeconds: 0,
+    });
+    recordLoginFailure.mockResolvedValue({
+      attempts: 1,
+      retryAfterSeconds: 900,
+    });
+    clearLoginFailures.mockResolvedValue(undefined);
+    createSession.mockResolvedValue(sessionWithRefreshToken);
+    rotateRefreshToken.mockResolvedValue(sessionWithRefreshToken);
+    revokeSession.mockResolvedValue(undefined);
+    createAccessToken.mockResolvedValue('signed-access-token');
   });
 
   describe('register', () => {
@@ -120,6 +214,163 @@ describe('AuthService', () => {
       ).rejects.toThrow('Redis unavailable');
 
       expect(sendVerificationEmail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('login', () => {
+    const loginDto = {
+      email: user.email,
+      password: 'SecureP@ss1',
+    };
+    const metadata = {
+      deviceName: 'Chrome on Windows',
+      userAgent: 'Mozilla/5.0',
+      ipAddress: '127.0.0.1',
+    };
+
+    it('creates a device session and issues both tokens', async () => {
+      findByEmail.mockResolvedValue(verifiedUser);
+
+      await expect(service.login(loginDto, metadata)).resolves.toEqual({
+        data: {
+          user: {
+            id: verifiedUser.id,
+            email: verifiedUser.email,
+            isVerified: true,
+          },
+          session: {
+            id: session.id,
+            expiresAt: session.expiresAt,
+          },
+          accessToken: 'signed-access-token',
+          refreshToken: sessionWithRefreshToken.refreshToken,
+        },
+      });
+
+      expect(getLoginFailureState).toHaveBeenCalledWith(
+        'user@example.com|127.0.0.1',
+      );
+      expect(comparePassword).toHaveBeenCalledWith(
+        loginDto.password,
+        verifiedUser.passwordHash,
+      );
+      expect(clearLoginFailures).toHaveBeenCalledWith(
+        'user@example.com|127.0.0.1',
+      );
+      expect(createSession).toHaveBeenCalledWith(verifiedUser.id, metadata);
+      expect(createAccessToken).toHaveBeenCalledWith(
+        verifiedUser.id,
+        session.id,
+      );
+    });
+
+    it('uses the same unauthorized response for an unknown account', async () => {
+      comparePassword.mockResolvedValue(false);
+
+      await expect(service.login(loginDto, metadata)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+
+      expect(comparePassword).toHaveBeenCalledWith(
+        loginDto.password,
+        expect.stringMatching(/^\$2[aby]\$12\$/),
+      );
+      expect(recordLoginFailure).toHaveBeenCalledWith(
+        'user@example.com|127.0.0.1',
+        900,
+      );
+      expect(createSession).not.toHaveBeenCalled();
+    });
+
+    it('uses the same unauthorized response for an incorrect password', async () => {
+      findByEmail.mockResolvedValue(verifiedUser);
+      comparePassword.mockResolvedValue(false);
+
+      await expect(service.login(loginDto, metadata)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+
+      expect(recordLoginFailure).toHaveBeenCalledWith(
+        'user@example.com|127.0.0.1',
+        900,
+      );
+      expect(createSession).not.toHaveBeenCalled();
+    });
+
+    it('blocks authentication when the failure limit is reached', async () => {
+      getLoginFailureState.mockResolvedValue({
+        attempts: 5,
+        retryAfterSeconds: 600,
+      });
+
+      await expect(service.login(loginDto, metadata)).rejects.toMatchObject({
+        status: 429,
+      });
+      expect(findByEmail).not.toHaveBeenCalled();
+      expect(comparePassword).not.toHaveBeenCalled();
+    });
+
+    it('rejects an unverified account after valid credentials', async () => {
+      findByEmail.mockResolvedValue(user);
+
+      await expect(service.login(loginDto, metadata)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+
+      expect(clearLoginFailures).toHaveBeenCalled();
+      expect(createSession).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('refresh', () => {
+    it('rotates the refresh token and issues a new access token', async () => {
+      await expect(service.refresh('old-refresh-token')).resolves.toEqual({
+        data: {
+          user: {
+            id: verifiedUser.id,
+            email: verifiedUser.email,
+            isVerified: true,
+          },
+          session: {
+            id: session.id,
+            expiresAt: session.expiresAt,
+          },
+          accessToken: 'signed-access-token',
+          refreshToken: sessionWithRefreshToken.refreshToken,
+        },
+      });
+
+      expect(rotateRefreshToken).toHaveBeenCalledWith('old-refresh-token');
+      expect(findById).toHaveBeenCalledWith(session.userId);
+      expect(createAccessToken).toHaveBeenCalledWith(
+        verifiedUser.id,
+        session.id,
+      );
+    });
+
+    it('revokes a rotated session when its user is unavailable', async () => {
+      findById.mockResolvedValue(null);
+
+      await expect(service.refresh('old-refresh-token')).rejects.toBeInstanceOf(
+        InvalidRefreshTokenException,
+      );
+      expect(revokeSession).toHaveBeenCalledWith(
+        session.id,
+        SESSION_REVOCATION_REASONS.accountUnavailable,
+      );
+      expect(createAccessToken).not.toHaveBeenCalled();
+    });
+
+    it('revokes the session when access-token signing fails', async () => {
+      createAccessToken.mockRejectedValue(new Error('JWT signing failed'));
+
+      await expect(service.refresh('old-refresh-token')).rejects.toThrow(
+        'JWT signing failed',
+      );
+      expect(revokeSession).toHaveBeenCalledWith(
+        session.id,
+        SESSION_REVOCATION_REASONS.tokenIssueFailure,
+      );
     });
   });
 

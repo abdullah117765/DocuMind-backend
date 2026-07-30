@@ -32,9 +32,7 @@ export interface LoginFailureState {
 function toNonNegativeInteger(value: unknown): number {
   const parsedValue = Number(value);
 
-  return Number.isSafeInteger(parsedValue) && parsedValue > 0
-    ? parsedValue
-    : 0;
+  return Number.isSafeInteger(parsedValue) && parsedValue > 0 ? parsedValue : 0;
 }
 
 @Injectable()
@@ -98,9 +96,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.client.del(verificationTokenKey(token));
   }
 
-  async getLoginFailureState(
-    identifier: string,
-  ): Promise<LoginFailureState> {
+  async getLoginFailureState(identifier: string): Promise<LoginFailureState> {
     const key = loginFailureKey(identifier);
     const [rawAttempts, rawTtl] = await Promise.all([
       this.client.get(key),

@@ -62,8 +62,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     configService: ConfigService,
   ) {
-    this.authConfig =
-      configService.getOrThrow<AuthConfiguration>('auth');
+    this.authConfig = configService.getOrThrow<AuthConfiguration>('auth');
   }
 
   async register(dto: RegisterDto): Promise<AuthActionResult> {
@@ -118,10 +117,7 @@ export class AuthService {
     const failureState =
       await this.redisService.getLoginFailureState(rateLimitIdentifier);
 
-    if (
-      failureState.attempts >=
-      this.authConfig.loginRateLimit.maxAttempts
-    ) {
+    if (failureState.attempts >= this.authConfig.loginRateLimit.maxAttempts) {
       throw new HttpException(
         'Too many login attempts. Please try again later.',
         HttpStatus.TOO_MANY_REQUESTS,
@@ -150,17 +146,12 @@ export class AuthService {
       );
     }
 
-    const session = await this.sessionService.createSession(
-      user.id,
-      metadata,
-    );
+    const session = await this.sessionService.createSession(user.id, metadata);
 
     return this.createAuthenticatedSessionResult(user, session);
   }
 
-  async refresh(
-    rawRefreshToken: string,
-  ): Promise<AuthenticatedSessionResult> {
+  async refresh(rawRefreshToken: string): Promise<AuthenticatedSessionResult> {
     const rotatedSession =
       await this.sessionService.rotateRefreshToken(rawRefreshToken);
     const user = await this.usersService.findById(

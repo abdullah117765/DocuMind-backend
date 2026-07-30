@@ -11,6 +11,8 @@ describe('RedisService', () => {
     ping: jest.fn(),
     set: jest.fn(),
     get: jest.fn(),
+    ttl: jest.fn(),
+    eval: jest.fn(),
     del: jest.fn(),
   };
   const redisService = new RedisService(clientMock as unknown as Redis);
@@ -56,6 +58,51 @@ describe('RedisService', () => {
     await redisService.deleteVerificationToken('token-123');
 
     expect(clientMock.del).toHaveBeenCalledWith('verify:token-123');
+  });
+
+  it('reads failed-login attempts without exposing the identifier in the key', async () => {
+    clientMock.get.mockResolvedValue('2');
+    clientMock.ttl.mockResolvedValue(480);
+
+    await expect(
+      redisService.getLoginFailureState('user@example.com|127.0.0.1'),
+    ).resolves.toEqual({
+      attempts: 2,
+      retryAfterSeconds: 480,
+    });
+    expect(clientMock.get).toHaveBeenCalledWith(
+      expect.stringMatching(/^login-failure:[0-9a-f]{64}$/),
+    );
+    expect(clientMock.ttl).toHaveBeenCalledWith(
+      expect.stringMatching(/^login-failure:[0-9a-f]{64}$/),
+    );
+  });
+
+  it('atomically records a failed-login attempt and expiry', async () => {
+    clientMock.eval.mockResolvedValue([3, 900]);
+
+    await expect(
+      redisService.recordLoginFailure('user@example.com|127.0.0.1', 900),
+    ).resolves.toEqual({
+      attempts: 3,
+      retryAfterSeconds: 900,
+    });
+    expect(clientMock.eval).toHaveBeenCalledWith(
+      expect.any(String),
+      1,
+      expect.stringMatching(/^login-failure:[0-9a-f]{64}$/),
+      900,
+    );
+  });
+
+  it('clears failed-login attempts after valid credentials', async () => {
+    clientMock.del.mockResolvedValue(1);
+
+    await redisService.clearLoginFailures('user@example.com|127.0.0.1');
+
+    expect(clientMock.del).toHaveBeenCalledWith(
+      expect.stringMatching(/^login-failure:[0-9a-f]{64}$/),
+    );
   });
 
   it('rejects an invalid verification-token TTL', async () => {
