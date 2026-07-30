@@ -16,3 +16,9 @@ export class RefreshTokenReuseException extends HttpException {
     );
   }
 }
+
+export class InvalidPasswordResetOtpException extends HttpException {
+  constructor() {
+    super('Invalid or expired password reset code', INVALID_TOKEN_STATUS);
+  }
+}

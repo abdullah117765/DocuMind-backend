@@ -50,4 +50,20 @@ describe('MailService', () => {
       }),
     );
   });
+
+  it('sends a password-reset OTP with its expiry', async () => {
+    await service.sendPasswordResetOtp('  USER@Example.COM ', '042817', 10);
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'user@example.com',
+        subject: 'Your password reset code',
+        template: 'reset-password',
+        context: {
+          otp: '042817',
+          expiresInMinutes: 10,
+        },
+      }),
+    );
+  });
 });

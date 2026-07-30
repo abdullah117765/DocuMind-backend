@@ -12,8 +12,12 @@ import { Session, User } from '../../generated/prisma/client';
 import { MailService } from '../mail/mail.service';
 import { RedisService } from '../redis/redis.service';
 import { UsersService } from '../users/users.service';
-import { InvalidRefreshTokenException } from './auth.exceptions';
+import {
+  InvalidPasswordResetOtpException,
+  InvalidRefreshTokenException,
+} from './auth.exceptions';
 import { AuthService } from './auth.service';
+import { PasswordResetService } from './password-reset.service';
 import { SESSION_REVOCATION_REASONS, SessionService } from './session.service';
 import { TokenService } from './token.service';
 
@@ -87,7 +91,14 @@ describe('AuthService', () => {
   const createSession = jest.fn();
   const rotateRefreshToken = jest.fn();
   const revokeSession = jest.fn();
+  const resetPasswordAndRevokeSessions = jest.fn();
   const createAccessToken = jest.fn();
+  const assertPasswordResetRequestAllowed = jest.fn();
+  const issuePasswordResetOtp = jest.fn();
+  const verifyAndConsumePasswordResetOtp = jest.fn();
+  const invalidatePasswordResetOtp = jest.fn();
+  const getPasswordResetExpiryMinutes = jest.fn();
+  const sendPasswordResetOtp = jest.fn();
   const getOrThrow = jest.fn().mockReturnValue(authConfiguration);
   const usersService = {
     findByEmail,
@@ -105,11 +116,13 @@ describe('AuthService', () => {
   } as unknown as RedisService;
   const mailService = {
     sendVerificationEmail,
+    sendPasswordResetOtp,
   } as unknown as MailService;
   const sessionService = {
     createSession,
     rotateRefreshToken,
     revokeSession,
+    resetPasswordAndRevokeSessions,
   } as unknown as SessionService;
   const tokenService = {
     createAccessToken,
@@ -117,12 +130,20 @@ describe('AuthService', () => {
   const configService = {
     getOrThrow,
   } as unknown as ConfigService;
+  const passwordResetService = {
+    assertRequestAllowed: assertPasswordResetRequestAllowed,
+    issueOtp: issuePasswordResetOtp,
+    verifyAndConsumeOtp: verifyAndConsumePasswordResetOtp,
+    invalidateOtp: invalidatePasswordResetOtp,
+    getExpiryMinutes: getPasswordResetExpiryMinutes,
+  } as unknown as PasswordResetService;
   const service = new AuthService(
     usersService,
     redisService,
     mailService,
     sessionService,
     tokenService,
+    passwordResetService,
     configService,
   );
   const hashPassword = jest.mocked(hash);
@@ -156,7 +177,14 @@ describe('AuthService', () => {
     createSession.mockResolvedValue(sessionWithRefreshToken);
     rotateRefreshToken.mockResolvedValue(sessionWithRefreshToken);
     revokeSession.mockResolvedValue(undefined);
+    resetPasswordAndRevokeSessions.mockResolvedValue(undefined);
     createAccessToken.mockResolvedValue('signed-access-token');
+    assertPasswordResetRequestAllowed.mockResolvedValue(undefined);
+    issuePasswordResetOtp.mockResolvedValue('042817');
+    verifyAndConsumePasswordResetOtp.mockResolvedValue(undefined);
+    invalidatePasswordResetOtp.mockResolvedValue(undefined);
+    getPasswordResetExpiryMinutes.mockReturnValue(10);
+    sendPasswordResetOtp.mockResolvedValue(undefined);
   });
 
   describe('register', () => {
@@ -408,6 +436,110 @@ describe('AuthService', () => {
       );
 
       expect(deleteVerificationToken).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('forgotPassword', () => {
+    const request = {
+      email: user.email,
+    };
+    const genericResult = {
+      message:
+        'If an account exists for that email, a password reset code has been sent.',
+    };
+
+    it('sends a one-time code to an existing account', async () => {
+      findByEmail.mockResolvedValue(verifiedUser);
+
+      await expect(
+        service.forgotPassword(request, '203.0.113.10'),
+      ).resolves.toEqual(genericResult);
+
+      expect(assertPasswordResetRequestAllowed).toHaveBeenCalledWith(
+        user.email,
+        '203.0.113.10',
+      );
+      expect(issuePasswordResetOtp).toHaveBeenCalledWith(user.id);
+      expect(sendPasswordResetOtp).toHaveBeenCalledWith(
+        user.email,
+        '042817',
+        10,
+      );
+    });
+
+    it('returns the same response for an unknown account without sending mail', async () => {
+      await expect(
+        service.forgotPassword(request, '203.0.113.10'),
+      ).resolves.toEqual(genericResult);
+
+      expect(assertPasswordResetRequestAllowed).toHaveBeenCalled();
+      expect(issuePasswordResetOtp).not.toHaveBeenCalled();
+      expect(sendPasswordResetOtp).not.toHaveBeenCalled();
+    });
+
+    it('invalidates the OTP when email delivery fails', async () => {
+      findByEmail.mockResolvedValue(verifiedUser);
+      sendPasswordResetOtp.mockRejectedValue(new Error('SMTP unavailable'));
+
+      await expect(
+        service.forgotPassword(request, '203.0.113.10'),
+      ).rejects.toThrow('SMTP unavailable');
+
+      expect(invalidatePasswordResetOtp).toHaveBeenCalledWith(user.id);
+    });
+  });
+
+  describe('resetPassword', () => {
+    const request = {
+      email: user.email,
+      otp: '042817',
+      newPassword: 'NewSecureP@ss2',
+    };
+
+    it('consumes the OTP, hashes the new password, and revokes all sessions', async () => {
+      findByEmail.mockResolvedValue(verifiedUser);
+      hashPassword.mockResolvedValue('new-password-hash');
+
+      await expect(service.resetPassword(request)).resolves.toEqual({
+        message: 'Password reset successfully. Please log in again.',
+      });
+
+      expect(verifyAndConsumePasswordResetOtp).toHaveBeenCalledWith(
+        user.id,
+        request.otp,
+      );
+      expect(hashPassword).toHaveBeenCalledWith(request.newPassword, 12);
+      expect(resetPasswordAndRevokeSessions).toHaveBeenCalledWith(
+        user.id,
+        'new-password-hash',
+      );
+    });
+
+    it('uses the same invalid-code response for an unknown account', async () => {
+      await expect(service.resetPassword(request)).rejects.toBeInstanceOf(
+        InvalidPasswordResetOtpException,
+      );
+
+      expect(verifyAndConsumePasswordResetOtp).toHaveBeenCalledWith(
+        '00000000-0000-4000-8000-000000000000',
+        request.otp,
+      );
+      expect(hashPassword).not.toHaveBeenCalled();
+      expect(resetPasswordAndRevokeSessions).not.toHaveBeenCalled();
+    });
+
+    it('does not change the password when OTP verification fails', async () => {
+      findByEmail.mockResolvedValue(verifiedUser);
+      verifyAndConsumePasswordResetOtp.mockRejectedValue(
+        new InvalidPasswordResetOtpException(),
+      );
+
+      await expect(service.resetPassword(request)).rejects.toBeInstanceOf(
+        InvalidPasswordResetOtpException,
+      );
+
+      expect(hashPassword).not.toHaveBeenCalled();
+      expect(resetPasswordAndRevokeSessions).not.toHaveBeenCalled();
     });
   });
 });

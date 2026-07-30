@@ -8,11 +8,15 @@ describe('AuthController', () => {
   const verifyUserEmail = jest.fn();
   const loginUser = jest.fn();
   const refreshSession = jest.fn();
+  const requestPasswordReset = jest.fn();
+  const resetUserPassword = jest.fn();
   const authService = {
     register: registerUser,
     verifyEmail: verifyUserEmail,
     login: loginUser,
     refresh: refreshSession,
+    forgotPassword: requestPasswordReset,
+    resetPassword: resetUserPassword,
   } as unknown as AuthService;
   const controller = new AuthController(authService);
 
@@ -95,6 +99,40 @@ describe('AuthController', () => {
 
     await expect(controller.refresh(dto)).resolves.toEqual(result);
     expect(refreshSession).toHaveBeenCalledWith(dto.refreshToken);
+  });
+
+  it('delegates a password-reset request with the client IP', async () => {
+    const dto = {
+      email: 'user@example.com',
+    };
+    const request = {
+      ip: '203.0.113.10',
+    } as Request;
+    const result = {
+      message:
+        'If an account exists for that email, a password reset code has been sent.',
+    };
+    requestPasswordReset.mockResolvedValue(result);
+
+    await expect(controller.forgotPassword(dto, request)).resolves.toEqual(
+      result,
+    );
+    expect(requestPasswordReset).toHaveBeenCalledWith(dto, '203.0.113.10');
+  });
+
+  it('delegates password reset with the OTP and new password', async () => {
+    const dto = {
+      email: 'user@example.com',
+      otp: '042817',
+      newPassword: 'NewSecureP@ss2',
+    };
+    const result = {
+      message: 'Password reset successfully. Please log in again.',
+    };
+    resetUserPassword.mockResolvedValue(result);
+
+    await expect(controller.resetPassword(dto)).resolves.toEqual(result);
+    expect(resetUserPassword).toHaveBeenCalledWith(dto);
   });
 
   it('returns the current user and session without exposing token claims', () => {

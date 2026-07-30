@@ -7,6 +7,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import authConfig from './config/auth.config';
 import mailConfig from './config/mail.config';
+import passwordResetConfig from './config/password-reset.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './modules/mail/mail.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
@@ -18,7 +19,7 @@ import { RedisModule } from './modules/redis/redis.module';
       cache: true,
       envFilePath: '.env',
       isGlobal: true,
-      load: [authConfig, mailConfig],
+      load: [authConfig, mailConfig, passwordResetConfig],
     }),
     PrismaModule,
     RedisModule,

@@ -48,7 +48,11 @@ describe('SessionService', () => {
   const refreshTokenFindUnique = jest.fn();
   const refreshTokenCreate = jest.fn();
   const refreshTokenUpdateMany = jest.fn();
+  const userUpdate = jest.fn();
   const transactionClient = {
+    user: {
+      update: userUpdate,
+    },
     session: {
       updateMany: sessionUpdateMany,
     },
@@ -102,6 +106,7 @@ describe('SessionService', () => {
       id: nextToken.id,
       tokenHash: nextToken.tokenHash,
     });
+    userUpdate.mockResolvedValue(undefined);
   });
 
   it('creates a device session and initial refresh-token record', async () => {
@@ -230,6 +235,44 @@ describe('SessionService', () => {
       now,
     );
 
+    expect(sessionUpdateMany).toHaveBeenCalledWith({
+      where: {
+        userId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: now,
+        revokeReason: SESSION_REVOCATION_REASONS.passwordReset,
+      },
+    });
+    expect(refreshTokenUpdateMany).toHaveBeenCalledWith({
+      where: {
+        session: {
+          userId,
+        },
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: now,
+      },
+    });
+  });
+
+  it('atomically updates a password and revokes every active session', async () => {
+    await service.resetPasswordAndRevokeSessions(
+      userId,
+      'new-password-hash',
+      now,
+    );
+
+    expect(userUpdate).toHaveBeenCalledWith({
+      where: {
+        id: userId,
+      },
+      data: {
+        passwordHash: 'new-password-hash',
+      },
+    });
     expect(sessionUpdateMany).toHaveBeenCalledWith({
       where: {
         userId,

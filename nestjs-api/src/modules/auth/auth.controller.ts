@@ -32,9 +32,11 @@ import {
   AuthenticatedSessionResult,
   AuthService,
 } from './auth.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import type { AuthenticatedPrincipal } from './interfaces/authenticated-principal.interface';
 import type { DeviceMetadata } from './session.service';
@@ -190,6 +192,62 @@ export class AuthController {
   })
   refresh(@Body() dto: RefreshTokenDto): Promise<AuthenticatedSessionResult> {
     return this.authService.refresh(dto.refreshToken);
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Email a one-time password reset code' })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiOkResponse({
+    description: 'Generic response returned whether or not the account exists',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        message:
+          'If an account exists for that email, a password reset code has been sent.',
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Email validation failed',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Too many password reset requests',
+  })
+  forgotPassword(
+    @Body() dto: ForgotPasswordDto,
+    @Req() request: Request,
+  ): Promise<AuthActionResult> {
+    return this.authService.forgotPassword(dto, request.ip);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reset a password using the emailed one-time code',
+  })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiOkResponse({
+    description: 'Password reset and all existing sessions revoked',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        message: 'Password reset successfully. Please log in again.',
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Email, OTP, or new-password validation failed',
+  })
+  @ApiResponse({
+    status: 498,
+    description:
+      'The password reset code is invalid, expired, used, or locked after too many attempts',
+  })
+  resetPassword(@Body() dto: ResetPasswordDto): Promise<AuthActionResult> {
+    return this.authService.resetPassword(dto);
   }
 
   @Get('me')

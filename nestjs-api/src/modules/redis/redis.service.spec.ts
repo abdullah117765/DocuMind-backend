@@ -105,6 +105,80 @@ describe('RedisService', () => {
     );
   });
 
+  it('records password-reset requests without exposing the identifier', async () => {
+    clientMock.eval.mockResolvedValue([2, 720]);
+
+    await expect(
+      redisService.recordPasswordResetRequest(
+        'user@example.com|127.0.0.1',
+        900,
+      ),
+    ).resolves.toEqual({
+      attempts: 2,
+      retryAfterSeconds: 720,
+    });
+    expect(clientMock.eval).toHaveBeenCalledWith(
+      expect.any(String),
+      1,
+      expect.stringMatching(/^password-reset-rate:[0-9a-f]{64}$/),
+      900,
+    );
+  });
+
+  it('stores only a password-reset OTP hash with an expiry', async () => {
+    const otpHash = 'a'.repeat(64);
+    clientMock.set.mockResolvedValue('OK');
+
+    await redisService.storePasswordResetOtp('user-123', otpHash, 600);
+
+    expect(clientMock.set).toHaveBeenCalledWith(
+      expect.stringMatching(/^password-reset-otp:[0-9a-f]{64}$/),
+      `${otpHash}:0`,
+      'EX',
+      600,
+    );
+  });
+
+  it('atomically consumes a valid password-reset OTP', async () => {
+    const otpHash = 'a'.repeat(64);
+    clientMock.eval.mockResolvedValue(['valid', 1]);
+
+    await expect(
+      redisService.consumePasswordResetOtp('user-123', otpHash, 5),
+    ).resolves.toEqual({
+      status: 'valid',
+      attemptsRemaining: 4,
+    });
+    expect(clientMock.eval).toHaveBeenCalledWith(
+      expect.any(String),
+      1,
+      expect.stringMatching(/^password-reset-otp:[0-9a-f]{64}$/),
+      otpHash,
+      5,
+    );
+  });
+
+  it('reports a password-reset OTP locked after too many attempts', async () => {
+    clientMock.eval.mockResolvedValue(['locked', 5]);
+
+    await expect(
+      redisService.consumePasswordResetOtp('user-123', 'a'.repeat(64), 5),
+    ).resolves.toEqual({
+      status: 'locked',
+      attemptsRemaining: 0,
+    });
+  });
+
+  it('deletes a password-reset OTP', async () => {
+    clientMock.del.mockResolvedValue(1);
+
+    await redisService.deletePasswordResetOtp('user-123');
+
+    expect(clientMock.del).toHaveBeenCalledWith(
+      expect.stringMatching(/^password-reset-otp:[0-9a-f]{64}$/),
+    );
+  });
+
   it('rejects an invalid verification-token TTL', async () => {
     await expect(
       redisService.storeVerificationToken('token-123', 'user-123', 0),

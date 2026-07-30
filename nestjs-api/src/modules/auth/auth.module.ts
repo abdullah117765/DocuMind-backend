@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { PasswordResetService } from './password-reset.service';
 import { SessionService } from './session.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { TokenService } from './token.service';
@@ -39,6 +40,7 @@ import { TokenService } from './token.service';
     AuthService,
     JwtAuthGuard,
     JwtStrategy,
+    PasswordResetService,
     SessionService,
     TokenService,
   ],

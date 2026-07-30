@@ -30,6 +30,30 @@ export class MailService {
     });
   }
 
+  async sendPasswordResetOtp(
+    email: string,
+    otp: string,
+    expiresInMinutes: number,
+  ): Promise<void> {
+    await this.mailerService.sendMail({
+      to: email.trim().toLowerCase(),
+      subject: 'Your password reset code',
+      template: 'reset-password',
+      context: {
+        otp,
+        expiresInMinutes,
+      },
+      text: [
+        'A password reset was requested for your AI Document Intelligence account.',
+        '',
+        `Your password reset code is: ${otp}`,
+        '',
+        `This code expires in ${expiresInMinutes} minutes and can only be used once.`,
+        'If you did not request a password reset, you can ignore this email.',
+      ].join('\n'),
+    });
+  }
+
   private createVerificationUrl(token: string): string {
     const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
     const verificationUrl = new URL(

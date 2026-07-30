@@ -94,6 +94,22 @@ export class SessionService {
     });
   }
 
+  listActiveUserSessions(
+    userId: string,
+    now = new Date(),
+  ): Promise<Session[]> {
+    return this.prisma.session.findMany({
+      where: {
+        userId,
+        revokedAt: null,
+        expiresAt: {
+          gt: now,
+        },
+      },
+      orderBy: [{ lastActiveAt: 'desc' }, { createdAt: 'desc' }],
+    });
+  }
+
   async rotateRefreshToken(
     rawRefreshToken: string,
     now = new Date(),
@@ -179,6 +195,46 @@ export class SessionService {
     });
   }
 
+  revokeUserSession(
+    userId: string,
+    sessionId: string,
+    reason: SessionRevocationReason,
+    now = new Date(),
+  ): Promise<boolean> {
+    return this.prisma.$transaction(async (transaction) => {
+      const revokedSession = await transaction.session.updateMany({
+        where: {
+          id: sessionId,
+          userId,
+          revokedAt: null,
+          expiresAt: {
+            gt: now,
+          },
+        },
+        data: {
+          revokedAt: now,
+          revokeReason: reason,
+        },
+      });
+
+      if (revokedSession.count !== 1) {
+        return false;
+      }
+
+      await transaction.refreshToken.updateMany({
+        where: {
+          sessionId,
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: now,
+        },
+      });
+
+      return true;
+    });
+  }
+
   async revokeAllUserSessions(
     userId: string,
     reason: SessionRevocationReason,
@@ -193,6 +249,44 @@ export class SessionService {
         data: {
           revokedAt: now,
           revokeReason: reason,
+        },
+      });
+      await transaction.refreshToken.updateMany({
+        where: {
+          session: {
+            userId,
+          },
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: now,
+        },
+      });
+    });
+  }
+
+  async resetPasswordAndRevokeSessions(
+    userId: string,
+    passwordHash: string,
+    now = new Date(),
+  ): Promise<void> {
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          passwordHash,
+        },
+      });
+      await transaction.session.updateMany({
+        where: {
+          userId,
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: now,
+          revokeReason: SESSION_REVOCATION_REASONS.passwordReset,
         },
       });
       await transaction.refreshToken.updateMany({
