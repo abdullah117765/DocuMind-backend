@@ -4,9 +4,12 @@ import { JwtModule, JwtModuleOptions, JwtSignOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthConfiguration } from '../../config/auth.config';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AuthCookieService } from './auth-cookie.service';
+import { CsrfService } from './csrf.service';
 import { PasswordResetService } from './password-reset.service';
 import { SessionService } from './session.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -38,12 +41,23 @@ import { TokenService } from './token.service';
   controllers: [AuthController],
   providers: [
     AuthService,
+    AuthCookieService,
+    CsrfGuard,
+    CsrfService,
     JwtAuthGuard,
     JwtStrategy,
     PasswordResetService,
     SessionService,
     TokenService,
   ],
-  exports: [AuthService, JwtAuthGuard, SessionService, TokenService],
+  exports: [
+    AuthCookieService,
+    AuthService,
+    CsrfGuard,
+    CsrfService,
+    JwtAuthGuard,
+    SessionService,
+    TokenService,
+  ],
 })
 export class AuthModule {}

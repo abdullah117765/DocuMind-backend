@@ -1,6 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthConfiguration } from '../../../config/auth.config';
+import { CookieConfiguration } from '../../../config/cookie.config';
 import { Session, User } from '../../../generated/prisma/client';
 import { UsersService } from '../../users/users.service';
 import { SessionService } from '../session.service';
@@ -50,7 +51,18 @@ describe('JwtStrategy', () => {
       windowSeconds: 900,
     },
   };
-  const getOrThrow = jest.fn().mockReturnValue(authConfiguration);
+  const cookieConfiguration: CookieConfiguration = {
+    accessCookieName: 'access_token',
+    refreshCookieName: 'refresh_token',
+    csrfCookieName: 'csrf_token',
+    secure: false,
+    sameSite: 'lax',
+    authPath: '/api/auth',
+    csrfSecret: 'c'.repeat(64),
+  };
+  const getOrThrow = jest.fn((key: string) =>
+    key === 'auth' ? authConfiguration : cookieConfiguration,
+  );
   const findActiveSession = jest.fn();
   const findById = jest.fn();
   const configService = {

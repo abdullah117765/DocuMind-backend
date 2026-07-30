@@ -7,6 +7,14 @@ export function configureSwagger(
   configService: ConfigService,
   apiPrefix: string,
 ): void {
+  const accessCookieName = configService.get<string>(
+    'ACCESS_COOKIE_NAME',
+    'access_token',
+  );
+  const refreshCookieName = configService.get<string>(
+    'REFRESH_COOKIE_NAME',
+    'refresh_token',
+  );
   const config = new DocumentBuilder()
     .setTitle(
       configService.get<string>(
@@ -24,6 +32,8 @@ export function configureSwagger(
       },
       'access-token',
     )
+    .addCookieAuth(accessCookieName, undefined, 'access-cookie')
+    .addCookieAuth(refreshCookieName, undefined, 'refresh-cookie')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

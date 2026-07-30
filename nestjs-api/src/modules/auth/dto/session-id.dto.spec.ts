@@ -11,17 +11,16 @@ describe('SessionIdDto', () => {
     await expect(validate(dto)).resolves.toHaveLength(0);
   });
 
-  it.each([
-    '',
-    'not-a-uuid',
-    '550e8400-e29b-11d4-a716-446655440000',
-  ])('rejects an invalid session identifier: %s', async (sessionId) => {
-    const dto = plainToInstance(SessionIdDto, {
-      sessionId,
-    });
+  it.each(['', 'not-a-uuid', '550e8400-e29b-11d4-a716-446655440000'])(
+    'rejects an invalid session identifier: %s',
+    async (sessionId) => {
+      const dto = plainToInstance(SessionIdDto, {
+        sessionId,
+      });
 
-    const errors = await validate(dto);
+      const errors = await validate(dto);
 
-    expect(errors.some((error) => error.property === 'sessionId')).toBe(true);
-  });
+      expect(errors.some((error) => error.property === 'sessionId')).toBe(true);
+    },
+  );
 });

@@ -257,8 +257,7 @@ export class AuthService {
     userId: string,
     currentSessionId: string,
   ): Promise<ActiveSessionsResult> {
-    const sessions =
-      await this.sessionService.listActiveUserSessions(userId);
+    const sessions = await this.sessionService.listActiveUserSessions(userId);
 
     return {
       data: {
@@ -273,7 +272,9 @@ export class AuthService {
             expiresAt: session.expiresAt,
             isCurrent: session.id === currentSessionId,
           }))
-          .sort((left, right) => Number(right.isCurrent) - Number(left.isCurrent)),
+          .sort(
+            (left, right) => Number(right.isCurrent) - Number(left.isCurrent),
+          ),
       },
     };
   }

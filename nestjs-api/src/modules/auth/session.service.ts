@@ -94,10 +94,7 @@ export class SessionService {
     });
   }
 
-  listActiveUserSessions(
-    userId: string,
-    now = new Date(),
-  ): Promise<Session[]> {
+  listActiveUserSessions(userId: string, now = new Date()): Promise<Session[]> {
     return this.prisma.session.findMany({
       where: {
         userId,

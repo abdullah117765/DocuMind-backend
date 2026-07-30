@@ -2,6 +2,7 @@ import {
   ConflictException,
   ForbiddenException,
   HttpException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -91,6 +92,9 @@ describe('AuthService', () => {
   const createSession = jest.fn();
   const rotateRefreshToken = jest.fn();
   const revokeSession = jest.fn();
+  const listActiveUserSessions = jest.fn();
+  const revokeUserSession = jest.fn();
+  const revokeAllUserSessions = jest.fn();
   const resetPasswordAndRevokeSessions = jest.fn();
   const createAccessToken = jest.fn();
   const assertPasswordResetRequestAllowed = jest.fn();
@@ -122,6 +126,9 @@ describe('AuthService', () => {
     createSession,
     rotateRefreshToken,
     revokeSession,
+    listActiveUserSessions,
+    revokeUserSession,
+    revokeAllUserSessions,
     resetPasswordAndRevokeSessions,
   } as unknown as SessionService;
   const tokenService = {
@@ -177,6 +184,9 @@ describe('AuthService', () => {
     createSession.mockResolvedValue(sessionWithRefreshToken);
     rotateRefreshToken.mockResolvedValue(sessionWithRefreshToken);
     revokeSession.mockResolvedValue(undefined);
+    listActiveUserSessions.mockResolvedValue([session]);
+    revokeUserSession.mockResolvedValue(true);
+    revokeAllUserSessions.mockResolvedValue(undefined);
     resetPasswordAndRevokeSessions.mockResolvedValue(undefined);
     createAccessToken.mockResolvedValue('signed-access-token');
     assertPasswordResetRequestAllowed.mockResolvedValue(undefined);
@@ -540,6 +550,94 @@ describe('AuthService', () => {
 
       expect(hashPassword).not.toHaveBeenCalled();
       expect(resetPasswordAndRevokeSessions).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('device sessions', () => {
+    const otherSession: Session = {
+      ...session,
+      id: '6ba7b810-9dad-41d1-80b4-00c04fd430c8',
+      deviceName: 'Safari on iPhone',
+      userAgent: 'Mobile Safari',
+      ipAddress: '203.0.113.10',
+    };
+
+    it('lists only safe session details with the current device first', async () => {
+      listActiveUserSessions.mockResolvedValue([otherSession, session]);
+
+      await expect(
+        service.getActiveSessions(user.id, session.id),
+      ).resolves.toEqual({
+        data: {
+          sessions: [
+            {
+              id: session.id,
+              deviceName: session.deviceName,
+              userAgent: session.userAgent,
+              ipAddress: session.ipAddress,
+              createdAt: session.createdAt,
+              lastActiveAt: session.lastActiveAt,
+              expiresAt: session.expiresAt,
+              isCurrent: true,
+            },
+            {
+              id: otherSession.id,
+              deviceName: otherSession.deviceName,
+              userAgent: otherSession.userAgent,
+              ipAddress: otherSession.ipAddress,
+              createdAt: otherSession.createdAt,
+              lastActiveAt: otherSession.lastActiveAt,
+              expiresAt: otherSession.expiresAt,
+              isCurrent: false,
+            },
+          ],
+        },
+      });
+      expect(listActiveUserSessions).toHaveBeenCalledWith(user.id);
+    });
+
+    it('logs out the current session', async () => {
+      await expect(
+        service.logoutCurrentSession(user.id, session.id),
+      ).resolves.toEqual({
+        message: 'Logged out successfully',
+      });
+      expect(revokeUserSession).toHaveBeenCalledWith(
+        user.id,
+        session.id,
+        SESSION_REVOCATION_REASONS.logout,
+      );
+    });
+
+    it('logs out one selected owned session', async () => {
+      await expect(
+        service.logoutSession(user.id, otherSession.id),
+      ).resolves.toEqual({
+        message: 'Session logged out successfully',
+      });
+      expect(revokeUserSession).toHaveBeenCalledWith(
+        user.id,
+        otherSession.id,
+        SESSION_REVOCATION_REASONS.logout,
+      );
+    });
+
+    it('does not reveal an inactive or foreign session', async () => {
+      revokeUserSession.mockResolvedValue(false);
+
+      await expect(
+        service.logoutSession(user.id, otherSession.id),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('logs out every user session', async () => {
+      await expect(service.logoutAllSessions(user.id)).resolves.toEqual({
+        message: 'Logged out from all devices successfully',
+      });
+      expect(revokeAllUserSessions).toHaveBeenCalledWith(
+        user.id,
+        SESSION_REVOCATION_REASONS.logoutAll,
+      );
     });
   });
 });

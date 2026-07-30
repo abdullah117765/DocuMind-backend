@@ -44,6 +44,7 @@ describe('SessionService', () => {
   };
   const sessionCreate = jest.fn();
   const sessionFindFirst = jest.fn();
+  const sessionFindMany = jest.fn();
   const sessionUpdateMany = jest.fn();
   const refreshTokenFindUnique = jest.fn();
   const refreshTokenCreate = jest.fn();
@@ -72,6 +73,7 @@ describe('SessionService', () => {
     session: {
       create: sessionCreate,
       findFirst: sessionFindFirst,
+      findMany: sessionFindMany,
     },
     refreshToken: {
       findUnique: refreshTokenFindUnique,
@@ -99,6 +101,7 @@ describe('SessionService', () => {
     refreshTokenFindUnique.mockResolvedValue(storedToken);
     sessionCreate.mockResolvedValue(session);
     sessionFindFirst.mockResolvedValue(session);
+    sessionFindMany.mockResolvedValue([session]);
     sessionUpdateMany.mockResolvedValue({ count: 1 });
     refreshTokenUpdateMany.mockResolvedValue({ count: 1 });
     refreshTokenCreate.mockResolvedValue({
@@ -151,6 +154,22 @@ describe('SessionService', () => {
           gt: now,
         },
       },
+    });
+  });
+
+  it('lists only active user sessions in activity order', async () => {
+    await expect(service.listActiveUserSessions(userId, now)).resolves.toEqual([
+      session,
+    ]);
+    expect(sessionFindMany).toHaveBeenCalledWith({
+      where: {
+        userId,
+        revokedAt: null,
+        expiresAt: {
+          gt: now,
+        },
+      },
+      orderBy: [{ lastActiveAt: 'desc' }, { createdAt: 'desc' }],
     });
   });
 
@@ -256,6 +275,56 @@ describe('SessionService', () => {
         revokedAt: now,
       },
     });
+  });
+
+  it('revokes one owned active session and its refresh tokens', async () => {
+    await expect(
+      service.revokeUserSession(
+        userId,
+        sessionId,
+        SESSION_REVOCATION_REASONS.logout,
+        now,
+      ),
+    ).resolves.toBe(true);
+
+    expect(sessionUpdateMany).toHaveBeenCalledWith({
+      where: {
+        id: sessionId,
+        userId,
+        revokedAt: null,
+        expiresAt: {
+          gt: now,
+        },
+      },
+      data: {
+        revokedAt: now,
+        revokeReason: SESSION_REVOCATION_REASONS.logout,
+      },
+    });
+    expect(refreshTokenUpdateMany).toHaveBeenCalledWith({
+      where: {
+        sessionId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: now,
+      },
+    });
+  });
+
+  it('does not revoke tokens when the session is inactive or not owned', async () => {
+    sessionUpdateMany.mockResolvedValue({ count: 0 });
+
+    await expect(
+      service.revokeUserSession(
+        userId,
+        sessionId,
+        SESSION_REVOCATION_REASONS.logout,
+        now,
+      ),
+    ).resolves.toBe(false);
+
+    expect(refreshTokenUpdateMany).not.toHaveBeenCalled();
   });
 
   it('atomically updates a password and revokes every active session', async () => {

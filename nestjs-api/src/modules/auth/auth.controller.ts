@@ -1,12 +1,15 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Post,
+  Param,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -14,9 +17,11 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
+  ApiCookieAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiHeader,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
@@ -24,19 +29,26 @@ import {
   ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import {
+  AuthCookieService,
+  BrowserAuthenticatedSessionResult,
+} from './auth-cookie.service';
+import { InvalidRefreshTokenException } from './auth.exceptions';
+import {
+  ActiveSessionsResult,
   AuthActionResult,
-  AuthenticatedSessionResult,
   AuthService,
 } from './auth.service';
+import { CsrfService } from './csrf.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { SessionIdDto } from './dto/session-id.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import type { AuthenticatedPrincipal } from './interfaces/authenticated-principal.interface';
 import type { DeviceMetadata } from './session.service';
@@ -54,10 +66,20 @@ interface CurrentAuthenticationResult {
   };
 }
 
+interface CsrfTokenResult {
+  data: {
+    csrfToken: string;
+  };
+}
+
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly authCookieService: AuthCookieService,
+    private readonly csrfService: CsrfService,
+  ) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -105,9 +127,41 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  @Get('csrf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Issue a signed CSRF token and matching cookie' })
+  @ApiOkResponse({
+    description:
+      'CSRF token returned in the response and a readable CSRF cookie',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        data: {
+          csrfToken: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ',
+        },
+      },
+    },
+  })
+  getCsrfToken(
+    @Res({ passthrough: true }) response: Response,
+  ): CsrfTokenResult {
+    return {
+      data: {
+        csrfToken: this.csrfService.issueToken(response),
+      },
+    };
+  }
+
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Log in and create a device session' })
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
+  })
   @ApiHeader({
     name: 'x-device-name',
     required: false,
@@ -115,7 +169,8 @@ export class AuthController {
   })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({
-    description: 'Login successful and access/refresh tokens issued',
+    description:
+      'Login successful; access and refresh tokens set as HttpOnly cookies',
     schema: {
       example: {
         status: 'success',
@@ -130,9 +185,6 @@ export class AuthController {
             id: '21e7748f-bd05-46bd-b6a2-c6eb20e1204f',
             expiresAt: '2026-08-29T12:00:00.000Z',
           },
-          accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-          refreshToken:
-            '550e8400-e29b-41d4-a716-446655440000.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ',
         },
       },
     },
@@ -145,22 +197,35 @@ export class AuthController {
   @ApiTooManyRequestsResponse({
     description: 'Too many failed login attempts',
   })
-  login(
+  async login(
     @Body() dto: LoginDto,
     @Req() request: Request,
-  ): Promise<AuthenticatedSessionResult> {
-    return this.authService.login(dto, this.getDeviceMetadata(request));
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<BrowserAuthenticatedSessionResult> {
+    const result = await this.authService.login(
+      dto,
+      this.getDeviceMetadata(request),
+    );
+
+    this.authCookieService.setAuthenticationCookies(response, result);
+
+    return this.authCookieService.toBrowserResult(result);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
+  @ApiCookieAuth('refresh-cookie')
   @ApiOperation({
     summary: 'Rotate a refresh token and issue a new token pair',
   })
-  @ApiBody({ type: RefreshTokenDto })
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
+  })
   @ApiOkResponse({
-    description:
-      'Refresh token rotated and replacement access/refresh tokens issued',
+    description: 'Refresh token rotated and replacement HttpOnly cookies set',
     schema: {
       example: {
         status: 'success',
@@ -175,23 +240,36 @@ export class AuthController {
             id: '21e7748f-bd05-46bd-b6a2-c6eb20e1204f',
             expiresAt: '2026-08-29T12:15:00.000Z',
           },
-          accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-          refreshToken:
-            '6ba7b810-9dad-41d1-80b4-00c04fd430c8.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ',
         },
       },
     },
-  })
-  @ApiBadRequestResponse({
-    description: 'Refresh token input validation failed',
   })
   @ApiResponse({
     status: 498,
     description:
       'Refresh token is invalid, expired, revoked, or has already been used',
   })
-  refresh(@Body() dto: RefreshTokenDto): Promise<AuthenticatedSessionResult> {
-    return this.authService.refresh(dto.refreshToken);
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<BrowserAuthenticatedSessionResult> {
+    const refreshToken = this.authCookieService.getRefreshToken(request);
+
+    if (!refreshToken) {
+      this.authCookieService.clearAuthenticationCookies(response);
+      throw new InvalidRefreshTokenException();
+    }
+
+    try {
+      const result = await this.authService.refresh(refreshToken);
+
+      this.authCookieService.setAuthenticationCookies(response, result);
+
+      return this.authCookieService.toBrowserResult(result);
+    } catch (error: unknown) {
+      this.authCookieService.clearAuthenticationCookies(response);
+      throw error;
+    }
   }
 
   @Post('forgot-password')
@@ -246,14 +324,22 @@ export class AuthController {
     description:
       'The password reset code is invalid, expired, used, or locked after too many attempts',
   })
-  resetPassword(@Body() dto: ResetPasswordDto): Promise<AuthActionResult> {
-    return this.authService.resetPassword(dto);
+  async resetPassword(
+    @Body() dto: ResetPasswordDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthActionResult> {
+    const result = await this.authService.resetPassword(dto);
+
+    this.authCookieService.clearAuthenticationCookies(response);
+
+    return result;
   }
 
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
+  @ApiCookieAuth('access-cookie')
   @ApiOperation({ summary: 'Get the current authenticated user and session' })
   @ApiOkResponse({
     description: 'Current authenticated user and session',
@@ -292,6 +378,168 @@ export class AuthController {
         },
       },
     };
+  }
+
+  @Get('sessions')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiCookieAuth('access-cookie')
+  @ApiOperation({ summary: 'List active device sessions' })
+  @ApiOkResponse({
+    description: 'Active sessions with the current device identified',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        data: {
+          sessions: [
+            {
+              id: '21e7748f-bd05-46bd-b6a2-c6eb20e1204f',
+              deviceName: 'Chrome on Windows',
+              userAgent: 'Mozilla/5.0',
+              ipAddress: '127.0.0.1',
+              createdAt: '2026-07-30T12:00:00.000Z',
+              lastActiveAt: '2026-07-30T12:00:00.000Z',
+              expiresAt: '2026-08-29T12:00:00.000Z',
+              isCurrent: true,
+            },
+          ],
+        },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token is missing, invalid, or its session is inactive',
+  })
+  getActiveSessions(
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Promise<ActiveSessionsResult> {
+    return this.authService.getActiveSessions(
+      principal.userId,
+      principal.sessionId,
+    );
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
+  @ApiBearerAuth('access-token')
+  @ApiCookieAuth('access-cookie')
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
+  })
+  @ApiOperation({ summary: 'Log out the current device session' })
+  @ApiOkResponse({
+    description: 'Current session and its refresh tokens revoked',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        message: 'Logged out successfully',
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token is missing, invalid, or its session is inactive',
+  })
+  async logout(
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthActionResult> {
+    const result = await this.authService.logoutCurrentSession(
+      principal.userId,
+      principal.sessionId,
+    );
+
+    this.authCookieService.clearAuthenticationCookies(response);
+
+    return result;
+  }
+
+  @Delete('sessions/:sessionId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
+  @ApiBearerAuth('access-token')
+  @ApiCookieAuth('access-cookie')
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
+  })
+  @ApiOperation({ summary: 'Log out one owned device session' })
+  @ApiOkResponse({
+    description: 'Selected session and its refresh tokens revoked',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        message: 'Session logged out successfully',
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Session ID is not a UUID v4',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token is missing, invalid, or its session is inactive',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The session is inactive, does not exist, or belongs to another user',
+  })
+  async logoutSession(
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Param() dto: SessionIdDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthActionResult> {
+    const result = await this.authService.logoutSession(
+      principal.userId,
+      dto.sessionId,
+    );
+
+    if (dto.sessionId === principal.sessionId) {
+      this.authCookieService.clearAuthenticationCookies(response);
+    }
+
+    return result;
+  }
+
+  @Post('logout-all')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
+  @ApiBearerAuth('access-token')
+  @ApiCookieAuth('access-cookie')
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
+  })
+  @ApiOperation({ summary: 'Log out every device session' })
+  @ApiOkResponse({
+    description: 'Every session and refresh token for the user revoked',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        message: 'Logged out from all devices successfully',
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token is missing, invalid, or its session is inactive',
+  })
+  async logoutAll(
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthActionResult> {
+    const result = await this.authService.logoutAllSessions(principal.userId);
+
+    this.authCookieService.clearAuthenticationCookies(response);
+
+    return result;
   }
 
   @Get('verify-email')
