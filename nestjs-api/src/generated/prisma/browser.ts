@@ -32,3 +32,38 @@ export type Session = Prisma.SessionModel
  * 
  */
 export type RefreshToken = Prisma.RefreshTokenModel
+/**
+ * Model Organization
+ * 
+ */
+export type Organization = Prisma.OrganizationModel
+/**
+ * Model OrganizationMembership
+ * 
+ */
+export type OrganizationMembership = Prisma.OrganizationMembershipModel
+/**
+ * Model Role
+ * 
+ */
+export type Role = Prisma.RoleModel
+/**
+ * Model Permission
+ * 
+ */
+export type Permission = Prisma.PermissionModel
+/**
+ * Model RolePermission
+ * 
+ */
+export type RolePermission = Prisma.RolePermissionModel
+/**
+ * Model MembershipRole
+ * 
+ */
+export type MembershipRole = Prisma.MembershipRoleModel
+/**
+ * Model PlatformUserRole
+ * 
+ */
+export type PlatformUserRole = Prisma.PlatformUserRoleModel

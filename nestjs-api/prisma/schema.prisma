@@ -9,14 +9,37 @@ datasource db {
   provider = "postgresql"
 }
 
+enum OrganizationMembershipStatus {
+  ACTIVE
+  SUSPENDED
+  REMOVED
+}
+
+enum AccessScope {
+  PLATFORM
+  ORGANIZATION
+}
+
+enum RoleAssignmentSource {
+  BOOTSTRAP
+  ADMIN
+  SYSTEM
+}
+
 model User {
-  id           String    @id @default(uuid()) @db.Uuid
-  email        String    @unique
-  passwordHash String    @map("password_hash")
-  isVerified   Boolean   @default(false) @map("is_verified")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  sessions     Session[]
+  id                            String                   @id @default(uuid()) @db.Uuid
+  email                         String                   @unique
+  passwordHash                  String                   @map("password_hash")
+  isVerified                    Boolean                  @default(false) @map("is_verified")
+  createdAt                     DateTime                 @default(now()) @map("created_at")
+  updatedAt                     DateTime                 @updatedAt @map("updated_at")
+  sessions                      Session[]
+  organizationMemberships       OrganizationMembership[]
+  createdOrganizations          Organization[]           @relation("OrganizationCreator")
+  platformRoleAssignments       PlatformUserRole[]       @relation("PlatformRoleAssignee")
+  platformRoleAssignmentsMade   PlatformUserRole[]       @relation("PlatformRoleAssigner")
+  membershipRoleAssignmentsMade MembershipRole[]         @relation("MembershipRoleAssigner")
+  rolePermissionGrantsMade      RolePermission[]         @relation("RolePermissionGranter")
 
   @@map("users")
 }
@@ -56,4 +79,125 @@ model RefreshToken {
   @@index([sessionId, revokedAt])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+model Organization {
+  id              String                   @id @default(uuid()) @db.Uuid
+  name            String                   @db.VarChar(150)
+  slug            String                   @unique @db.VarChar(100)
+  createdByUserId String?                  @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime                 @default(now()) @map("created_at")
+  updatedAt       DateTime                 @updatedAt @map("updated_at")
+  createdBy       User?                    @relation("OrganizationCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  memberships     OrganizationMembership[]
+  roles           Role[]
+
+  @@index([createdByUserId])
+  @@map("organizations")
+}
+
+model OrganizationMembership {
+  id             String                       @id @default(uuid()) @db.Uuid
+  organizationId String                       @map("organization_id") @db.Uuid
+  userId         String                       @map("user_id") @db.Uuid
+  status         OrganizationMembershipStatus @default(ACTIVE)
+  createdAt      DateTime                     @default(now()) @map("created_at")
+  updatedAt      DateTime                     @updatedAt @map("updated_at")
+  organization   Organization                 @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roles          MembershipRole[]
+
+  @@unique([organizationId, userId])
+  @@index([userId, status])
+  @@index([organizationId, status])
+  @@map("organization_memberships")
+}
+
+model Role {
+  id                      String             @id @default(uuid()) @db.Uuid
+  organizationId          String?            @map("organization_id") @db.Uuid
+  systemKey               String?            @unique @map("system_key") @db.VarChar(100)
+  name                    String             @db.VarChar(100)
+  normalizedName          String             @map("normalized_name") @db.VarChar(100)
+  description             String?            @db.VarChar(500)
+  scope                   AccessScope
+  isSystem                Boolean            @default(false) @map("is_system")
+  isActive                Boolean            @default(true) @map("is_active")
+  autoGrantNewPermissions Boolean            @default(false) @map("auto_grant_new_permissions")
+  createdAt               DateTime           @default(now()) @map("created_at")
+  updatedAt               DateTime           @updatedAt @map("updated_at")
+  organization            Organization?      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  permissions             RolePermission[]
+  membershipAssignments   MembershipRole[]
+  platformAssignments     PlatformUserRole[]
+
+  @@unique([organizationId, normalizedName])
+  @@index([scope, isActive])
+  @@index([organizationId, isActive])
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid()) @db.Uuid
+  code        String           @unique @db.VarChar(120)
+  name        String           @db.VarChar(100)
+  description String?          @db.VarChar(500)
+  category    String           @db.VarChar(80)
+  scope       AccessScope
+  isSystem    Boolean          @default(false) @map("is_system")
+  isActive    Boolean          @default(true) @map("is_active")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  roles       RolePermission[]
+
+  @@index([scope, isActive])
+  @@index([category, isActive])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId          String     @map("role_id") @db.Uuid
+  permissionId    String     @map("permission_id") @db.Uuid
+  grantedByUserId String?    @map("granted_by_user_id") @db.Uuid
+  grantedAt       DateTime   @default(now()) @map("granted_at")
+  role            Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission      Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  grantedBy       User?      @relation("RolePermissionGranter", fields: [grantedByUserId], references: [id], onDelete: SetNull)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@index([grantedByUserId])
+  @@map("role_permissions")
+}
+
+model MembershipRole {
+  membershipId     String                 @map("membership_id") @db.Uuid
+  roleId           String                 @map("role_id") @db.Uuid
+  assignedByUserId String?                @map("assigned_by_user_id") @db.Uuid
+  source           RoleAssignmentSource   @default(ADMIN)
+  assignedAt       DateTime               @default(now()) @map("assigned_at")
+  membership       OrganizationMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  role             Role                   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assignedBy       User?                  @relation("MembershipRoleAssigner", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  @@id([membershipId, roleId])
+  @@index([roleId])
+  @@index([assignedByUserId])
+  @@map("membership_roles")
+}
+
+model PlatformUserRole {
+  userId           String               @map("user_id") @db.Uuid
+  roleId           String               @map("role_id") @db.Uuid
+  assignedByUserId String?              @map("assigned_by_user_id") @db.Uuid
+  source           RoleAssignmentSource @default(ADMIN)
+  assignedAt       DateTime             @default(now()) @map("assigned_at")
+  user             User                 @relation("PlatformRoleAssignee", fields: [userId], references: [id], onDelete: Cascade)
+  role             Role                 @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assignedBy       User?                @relation("PlatformRoleAssigner", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+  @@index([assignedByUserId])
+  @@map("platform_user_roles")
 }

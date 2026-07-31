@@ -5,10 +5,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import accessControlConfig from './config/access-control.config';
 import authConfig from './config/auth.config';
 import cookieConfig from './config/cookie.config';
 import mailConfig from './config/mail.config';
 import passwordResetConfig from './config/password-reset.config';
+import { AccessControlModule } from './modules/access-control/access-control.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './modules/mail/mail.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
@@ -20,12 +22,19 @@ import { RedisModule } from './modules/redis/redis.module';
       cache: true,
       envFilePath: '.env',
       isGlobal: true,
-      load: [authConfig, cookieConfig, mailConfig, passwordResetConfig],
+      load: [
+        accessControlConfig,
+        authConfig,
+        cookieConfig,
+        mailConfig,
+        passwordResetConfig,
+      ],
     }),
     PrismaModule,
     RedisModule,
     MailModule,
     AuthModule,
+    AccessControlModule,
   ],
   controllers: [AppController],
   providers: [

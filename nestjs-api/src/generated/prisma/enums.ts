@@ -9,7 +9,27 @@
 * 🟢 You can import this file directly.
 */
 
+export const OrganizationMembershipStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  REMOVED: 'REMOVED'
+} as const
+
+export type OrganizationMembershipStatus = (typeof OrganizationMembershipStatus)[keyof typeof OrganizationMembershipStatus]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const AccessScope = {
+  PLATFORM: 'PLATFORM',
+  ORGANIZATION: 'ORGANIZATION'
+} as const
+
+export type AccessScope = (typeof AccessScope)[keyof typeof AccessScope]
+
+
+export const RoleAssignmentSource = {
+  BOOTSTRAP: 'BOOTSTRAP',
+  ADMIN: 'ADMIN',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type RoleAssignmentSource = (typeof RoleAssignmentSource)[keyof typeof RoleAssignmentSource]
