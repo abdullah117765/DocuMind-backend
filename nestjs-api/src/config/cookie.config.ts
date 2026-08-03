@@ -8,6 +8,7 @@ export type CookieSameSite = 'lax' | 'strict' | 'none';
 export interface CookieConfiguration {
   accessCookieName: string;
   refreshCookieName: string;
+  passwordResetCookieName: string;
   csrfCookieName: string;
   secure: boolean;
   sameSite: CookieSameSite;
@@ -88,6 +89,10 @@ export default registerAs('cookies', (): CookieConfiguration => {
   return {
     accessCookieName: getCookieName('ACCESS_COOKIE_NAME', 'access_token'),
     refreshCookieName: getCookieName('REFRESH_COOKIE_NAME', 'refresh_token'),
+    passwordResetCookieName: getCookieName(
+      'PASSWORD_RESET_COOKIE_NAME',
+      'password_reset_token',
+    ),
     csrfCookieName: getCookieName('CSRF_COOKIE_NAME', 'csrf_token'),
     secure,
     sameSite,

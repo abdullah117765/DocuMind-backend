@@ -7,9 +7,13 @@ import {
   normalizeEmail,
 } from '../../../common/validation/email.validation';
 
-export class LoginDto {
+function trimOtp(value: unknown): unknown {
+  return typeof value === 'string' ? value.trim() : value;
+}
+
+export class VerifyPasswordResetOtpDto {
   @ApiProperty({
-    description: 'Registered email address',
+    description: 'Email address that requested the reset code',
     example: 'user@example.com',
     maxLength: 254,
   })
@@ -20,14 +24,15 @@ export class LoginDto {
   email!: string;
 
   @ApiProperty({
-    description: 'Account password',
-    example: 'SecureP@ss1',
-    maxLength: 64,
-    format: 'password',
+    description: 'Six-digit password reset code sent by email',
+    example: '042817',
+    minLength: 6,
+    maxLength: 6,
   })
-  @IsString({ message: 'Password must be a string' })
-  @IsNotEmpty({ message: 'Password is required' })
-  @Matches(/\S/, { message: 'Password is required' })
-  @MaxLength(64, { message: 'Password must not exceed 64 characters' })
-  password!: string;
+  @Transform(({ value }: TransformFnParams): unknown => trimOtp(value))
+  @IsString({ message: 'OTP must be a string' })
+  @Matches(/^\d{6}$/, {
+    message: 'OTP must contain exactly 6 digits',
+  })
+  otp!: string;
 }

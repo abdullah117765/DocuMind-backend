@@ -8,10 +8,13 @@ import type { AuthenticatedPrincipal } from './interfaces/authenticated-principa
 describe('AuthController', () => {
   const registerUser = jest.fn();
   const verifyUserEmail = jest.fn();
+  const resendVerificationEmail = jest.fn();
   const loginUser = jest.fn();
   const refreshSession = jest.fn();
   const requestPasswordReset = jest.fn();
+  const verifyPasswordResetOtp = jest.fn();
   const resetUserPassword = jest.fn();
+  const getPasswordResetSession = jest.fn();
   const getActiveSessions = jest.fn();
   const logoutCurrentSession = jest.fn();
   const logoutSession = jest.fn();
@@ -20,14 +23,20 @@ describe('AuthController', () => {
   const clearAuthenticationCookies = jest.fn();
   const getRefreshToken = jest.fn();
   const toBrowserResult = jest.fn();
+  const setPasswordResetCookie = jest.fn();
+  const clearPasswordResetCookie = jest.fn();
+  const getPasswordResetToken = jest.fn();
   const issueCsrfToken = jest.fn();
   const authService = {
     register: registerUser,
     verifyEmail: verifyUserEmail,
+    resendVerificationEmail,
     login: loginUser,
     refresh: refreshSession,
     forgotPassword: requestPasswordReset,
+    verifyPasswordResetOtp,
     resetPassword: resetUserPassword,
+    getPasswordResetSession,
     getActiveSessions,
     logoutCurrentSession,
     logoutSession,
@@ -38,6 +47,9 @@ describe('AuthController', () => {
     clearAuthenticationCookies,
     getRefreshToken,
     toBrowserResult,
+    setPasswordResetCookie,
+    clearPasswordResetCookie,
+    getPasswordResetToken,
   } as unknown as AuthCookieService;
   const csrfService = {
     issueToken: issueCsrfToken,
@@ -59,6 +71,7 @@ describe('AuthController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getRefreshToken.mockReturnValue('refresh-token');
+    getPasswordResetToken.mockReturnValue('password-reset-token');
   });
 
   it('issues a CSRF token through the response cookie service', () => {
@@ -87,17 +100,34 @@ describe('AuthController', () => {
     expect(registerUser).toHaveBeenCalledWith(dto);
   });
 
-  it('delegates email verification using the query token', async () => {
+  it('delegates explicit email verification using the request body token', async () => {
     const dto = {
       token: '550e8400-e29b-41d4-a716-446655440000',
     };
     const result = {
-      message: 'Email verified successfully',
+      message: 'Email verified successfully. You can now sign in.',
+      data: { state: 'VERIFIED' },
     };
     verifyUserEmail.mockResolvedValue(result);
 
     await expect(controller.verifyEmail(dto)).resolves.toEqual(result);
     expect(verifyUserEmail).toHaveBeenCalledWith(dto.token);
+  });
+
+  it('delegates a generic verification-email resend with the client IP', async () => {
+    const dto = { email: 'user@example.com' };
+    const request = { ip: '203.0.113.10' } as Request;
+    const result = {
+      message:
+        'If an unverified account exists for this email, a new verification link has been sent.',
+      data: { cooldownSeconds: 60 },
+    };
+    resendVerificationEmail.mockResolvedValue(result);
+
+    await expect(
+      controller.resendVerificationEmail(dto, request),
+    ).resolves.toEqual(result);
+    expect(resendVerificationEmail).toHaveBeenCalledWith(dto, '203.0.113.10');
   });
 
   it('delegates login with request device metadata', async () => {
@@ -196,21 +226,65 @@ describe('AuthController', () => {
       ip: '203.0.113.10',
     } as Request;
     const result = {
-      message:
-        'If an account exists for that email, a password reset code has been sent.',
+      message: 'A six-digit verification code has been sent to your email.',
+      data: {
+        cooldownSeconds: 40,
+        expiresInSeconds: 120,
+      },
     };
     requestPasswordReset.mockResolvedValue(result);
 
-    await expect(controller.forgotPassword(dto, request)).resolves.toEqual(
-      result,
-    );
+    await expect(
+      controller.forgotPassword(dto, request, response),
+    ).resolves.toEqual(result);
     expect(requestPasswordReset).toHaveBeenCalledWith(dto, '203.0.113.10');
+    expect(clearPasswordResetCookie).toHaveBeenCalledWith(response);
   });
 
-  it('delegates password reset with the OTP and new password', async () => {
+  it('delegates password-reset OTP verification', async () => {
     const dto = {
       email: 'user@example.com',
       otp: '042817',
+    };
+    const result = {
+      message: 'Code verified. You can now choose a new password.',
+      data: {
+        resetToken: '550e8400-e29b-41d4-a716-446655440000',
+        expiresInSeconds: 120,
+      },
+    };
+    verifyPasswordResetOtp.mockResolvedValue(result);
+
+    await expect(
+      controller.verifyPasswordResetOtp(dto, response),
+    ).resolves.toEqual({
+      message: result.message,
+      data: { expiresInSeconds: 120 },
+    });
+    expect(verifyPasswordResetOtp).toHaveBeenCalledWith(dto);
+    expect(setPasswordResetCookie).toHaveBeenCalledWith(
+      response,
+      result.data.resetToken,
+      120,
+    );
+  });
+
+  it('reports the active HttpOnly password-reset session', async () => {
+    const request = {} as Request;
+    const result = { data: { expiresInSeconds: 91 } };
+    getPasswordResetSession.mockResolvedValue(result);
+
+    await expect(controller.getPasswordResetSession(request)).resolves.toEqual(
+      result,
+    );
+    expect(getPasswordResetToken).toHaveBeenCalledWith(request);
+    expect(getPasswordResetSession).toHaveBeenCalledWith(
+      'password-reset-token',
+    );
+  });
+
+  it('delegates password reset with the verified token and new password', async () => {
+    const dto = {
       newPassword: 'NewSecureP@ss2',
     };
     const result = {
@@ -218,10 +292,13 @@ describe('AuthController', () => {
     };
     resetUserPassword.mockResolvedValue(result);
 
-    await expect(controller.resetPassword(dto, response)).resolves.toEqual(
-      result,
-    );
-    expect(resetUserPassword).toHaveBeenCalledWith(dto);
+    const request = {} as Request;
+
+    await expect(
+      controller.resetPassword(dto, request, response),
+    ).resolves.toEqual(result);
+    expect(resetUserPassword).toHaveBeenCalledWith(dto, 'password-reset-token');
+    expect(clearPasswordResetCookie).toHaveBeenCalledWith(response);
     expect(clearAuthenticationCookies).toHaveBeenCalledWith(response);
   });
 

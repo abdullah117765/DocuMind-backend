@@ -54,6 +54,7 @@ describe('JwtStrategy', () => {
   const cookieConfiguration: CookieConfiguration = {
     accessCookieName: 'access_token',
     refreshCookieName: 'refresh_token',
+    passwordResetCookieName: 'password_reset_token',
     csrfCookieName: 'csrf_token',
     secure: false,
     sameSite: 'lax',

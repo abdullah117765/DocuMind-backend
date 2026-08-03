@@ -1,5 +1,4 @@
 import type Redis from 'ioredis';
-import { VERIFICATION_TOKEN_TTL_SECONDS } from './redis.constants';
 import { RedisService } from './redis.service';
 
 describe('RedisService', () => {
@@ -28,36 +27,6 @@ describe('RedisService', () => {
     await redisService.onModuleInit();
 
     expect(clientMock.connect).toHaveBeenCalledTimes(1);
-  });
-
-  it('stores a verification token with the default 24-hour TTL', async () => {
-    clientMock.set.mockResolvedValue('OK');
-
-    await redisService.storeVerificationToken('token-123', 'user-123');
-
-    expect(clientMock.set).toHaveBeenCalledWith(
-      'verify:token-123',
-      'user-123',
-      'EX',
-      VERIFICATION_TOKEN_TTL_SECONDS,
-    );
-  });
-
-  it('retrieves the user ID associated with a verification token', async () => {
-    clientMock.get.mockResolvedValue('user-123');
-
-    await expect(redisService.getVerificationUserId('token-123')).resolves.toBe(
-      'user-123',
-    );
-    expect(clientMock.get).toHaveBeenCalledWith('verify:token-123');
-  });
-
-  it('deletes a verification token', async () => {
-    clientMock.del.mockResolvedValue(1);
-
-    await redisService.deleteVerificationToken('token-123');
-
-    expect(clientMock.del).toHaveBeenCalledWith('verify:token-123');
   });
 
   it('reads failed-login attempts without exposing the identifier in the key', async () => {
@@ -125,6 +94,84 @@ describe('RedisService', () => {
     );
   });
 
+  it('atomically acquires a password-reset resend cooldown', async () => {
+    clientMock.set.mockResolvedValue('OK');
+
+    await expect(
+      redisService.acquirePasswordResetCooldown('user@example.com', 40),
+    ).resolves.toEqual({
+      acquired: true,
+      retryAfterSeconds: 40,
+    });
+    expect(clientMock.set).toHaveBeenCalledWith(
+      expect.stringMatching(/^password-reset-cooldown:[0-9a-f]{64}$/),
+      '1',
+      'EX',
+      40,
+      'NX',
+    );
+  });
+
+  it('returns the remaining cooldown when a resend is too early', async () => {
+    clientMock.set.mockResolvedValue(null);
+    clientMock.ttl.mockResolvedValue(23);
+
+    await expect(
+      redisService.acquirePasswordResetCooldown('user@example.com', 40),
+    ).resolves.toEqual({
+      acquired: false,
+      retryAfterSeconds: 23,
+    });
+  });
+
+  it('releases a password-reset resend cooldown', async () => {
+    clientMock.del.mockResolvedValue(1);
+
+    await redisService.releasePasswordResetCooldown('user@example.com');
+
+    expect(clientMock.del).toHaveBeenCalledWith(
+      expect.stringMatching(/^password-reset-cooldown:[0-9a-f]{64}$/),
+    );
+  });
+
+  it('records email-verification requests without exposing identifiers', async () => {
+    clientMock.eval.mockResolvedValue([2, 720]);
+
+    await expect(
+      redisService.recordEmailVerificationRequest(
+        'email:user@example.com',
+        900,
+      ),
+    ).resolves.toEqual({ attempts: 2, retryAfterSeconds: 720 });
+    expect(clientMock.eval).toHaveBeenCalledWith(
+      expect.any(String),
+      1,
+      expect.stringMatching(/^email-verification-rate:[0-9a-f]{64}$/),
+      900,
+    );
+  });
+
+  it('acquires and releases an email-verification resend cooldown', async () => {
+    clientMock.set.mockResolvedValue('OK');
+    clientMock.del.mockResolvedValue(1);
+
+    await expect(
+      redisService.acquireEmailVerificationCooldown('user@example.com', 60),
+    ).resolves.toEqual({ acquired: true, retryAfterSeconds: 60 });
+    expect(clientMock.set).toHaveBeenCalledWith(
+      expect.stringMatching(/^email-verification-cooldown:[0-9a-f]{64}$/),
+      '1',
+      'EX',
+      60,
+      'NX',
+    );
+
+    await redisService.releaseEmailVerificationCooldown('user@example.com');
+    expect(clientMock.del).toHaveBeenCalledWith(
+      expect.stringMatching(/^email-verification-cooldown:[0-9a-f]{64}$/),
+    );
+  });
+
   it('stores only a password-reset OTP hash with an expiry', async () => {
     const otpHash = 'a'.repeat(64);
     clientMock.set.mockResolvedValue('OK');
@@ -177,13 +224,6 @@ describe('RedisService', () => {
     expect(clientMock.del).toHaveBeenCalledWith(
       expect.stringMatching(/^password-reset-otp:[0-9a-f]{64}$/),
     );
-  });
-
-  it('rejects an invalid verification-token TTL', async () => {
-    await expect(
-      redisService.storeVerificationToken('token-123', 'user-123', 0),
-    ).rejects.toThrow(RangeError);
-    expect(clientMock.set).not.toHaveBeenCalled();
   });
 
   it('closes a connected client during module shutdown', async () => {

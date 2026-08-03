@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   HttpException,
@@ -9,20 +10,27 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { compare, hash } from 'bcrypt';
-import { randomUUID } from 'node:crypto';
 import { AuthConfiguration } from '../../config/auth.config';
 import { User } from '../../generated/prisma/client';
 import { MailService } from '../mail/mail.service';
 import { RedisService } from '../redis/redis.service';
 import { UsersService } from '../users/users.service';
 import {
-  InvalidPasswordResetOtpException,
+  AUTH_ERROR_REASONS,
+  InvalidPasswordResetAuthorizationException,
   InvalidRefreshTokenException,
 } from './auth.exceptions';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyPasswordResetOtpDto } from './dto/verify-password-reset-otp.dto';
+import { ResendVerificationEmailDto } from './dto/resend-verification-email.dto';
+import {
+  EmailVerificationActionResult,
+  EmailVerificationResendResult,
+  EmailVerificationService,
+} from './email-verification.service';
 import { PasswordResetService } from './password-reset.service';
 import {
   DeviceMetadata,
@@ -33,15 +41,42 @@ import {
 import { TokenService } from './token.service';
 
 const PASSWORD_HASH_ROUNDS = 12;
-const INVALID_TOKEN_STATUS = 498;
 const DUMMY_PASSWORD_HASH =
   '$2b$12$puR9afvrAILWKKnVKbDCX.0CXlT.969TXmlk0BC2aAbR/9yjc5..y';
-const DUMMY_PASSWORD_RESET_USER_ID = '00000000-0000-4000-8000-000000000000';
 const PASSWORD_RESET_REQUEST_MESSAGE =
-  'If an account exists for that email, a password reset code has been sent.';
+  'A six-digit verification code has been sent to your email.';
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === 'P2002'
+  );
+}
 
 export interface AuthActionResult {
   message: string;
+}
+
+export interface PasswordResetRequestResult extends AuthActionResult {
+  data: {
+    cooldownSeconds: number;
+    expiresInSeconds: number;
+  };
+}
+
+export interface PasswordResetOtpVerificationResult extends AuthActionResult {
+  data: {
+    resetToken: string;
+    expiresInSeconds: number;
+  };
+}
+
+export interface PasswordResetSessionResult {
+  data: {
+    expiresInSeconds: number;
+  };
 }
 
 export interface AuthenticatedSessionResult {
@@ -86,6 +121,7 @@ export class AuthService {
     private readonly sessionService: SessionService,
     private readonly tokenService: TokenService,
     private readonly passwordResetService: PasswordResetService,
+    private readonly emailVerificationService: EmailVerificationService,
     configService: ConfigService,
   ) {
     this.authConfig = configService.getOrThrow<AuthConfiguration>('auth');
@@ -95,18 +131,45 @@ export class AuthService {
     const existingUser = await this.usersService.findByEmail(dto.email);
 
     if (existingUser) {
+      if (!existingUser.isVerified) {
+        throw new ConflictException({
+          message:
+            'This account already exists but is still awaiting email verification.',
+          details: { reason: AUTH_ERROR_REASONS.emailNotVerified },
+        });
+      }
+
       throw new ConflictException('Email is already registered');
     }
 
     const passwordHash = await hash(dto.password, PASSWORD_HASH_ROUNDS);
-    const user = await this.usersService.create({
-      email: dto.email,
-      passwordHash,
-    });
-    const verificationToken = randomUUID();
+    let user: User;
 
-    await this.redisService.storeVerificationToken(verificationToken, user.id);
-    await this.mailService.sendVerificationEmail(user.email, verificationToken);
+    try {
+      user = await this.usersService.create({
+        email: dto.email,
+        passwordHash,
+      });
+    } catch (error: unknown) {
+      if (!isUniqueConstraintError(error)) {
+        throw error;
+      }
+
+      const concurrentlyCreatedUser = await this.usersService.findByEmail(
+        dto.email,
+      );
+
+      if (concurrentlyCreatedUser && !concurrentlyCreatedUser.isVerified) {
+        throw new ConflictException({
+          message:
+            'This account already exists but is still awaiting email verification.',
+          details: { reason: AUTH_ERROR_REASONS.emailNotVerified },
+        });
+      }
+
+      throw new ConflictException('Email is already registered');
+    }
+    await this.emailVerificationService.sendForUser(user);
 
     return {
       message:
@@ -114,38 +177,40 @@ export class AuthService {
     };
   }
 
-  async verifyEmail(token: string): Promise<AuthActionResult> {
-    const userId = await this.redisService.getVerificationUserId(token);
+  verifyEmail(token: string): Promise<EmailVerificationActionResult> {
+    return this.emailVerificationService.verify(token);
+  }
 
-    if (!userId) {
-      throw new HttpException(
-        'Invalid or expired verification token',
-        INVALID_TOKEN_STATUS,
-      );
-    }
-
-    await this.usersService.markVerified(userId);
-    await this.redisService.deleteVerificationToken(token);
-
-    return {
-      message: 'Email verified successfully',
-    };
+  resendVerificationEmail(
+    dto: ResendVerificationEmailDto,
+    ipAddress?: string | null,
+  ): Promise<EmailVerificationResendResult> {
+    return this.emailVerificationService.resend(dto.email, ipAddress);
   }
 
   async login(
     dto: LoginDto,
     metadata: DeviceMetadata = {},
   ): Promise<AuthenticatedSessionResult> {
-    const rateLimitIdentifier = this.getLoginRateLimitIdentifier(
+    const rateLimitIdentifiers = this.getLoginRateLimitIdentifiers(
       dto.email,
       metadata.ipAddress,
     );
-    const failureState =
-      await this.redisService.getLoginFailureState(rateLimitIdentifier);
+    const failureStates = await Promise.all(
+      rateLimitIdentifiers.map((identifier) =>
+        this.redisService.getLoginFailureState(identifier),
+      ),
+    );
+    const blockedState = failureStates.find(
+      (state) => state.attempts >= this.authConfig.loginRateLimit.maxAttempts,
+    );
 
-    if (failureState.attempts >= this.authConfig.loginRateLimit.maxAttempts) {
+    if (blockedState) {
       throw new HttpException(
-        'Too many login attempts. Please try again later.',
+        {
+          message: 'Too many login attempts. Please try again later.',
+          details: { retryAfterSeconds: blockedState.retryAfterSeconds },
+        },
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
@@ -157,19 +222,24 @@ export class AuthService {
     );
 
     if (!user || !passwordMatches) {
-      await this.redisService.recordLoginFailure(
-        rateLimitIdentifier,
-        this.authConfig.loginRateLimit.windowSeconds,
+      await Promise.all(
+        rateLimitIdentifiers.map((identifier) =>
+          this.redisService.recordLoginFailure(
+            identifier,
+            this.authConfig.loginRateLimit.windowSeconds,
+          ),
+        ),
       );
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    await this.redisService.clearLoginFailures(rateLimitIdentifier);
+    await this.redisService.clearLoginFailures(rateLimitIdentifiers[0]);
 
     if (!user.isVerified) {
-      throw new ForbiddenException(
-        'Please verify your email before logging in',
-      );
+      throw new ForbiddenException({
+        message: 'Please verify your email before logging in.',
+        details: { reason: AUTH_ERROR_REASONS.emailNotVerified },
+      });
     }
 
     const session = await this.sessionService.createSession(user.id, metadata);
@@ -198,53 +268,122 @@ export class AuthService {
   async forgotPassword(
     dto: ForgotPasswordDto,
     ipAddress?: string | null,
-  ): Promise<AuthActionResult> {
+  ): Promise<PasswordResetRequestResult> {
     await this.passwordResetService.assertRequestAllowed(dto.email, ipAddress);
 
     const user = await this.usersService.findByEmail(dto.email);
 
     if (!user) {
-      return {
-        message: PASSWORD_RESET_REQUEST_MESSAGE,
-      };
+      throw new NotFoundException('No account found with this email address');
     }
 
-    const otp = await this.passwordResetService.issueOtp(user.id);
+    if (!user.isVerified) {
+      throw new ForbiddenException({
+        message:
+          'Verify your email address before resetting this account password.',
+        details: { reason: AUTH_ERROR_REASONS.emailNotVerified },
+      });
+    }
+
+    let otpIssued = false;
 
     try {
+      const otp = await this.passwordResetService.issueOtp(user.id);
+      otpIssued = true;
       await this.mailService.sendPasswordResetOtp(
         user.email,
         otp,
         this.passwordResetService.getExpiryMinutes(),
       );
     } catch (error: unknown) {
-      await this.passwordResetService.invalidateOtp(user.id).catch(() => {
-        // Preserve the mail failure while making a best effort to remove its OTP.
-      });
+      if (user && otpIssued) {
+        await this.passwordResetService.invalidateOtp(user.id).catch(() => {
+          // Preserve the original failure while removing an unusable OTP.
+        });
+      }
+      await this.passwordResetService
+        .releaseRequestCooldown(dto.email)
+        .catch(() => {
+          // Preserve the original failure while allowing a later retry.
+        });
       throw error;
     }
 
+    return this.createPasswordResetRequestResult();
+  }
+
+  async verifyPasswordResetOtp(
+    dto: VerifyPasswordResetOtpDto,
+  ): Promise<PasswordResetOtpVerificationResult> {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    if (!user) {
+      throw new NotFoundException('No account found with this email address');
+    }
+
+    if (!user.isVerified) {
+      throw new ForbiddenException({
+        message:
+          'Verify your email address before resetting this account password.',
+        details: { reason: AUTH_ERROR_REASONS.emailNotVerified },
+      });
+    }
+
+    const resetToken =
+      await this.passwordResetService.verifyOtpAndIssueAuthorization(
+        user.id,
+        dto.otp,
+      );
+
     return {
-      message: PASSWORD_RESET_REQUEST_MESSAGE,
+      message: 'Code verified. You can now choose a new password.',
+      data: {
+        resetToken,
+        expiresInSeconds:
+          this.passwordResetService.getAuthorizationTtlSeconds(),
+      },
     };
   }
 
-  async resetPassword(dto: ResetPasswordDto): Promise<AuthActionResult> {
-    const user = await this.usersService.findByEmail(dto.email);
+  async getPasswordResetSession(
+    resetToken: string,
+  ): Promise<PasswordResetSessionResult> {
+    const authorization =
+      await this.passwordResetService.getAuthorizationStatus(resetToken);
 
-    await this.passwordResetService.verifyAndConsumeOtp(
-      user?.id ?? DUMMY_PASSWORD_RESET_USER_ID,
-      dto.otp,
-    );
+    return {
+      data: {
+        expiresInSeconds: Math.max(
+          Math.ceil((authorization.expiresAt.getTime() - Date.now()) / 1000),
+          1,
+        ),
+      },
+    };
+  }
+
+  async resetPassword(
+    dto: ResetPasswordDto,
+    resetToken: string,
+  ): Promise<AuthActionResult> {
+    const authorization =
+      await this.passwordResetService.getAuthorizationStatus(resetToken);
+    const user = await this.usersService.findById(authorization.userId);
 
     if (!user) {
-      throw new InvalidPasswordResetOtpException();
+      throw new InvalidPasswordResetAuthorizationException();
+    }
+
+    if (await compare(dto.newPassword, user.passwordHash)) {
+      throw new BadRequestException({
+        message: 'Choose a password you have not already been using.',
+        details: { reason: AUTH_ERROR_REASONS.passwordUnchanged },
+      });
     }
 
     const passwordHash = await hash(dto.newPassword, PASSWORD_HASH_ROUNDS);
 
-    await this.sessionService.resetPasswordAndRevokeSessions(
-      user.id,
+    await this.passwordResetService.completePasswordReset(
+      resetToken,
       passwordHash,
     );
 
@@ -360,10 +499,23 @@ export class AuthService {
     };
   }
 
-  private getLoginRateLimitIdentifier(
+  private getLoginRateLimitIdentifiers(
     email: string,
     ipAddress: string | null | undefined,
-  ): string {
-    return `${email.trim().toLowerCase()}|${ipAddress?.trim() || 'unknown'}`;
+  ): [string, string] {
+    return [
+      `account:${email.trim().toLowerCase()}`,
+      `ip:${ipAddress?.trim() || 'unknown'}`,
+    ];
+  }
+
+  private createPasswordResetRequestResult(): PasswordResetRequestResult {
+    return {
+      message: PASSWORD_RESET_REQUEST_MESSAGE,
+      data: {
+        cooldownSeconds: this.passwordResetService.getResendCooldownSeconds(),
+        expiresInSeconds: this.passwordResetService.getOtpTtlSeconds(),
+      },
+    };
   }
 }

@@ -4,10 +4,10 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Post,
   Param,
-  Query,
   Req,
   Res,
   UseGuards,
@@ -37,19 +37,26 @@ import {
   AuthCookieService,
   BrowserAuthenticatedSessionResult,
 } from './auth-cookie.service';
-import { InvalidRefreshTokenException } from './auth.exceptions';
+import {
+  InvalidPasswordResetAuthorizationException,
+  InvalidRefreshTokenException,
+} from './auth.exceptions';
 import {
   ActiveSessionsResult,
   AuthActionResult,
   AuthService,
+  PasswordResetRequestResult,
+  PasswordResetSessionResult,
 } from './auth.service';
 import { CsrfService } from './csrf.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResendVerificationEmailDto } from './dto/resend-verification-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SessionIdDto } from './dto/session-id.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { VerifyPasswordResetOtpDto } from './dto/verify-password-reset-otp.dto';
 import type { AuthenticatedPrincipal } from './interfaces/authenticated-principal.interface';
 import type { DeviceMetadata } from './session.service';
 
@@ -69,6 +76,12 @@ interface CurrentAuthenticationResult {
 interface CsrfTokenResult {
   data: {
     csrfToken: string;
+  };
+}
+
+interface BrowserPasswordResetVerificationResult extends AuthActionResult {
+  data: {
+    expiresInSeconds: number;
   };
 }
 
@@ -277,33 +290,126 @@ export class AuthController {
   @ApiOperation({ summary: 'Email a one-time password reset code' })
   @ApiBody({ type: ForgotPasswordDto })
   @ApiOkResponse({
-    description: 'Generic response returned whether or not the account exists',
+    description: 'A reset code was sent to the registered account',
     schema: {
       example: {
         status: 'success',
         code: 200,
-        message:
-          'If an account exists for that email, a password reset code has been sent.',
+        message: 'A six-digit verification code has been sent to your email.',
+        data: {
+          cooldownSeconds: 40,
+          expiresInSeconds: 120,
+        },
       },
     },
   })
   @ApiBadRequestResponse({
     description: 'Email validation failed',
   })
+  @ApiNotFoundResponse({
+    description: 'No account exists for the supplied email address',
+  })
   @ApiTooManyRequestsResponse({
     description: 'Too many password reset requests',
   })
-  forgotPassword(
+  async forgotPassword(
     @Body() dto: ForgotPasswordDto,
     @Req() request: Request,
-  ): Promise<AuthActionResult> {
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<PasswordResetRequestResult> {
+    this.authCookieService.clearPasswordResetCookie(response);
     return this.authService.forgotPassword(dto, request.ip);
+  }
+
+  @Post('verify-password-reset-otp')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Verify a password-reset OTP' })
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
+  })
+  @ApiBody({ type: VerifyPasswordResetOtpDto })
+  @ApiOkResponse({
+    description:
+      'OTP verified and a short-lived HttpOnly password-reset session created',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        message: 'Code verified. You can now choose a new password.',
+        data: {
+          expiresInSeconds: 120,
+        },
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Email or OTP validation failed',
+  })
+  @ApiNotFoundResponse({
+    description: 'No account exists for the supplied email address',
+  })
+  @ApiResponse({
+    status: 498,
+    description: 'OTP is invalid, expired, used, or locked',
+  })
+  async verifyPasswordResetOtp(
+    @Body() dto: VerifyPasswordResetOtpDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<BrowserPasswordResetVerificationResult> {
+    const result = await this.authService.verifyPasswordResetOtp(dto);
+
+    this.authCookieService.setPasswordResetCookie(
+      response,
+      result.data.resetToken,
+      result.data.expiresInSeconds,
+    );
+
+    return {
+      message: result.message,
+      data: { expiresInSeconds: result.data.expiresInSeconds },
+    };
+  }
+
+  @Get('password-reset-session')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Inspect the active browser password-reset session',
+  })
+  @ApiOkResponse({
+    description: 'Password-reset session is active',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        data: { expiresInSeconds: 120 },
+      },
+    },
+  })
+  getPasswordResetSession(
+    @Req() request: Request,
+  ): Promise<PasswordResetSessionResult> {
+    const resetToken = this.authCookieService.getPasswordResetToken(request);
+
+    if (!resetToken) {
+      throw new InvalidPasswordResetAuthorizationException();
+    }
+
+    return this.authService.getPasswordResetSession(resetToken);
   }
 
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
   @ApiOperation({
-    summary: 'Reset a password using the emailed one-time code',
+    summary: 'Set a new password after OTP verification',
+  })
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
   })
   @ApiBody({ type: ResetPasswordDto })
   @ApiOkResponse({
@@ -317,22 +423,40 @@ export class AuthController {
     },
   })
   @ApiBadRequestResponse({
-    description: 'Email, OTP, or new-password validation failed',
+    description: 'Password-reset session or new-password validation failed',
   })
   @ApiResponse({
     status: 498,
     description:
-      'The password reset code is invalid, expired, used, or locked after too many attempts',
+      'The password reset session is invalid, expired, or already used',
   })
   async resetPassword(
     @Body() dto: ResetPasswordDto,
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthActionResult> {
-    const result = await this.authService.resetPassword(dto);
+    const resetToken = this.authCookieService.getPasswordResetToken(request);
 
-    this.authCookieService.clearAuthenticationCookies(response);
+    if (!resetToken) {
+      throw new InvalidPasswordResetAuthorizationException();
+    }
 
-    return result;
+    try {
+      const result = await this.authService.resetPassword(dto, resetToken);
+
+      this.authCookieService.clearPasswordResetCookie(response);
+      this.authCookieService.clearAuthenticationCookies(response);
+
+      return result;
+    } catch (error: unknown) {
+      if (
+        error instanceof HttpException &&
+        [409, 410, 498].includes(error.getStatus())
+      ) {
+        this.authCookieService.clearPasswordResetCookie(response);
+      }
+      throw error;
+    }
   }
 
   @Get('me')
@@ -542,7 +666,33 @@ export class AuthController {
     return result;
   }
 
-  @Get('verify-email')
+  @Post('resend-verification-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend an account email-verification link' })
+  @ApiBody({ type: ResendVerificationEmailDto })
+  @ApiOkResponse({
+    description: 'A generic resend result that does not disclose account state',
+    schema: {
+      example: {
+        status: 'success',
+        code: 200,
+        message:
+          'If an unverified account exists for this email, a new verification link has been sent.',
+        data: { cooldownSeconds: 60 },
+      },
+    },
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'The resend cooldown or request limit has been reached',
+  })
+  resendVerificationEmail(
+    @Body() dto: ResendVerificationEmailDto,
+    @Req() request: Request,
+  ) {
+    return this.authService.resendVerificationEmail(dto, request.ip);
+  }
+
+  @Post('verify-email')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify a registered email address' })
   @ApiOkResponse({
@@ -556,7 +706,7 @@ export class AuthController {
     },
   })
   @ApiBadRequestResponse({
-    description: 'Verification token format validation failed',
+    description: 'Verification token is malformed or unknown',
     schema: {
       example: {
         status: 'error',
@@ -572,17 +722,21 @@ export class AuthController {
     },
   })
   @ApiResponse({
-    status: 498,
-    description: 'Verification token is invalid or expired',
+    status: HttpStatus.GONE,
+    description: 'Verification token has expired',
     schema: {
       example: {
         status: 'error',
-        code: 498,
-        message: 'Invalid or expired verification token',
+        code: 410,
+        message:
+          'This verification link has expired. Request a fresh link to continue.',
       },
     },
   })
-  verifyEmail(@Query() dto: VerifyEmailDto): Promise<AuthActionResult> {
+  @ApiConflictResponse({
+    description: 'Verification token was already used or replaced',
+  })
+  verifyEmail(@Body() dto: VerifyEmailDto) {
     return this.authService.verifyEmail(dto.token);
   }
 

@@ -8,6 +8,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import accessControlConfig from './config/access-control.config';
 import authConfig from './config/auth.config';
 import cookieConfig from './config/cookie.config';
+import emailVerificationConfig from './config/email-verification.config';
 import mailConfig from './config/mail.config';
 import passwordResetConfig from './config/password-reset.config';
 import { AccessControlModule } from './modules/access-control/access-control.module';
@@ -26,6 +27,7 @@ import { RedisModule } from './modules/redis/redis.module';
         accessControlConfig,
         authConfig,
         cookieConfig,
+        emailVerificationConfig,
         mailConfig,
         passwordResetConfig,
       ],

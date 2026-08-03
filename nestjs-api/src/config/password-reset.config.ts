@@ -3,6 +3,8 @@ import { registerAs } from '@nestjs/config';
 const MINIMUM_SECRET_LENGTH = 64;
 
 export interface PasswordResetConfiguration {
+  resendCooldownSeconds: number;
+  authorizationTtlSeconds: number;
   otp: {
     secret: string;
     ttlSeconds: number;
@@ -42,9 +44,17 @@ function getPositiveInteger(name: string, defaultValue: number): number {
 }
 
 export default registerAs('passwordReset', (): PasswordResetConfiguration => ({
+  authorizationTtlSeconds: getPositiveInteger(
+    'PASSWORD_RESET_AUTHORIZATION_TTL_SECONDS',
+    2 * 60,
+  ),
+  resendCooldownSeconds: getPositiveInteger(
+    'PASSWORD_RESET_RESEND_COOLDOWN_SECONDS',
+    40,
+  ),
   otp: {
     secret: requireSecret('PASSWORD_RESET_OTP_SECRET'),
-    ttlSeconds: getPositiveInteger('PASSWORD_RESET_OTP_TTL_SECONDS', 10 * 60),
+    ttlSeconds: getPositiveInteger('PASSWORD_RESET_OTP_TTL_SECONDS', 2 * 60),
     maxAttempts: getPositiveInteger('PASSWORD_RESET_OTP_MAX_ATTEMPTS', 5),
   },
   rateLimit: {

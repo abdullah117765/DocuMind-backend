@@ -1,15 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
-import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
+import { IsNotEmpty, Matches, MaxLength } from 'class-validator';
 import {
   APP_EMAIL_PATTERN,
   INVALID_EMAIL_MESSAGE,
   normalizeEmail,
 } from '../../../common/validation/email.validation';
 
-export class LoginDto {
+export class ResendVerificationEmailDto {
   @ApiProperty({
-    description: 'Registered email address',
+    description: 'Email address that may be awaiting verification',
     example: 'user@example.com',
     maxLength: 254,
   })
@@ -18,16 +18,4 @@ export class LoginDto {
   @IsNotEmpty({ message: 'Email is required' })
   @MaxLength(254, { message: 'Email must not exceed 254 characters' })
   email!: string;
-
-  @ApiProperty({
-    description: 'Account password',
-    example: 'SecureP@ss1',
-    maxLength: 64,
-    format: 'password',
-  })
-  @IsString({ message: 'Password must be a string' })
-  @IsNotEmpty({ message: 'Password is required' })
-  @Matches(/\S/, { message: 'Password is required' })
-  @MaxLength(64, { message: 'Password must not exceed 64 characters' })
-  password!: string;
 }

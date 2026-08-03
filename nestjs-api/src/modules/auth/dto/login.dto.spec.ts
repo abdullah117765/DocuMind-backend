@@ -24,6 +24,21 @@ describe('LoginDto', () => {
     expect(errors.some((error) => error.property === 'email')).toBe(true);
   });
 
+  it.each([
+    'user[bracket]@example.com',
+    'user@[example].com',
+    '(user)@example.com',
+  ])('rejects unsupported email symbols: %s', async (email) => {
+    const dto = plainToInstance(LoginDto, {
+      email,
+      password: 'SecureP@ss1',
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors.some((error) => error.property === 'email')).toBe(true);
+  });
+
   it.each([undefined, '', '   ', 123])(
     'rejects an invalid password value: %s',
     async (password) => {

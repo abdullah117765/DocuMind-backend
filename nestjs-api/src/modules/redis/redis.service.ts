@@ -6,12 +6,8 @@ import {
 } from '@nestjs/common';
 import type Redis from 'ioredis';
 import { createHash } from 'node:crypto';
-import {
-  REDIS_CLIENT,
-  VERIFICATION_TOKEN_TTL_SECONDS,
-} from './redis.constants';
+import { REDIS_CLIENT } from './redis.constants';
 
-const verificationTokenKey = (token: string): string => `verify:${token}`;
 const WINDOW_ATTEMPT_SCRIPT = `
 local attempts = redis.call('INCR', KEYS[1])
 if attempts == 1 then
@@ -61,13 +57,18 @@ end
 redis.call('SET', KEYS[1], storedHash .. ':' .. attempts, 'EX', ttl)
 return {'invalid', attempts}
 `;
-
 const loginFailureKey = (identifier: string): string =>
   `login-failure:${createHash('sha256').update(identifier).digest('hex')}`;
 const passwordResetRateLimitKey = (identifier: string): string =>
   `password-reset-rate:${createHash('sha256').update(identifier).digest('hex')}`;
+const passwordResetCooldownKey = (email: string): string =>
+  `password-reset-cooldown:${createHash('sha256').update(email).digest('hex')}`;
 const passwordResetOtpKey = (userId: string): string =>
   `password-reset-otp:${createHash('sha256').update(userId).digest('hex')}`;
+const emailVerificationRateLimitKey = (identifier: string): string =>
+  `email-verification-rate:${createHash('sha256').update(identifier).digest('hex')}`;
+const emailVerificationCooldownKey = (email: string): string =>
+  `email-verification-cooldown:${createHash('sha256').update(email).digest('hex')}`;
 
 export interface LoginFailureState {
   attempts: number;
@@ -77,6 +78,11 @@ export interface LoginFailureState {
 export interface PasswordResetOtpResult {
   status: 'valid' | 'invalid' | 'locked';
   attemptsRemaining: number;
+}
+
+export interface PasswordResetCooldownResult {
+  acquired: boolean;
+  retryAfterSeconds: number;
 }
 
 function toNonNegativeInteger(value: unknown): number {
@@ -119,33 +125,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.client.ping();
   }
 
-  async storeVerificationToken(
-    token: string,
-    userId: string,
-    ttlSeconds = VERIFICATION_TOKEN_TTL_SECONDS,
-  ): Promise<void> {
-    if (!Number.isInteger(ttlSeconds) || ttlSeconds <= 0) {
-      throw new RangeError(
-        'Verification token TTL must be a positive integer.',
-      );
-    }
-
-    await this.client.set(
-      verificationTokenKey(token),
-      userId,
-      'EX',
-      ttlSeconds,
-    );
-  }
-
-  getVerificationUserId(token: string): Promise<string | null> {
-    return this.client.get(verificationTokenKey(token));
-  }
-
-  async deleteVerificationToken(token: string): Promise<void> {
-    await this.client.del(verificationTokenKey(token));
-  }
-
   async getLoginFailureState(identifier: string): Promise<LoginFailureState> {
     const key = loginFailureKey(identifier);
     const [rawAttempts, rawTtl] = await Promise.all([
@@ -183,6 +162,81 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       windowSeconds,
       'Password-reset rate-limit window',
     );
+  }
+
+  async acquirePasswordResetCooldown(
+    email: string,
+    cooldownSeconds: number,
+  ): Promise<PasswordResetCooldownResult> {
+    if (!Number.isSafeInteger(cooldownSeconds) || cooldownSeconds <= 0) {
+      throw new RangeError(
+        'Password-reset resend cooldown must be a positive integer.',
+      );
+    }
+
+    const key = passwordResetCooldownKey(email);
+    const result = await this.client.set(key, '1', 'EX', cooldownSeconds, 'NX');
+
+    if (result === 'OK') {
+      return {
+        acquired: true,
+        retryAfterSeconds: cooldownSeconds,
+      };
+    }
+
+    const remainingSeconds = toNonNegativeInteger(await this.client.ttl(key));
+
+    return {
+      acquired: false,
+      retryAfterSeconds: remainingSeconds || cooldownSeconds,
+    };
+  }
+
+  async releasePasswordResetCooldown(email: string): Promise<void> {
+    await this.client.del(passwordResetCooldownKey(email));
+  }
+
+  async recordEmailVerificationRequest(
+    identifier: string,
+    windowSeconds: number,
+  ): Promise<LoginFailureState> {
+    return this.recordWindowAttempt(
+      emailVerificationRateLimitKey(identifier),
+      windowSeconds,
+      'Email-verification rate-limit window',
+    );
+  }
+
+  async acquireEmailVerificationCooldown(
+    email: string,
+    cooldownSeconds: number,
+  ): Promise<PasswordResetCooldownResult> {
+    if (!Number.isSafeInteger(cooldownSeconds) || cooldownSeconds <= 0) {
+      throw new RangeError(
+        'Email-verification resend cooldown must be a positive integer.',
+      );
+    }
+
+    const key = emailVerificationCooldownKey(email);
+    const result = await this.client.set(key, '1', 'EX', cooldownSeconds, 'NX');
+
+    if (result === 'OK') {
+      return {
+        acquired: true,
+        retryAfterSeconds: cooldownSeconds,
+      };
+    }
+
+    const remainingSeconds = toNonNegativeInteger(await this.client.ttl(key));
+
+    return {
+      acquired: false,
+      retryAfterSeconds: remainingSeconds || cooldownSeconds,
+    };
+  }
+
+  async releaseEmailVerificationCooldown(email: string): Promise<void> {
+    await this.client.del(emailVerificationCooldownKey(email));
   }
 
   async storePasswordResetOtp(

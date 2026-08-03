@@ -10,6 +10,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthCookieService } from './auth-cookie.service';
 import { CsrfService } from './csrf.service';
+import { EmailVerificationService } from './email-verification.service';
 import { PasswordResetService } from './password-reset.service';
 import { SessionService } from './session.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -44,6 +45,7 @@ import { TokenService } from './token.service';
     AuthCookieService,
     CsrfGuard,
     CsrfService,
+    EmailVerificationService,
     JwtAuthGuard,
     JwtStrategy,
     PasswordResetService,

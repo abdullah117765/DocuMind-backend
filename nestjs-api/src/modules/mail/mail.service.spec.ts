@@ -15,7 +15,11 @@ describe('MailService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    getOrThrow.mockReturnValue('http://localhost:5173');
+    getOrThrow.mockImplementation((key: string) =>
+      key === 'emailVerification'
+        ? { tokenTtlSeconds: 86_400 }
+        : 'http://localhost:5173',
+    );
     sendMail.mockResolvedValue(undefined);
   });
 
@@ -31,8 +35,9 @@ describe('MailService', () => {
         subject: 'Verify your email address',
         template: 'verify-email',
         context: {
+          expiryDescription: '24 hours',
           verificationUrl:
-            'http://localhost:5173/verify-email?token=verification-token',
+            'http://localhost:5173/verify-email#token=verification-token',
         },
       }),
     );
@@ -44,8 +49,9 @@ describe('MailService', () => {
     expect(sendMail).toHaveBeenCalledWith(
       expect.objectContaining({
         context: {
+          expiryDescription: '24 hours',
           verificationUrl:
-            'http://localhost:5173/verify-email?token=token+%2B+value',
+            'http://localhost:5173/verify-email#token=token+%2B+value',
         },
       }),
     );

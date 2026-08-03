@@ -16,6 +16,7 @@ interface ErrorEnvelope {
 }
 
 const serverErrorStatusThreshold: number = HttpStatus.INTERNAL_SERVER_ERROR;
+const tooManyRequestsStatus: number = HttpStatus.TOO_MANY_REQUESTS;
 
 const defaultErrorMessages: Record<number, string> = {
   [HttpStatus.BAD_REQUEST]: 'Invalid request parameters',
@@ -70,6 +71,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
     const errorEnvelope = this.createErrorEnvelope(exception, statusCode);
+
+    if (
+      statusCode === tooManyRequestsStatus &&
+      isRecord(errorEnvelope.details) &&
+      typeof errorEnvelope.details.retryAfterSeconds === 'number'
+    ) {
+      response.setHeader(
+        'Retry-After',
+        Math.max(Math.ceil(errorEnvelope.details.retryAfterSeconds), 1),
+      );
+    }
 
     if (
       !(exception instanceof HttpException) ||

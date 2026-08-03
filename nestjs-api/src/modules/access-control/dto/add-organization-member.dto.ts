@@ -3,16 +3,17 @@ import {
   ArrayMaxSize,
   ArrayUnique,
   IsArray,
-  IsEmail,
   IsOptional,
   IsUUID,
+  Matches,
   MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-function normalizeEmail(value: unknown): unknown {
-  return typeof value === 'string' ? value.trim().toLowerCase() : value;
-}
+import {
+  APP_EMAIL_PATTERN,
+  INVALID_EMAIL_MESSAGE,
+  normalizeEmail,
+} from '../../../common/validation/email.validation';
 
 export class AddOrganizationMemberDto {
   @ApiProperty({
@@ -21,7 +22,7 @@ export class AddOrganizationMemberDto {
     maxLength: 254,
   })
   @Transform(({ value }: TransformFnParams): unknown => normalizeEmail(value))
-  @IsEmail({}, { message: 'Email must be a valid email address' })
+  @Matches(APP_EMAIL_PATTERN, { message: INVALID_EMAIL_MESSAGE })
   @MaxLength(254, { message: 'Email must not exceed 254 characters' })
   email!: string;
 

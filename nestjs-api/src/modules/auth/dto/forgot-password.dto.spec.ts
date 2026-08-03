@@ -12,16 +12,20 @@ describe('ForgotPasswordDto', () => {
     expect(dto.email).toBe('user@example.com');
   });
 
-  it.each([undefined, '', 'not-an-email'])(
-    'rejects an invalid email value: %s',
-    async (email) => {
-      const dto = plainToInstance(ForgotPasswordDto, {
-        email,
-      });
+  it.each([
+    undefined,
+    '',
+    'not-an-email',
+    'user[bracket]@example.com',
+    'user@[example].com',
+    '(user)@example.com',
+  ])('rejects an invalid email value: %s', async (email) => {
+    const dto = plainToInstance(ForgotPasswordDto, {
+      email,
+    });
 
-      const errors = await validate(dto);
+    const errors = await validate(dto);
 
-      expect(errors.some((error) => error.property === 'email')).toBe(true);
-    },
-  );
+    expect(errors.some((error) => error.property === 'email')).toBe(true);
+  });
 });

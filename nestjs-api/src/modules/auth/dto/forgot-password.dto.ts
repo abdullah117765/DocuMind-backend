@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
-import { IsEmail, IsNotEmpty, MaxLength } from 'class-validator';
-
-function normalizeEmail(value: unknown): unknown {
-  return typeof value === 'string' ? value.trim().toLowerCase() : value;
-}
+import { IsNotEmpty, Matches, MaxLength } from 'class-validator';
+import {
+  APP_EMAIL_PATTERN,
+  INVALID_EMAIL_MESSAGE,
+  normalizeEmail,
+} from '../../../common/validation/email.validation';
 
 export class ForgotPasswordDto {
   @ApiProperty({
@@ -13,7 +14,7 @@ export class ForgotPasswordDto {
     maxLength: 254,
   })
   @Transform(({ value }: TransformFnParams): unknown => normalizeEmail(value))
-  @IsEmail({}, { message: 'Email must be a valid email address' })
+  @Matches(APP_EMAIL_PATTERN, { message: INVALID_EMAIL_MESSAGE })
   @IsNotEmpty({ message: 'Email is required' })
   @MaxLength(254, { message: 'Email must not exceed 254 characters' })
   email!: string;

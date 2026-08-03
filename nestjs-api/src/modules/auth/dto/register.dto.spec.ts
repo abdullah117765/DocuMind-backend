@@ -25,6 +25,21 @@ describe('RegisterDto', () => {
   });
 
   it.each([
+    'user[bracket]@example.com',
+    'user@[example].com',
+    '(user)@example.com',
+  ])('rejects unsupported email symbols: %s', async (email) => {
+    const dto = plainToInstance(RegisterDto, {
+      email,
+      password: 'SecureP@ss1',
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors.some((error) => error.property === 'email')).toBe(true);
+  });
+
+  it.each([
     ['fewer than 8 characters', 'Short1!'],
     ['no uppercase letter', 'securep@ss1'],
     ['no lowercase letter', 'SECUREP@SS1'],

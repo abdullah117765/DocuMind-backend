@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
+import { EmailVerificationConfiguration } from '../../config/email-verification.config';
 
 @Injectable()
 export class MailService {
@@ -11,12 +12,20 @@ export class MailService {
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     const verificationUrl = this.createVerificationUrl(token);
+    const verificationConfig =
+      this.configService.getOrThrow<EmailVerificationConfiguration>(
+        'emailVerification',
+      );
+    const expiryDescription = this.formatDuration(
+      verificationConfig.tokenTtlSeconds,
+    );
 
     await this.mailerService.sendMail({
       to: email.trim().toLowerCase(),
       subject: 'Verify your email address',
       template: 'verify-email',
       context: {
+        expiryDescription,
         verificationUrl,
       },
       text: [
@@ -25,7 +34,7 @@ export class MailService {
         'Verify your email address by opening this link:',
         verificationUrl,
         '',
-        'This link expires in 24 hours. If you did not create an account, you can ignore this email.',
+        `This link expires in ${expiryDescription}. If you did not create an account, you can ignore this email.`,
       ].join('\n'),
     });
   }
@@ -61,12 +70,22 @@ export class MailService {
       this.ensureTrailingSlash(frontendUrl),
     );
 
-    verificationUrl.searchParams.set('token', token);
+    verificationUrl.hash = new URLSearchParams({ token }).toString();
 
     return verificationUrl.toString();
   }
 
   private ensureTrailingSlash(value: string): string {
     return value.endsWith('/') ? value : `${value}/`;
+  }
+
+  private formatDuration(seconds: number): string {
+    if (seconds % 3600 === 0) {
+      const hours = seconds / 3600;
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+    }
+
+    const minutes = Math.ceil(seconds / 60);
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
   }
 }

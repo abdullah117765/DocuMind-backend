@@ -191,6 +191,8 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
+  emailVerificationTokens?: Prisma.EmailVerificationTokenListRelationFilter
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationListRelationFilter
   organizationMemberships?: Prisma.OrganizationMembershipListRelationFilter
   createdOrganizations?: Prisma.OrganizationListRelationFilter
   platformRoleAssignments?: Prisma.PlatformUserRoleListRelationFilter
@@ -207,6 +209,8 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenOrderByRelationAggregateInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationOrderByRelationAggregateInput
   organizationMemberships?: Prisma.OrganizationMembershipOrderByRelationAggregateInput
   createdOrganizations?: Prisma.OrganizationOrderByRelationAggregateInput
   platformRoleAssignments?: Prisma.PlatformUserRoleOrderByRelationAggregateInput
@@ -226,6 +230,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
+  emailVerificationTokens?: Prisma.EmailVerificationTokenListRelationFilter
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationListRelationFilter
   organizationMemberships?: Prisma.OrganizationMembershipListRelationFilter
   createdOrganizations?: Prisma.OrganizationListRelationFilter
   platformRoleAssignments?: Prisma.PlatformUserRoleListRelationFilter
@@ -266,6 +272,8 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
@@ -282,6 +290,8 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -298,6 +308,8 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
@@ -314,6 +326,8 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -396,6 +410,34 @@ export type BoolFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UserCreateNestedOneWithoutEmailVerificationTokensInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmailVerificationTokensInput, Prisma.UserUncheckedCreateWithoutEmailVerificationTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailVerificationTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutEmailVerificationTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmailVerificationTokensInput, Prisma.UserUncheckedCreateWithoutEmailVerificationTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailVerificationTokensInput
+  upsert?: Prisma.UserUpsertWithoutEmailVerificationTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmailVerificationTokensInput, Prisma.UserUpdateWithoutEmailVerificationTokensInput>, Prisma.UserUncheckedUpdateWithoutEmailVerificationTokensInput>
+}
+
+export type UserCreateNestedOneWithoutPasswordResetAuthorizationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetAuthorizationsInput, Prisma.UserUncheckedCreateWithoutPasswordResetAuthorizationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetAuthorizationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordResetAuthorizationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetAuthorizationsInput, Prisma.UserUncheckedCreateWithoutPasswordResetAuthorizationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetAuthorizationsInput
+  upsert?: Prisma.UserUpsertWithoutPasswordResetAuthorizationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetAuthorizationsInput, Prisma.UserUpdateWithoutPasswordResetAuthorizationsInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetAuthorizationsInput>
 }
 
 export type UserCreateNestedOneWithoutSessionsInput = {
@@ -504,6 +546,174 @@ export type UserUpdateOneWithoutPlatformRoleAssignmentsMadeNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPlatformRoleAssignmentsMadeInput, Prisma.UserUpdateWithoutPlatformRoleAssignmentsMadeInput>, Prisma.UserUncheckedUpdateWithoutPlatformRoleAssignmentsMadeInput>
 }
 
+export type UserCreateWithoutEmailVerificationTokensInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutEmailVerificationTokensInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmailVerificationTokensInput, Prisma.UserUncheckedCreateWithoutEmailVerificationTokensInput>
+}
+
+export type UserUpsertWithoutEmailVerificationTokensInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutEmailVerificationTokensInput, Prisma.UserUncheckedUpdateWithoutEmailVerificationTokensInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmailVerificationTokensInput, Prisma.UserUncheckedCreateWithoutEmailVerificationTokensInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutEmailVerificationTokensInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutEmailVerificationTokensInput, Prisma.UserUncheckedUpdateWithoutEmailVerificationTokensInput>
+}
+
+export type UserUpdateWithoutEmailVerificationTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserCreateWithoutPasswordResetAuthorizationsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutPasswordResetAuthorizationsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutPasswordResetAuthorizationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetAuthorizationsInput, Prisma.UserUncheckedCreateWithoutPasswordResetAuthorizationsInput>
+}
+
+export type UserUpsertWithoutPasswordResetAuthorizationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetAuthorizationsInput, Prisma.UserUncheckedUpdateWithoutPasswordResetAuthorizationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetAuthorizationsInput, Prisma.UserUncheckedCreateWithoutPasswordResetAuthorizationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordResetAuthorizationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetAuthorizationsInput, Prisma.UserUncheckedUpdateWithoutPasswordResetAuthorizationsInput>
+}
+
+export type UserUpdateWithoutPasswordResetAuthorizationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordResetAuthorizationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -511,6 +721,8 @@ export type UserCreateWithoutSessionsInput = {
   isVerified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
@@ -526,6 +738,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   isVerified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -557,6 +771,8 @@ export type UserUpdateWithoutSessionsInput = {
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
@@ -572,6 +788,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -588,6 +806,8 @@ export type UserCreateWithoutCreatedOrganizationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
@@ -603,6 +823,8 @@ export type UserUncheckedCreateWithoutCreatedOrganizationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -634,6 +856,8 @@ export type UserUpdateWithoutCreatedOrganizationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
@@ -649,6 +873,8 @@ export type UserUncheckedUpdateWithoutCreatedOrganizationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -664,6 +890,8 @@ export type UserCreateWithoutOrganizationMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
@@ -679,6 +907,8 @@ export type UserUncheckedCreateWithoutOrganizationMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -710,6 +940,8 @@ export type UserUpdateWithoutOrganizationMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
@@ -725,6 +957,8 @@ export type UserUncheckedUpdateWithoutOrganizationMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -740,6 +974,8 @@ export type UserCreateWithoutRolePermissionGrantsMadeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
@@ -755,6 +991,8 @@ export type UserUncheckedCreateWithoutRolePermissionGrantsMadeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -786,6 +1024,8 @@ export type UserUpdateWithoutRolePermissionGrantsMadeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
@@ -801,6 +1041,8 @@ export type UserUncheckedUpdateWithoutRolePermissionGrantsMadeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -816,6 +1058,8 @@ export type UserCreateWithoutMembershipRoleAssignmentsMadeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
@@ -831,6 +1075,8 @@ export type UserUncheckedCreateWithoutMembershipRoleAssignmentsMadeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -862,6 +1108,8 @@ export type UserUpdateWithoutMembershipRoleAssignmentsMadeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
@@ -877,6 +1125,8 @@ export type UserUncheckedUpdateWithoutMembershipRoleAssignmentsMadeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -892,6 +1142,8 @@ export type UserCreateWithoutPlatformRoleAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
@@ -907,6 +1159,8 @@ export type UserUncheckedCreateWithoutPlatformRoleAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -927,6 +1181,8 @@ export type UserCreateWithoutPlatformRoleAssignmentsMadeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
@@ -942,6 +1198,8 @@ export type UserUncheckedCreateWithoutPlatformRoleAssignmentsMadeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -973,6 +1231,8 @@ export type UserUpdateWithoutPlatformRoleAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
@@ -988,6 +1248,8 @@ export type UserUncheckedUpdateWithoutPlatformRoleAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -1014,6 +1276,8 @@ export type UserUpdateWithoutPlatformRoleAssignmentsMadeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
@@ -1029,6 +1293,8 @@ export type UserUncheckedUpdateWithoutPlatformRoleAssignmentsMadeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -1043,6 +1309,8 @@ export type UserUncheckedUpdateWithoutPlatformRoleAssignmentsMadeInput = {
 
 export type UserCountOutputType = {
   sessions: number
+  emailVerificationTokens: number
+  passwordResetAuthorizations: number
   organizationMemberships: number
   createdOrganizations: number
   platformRoleAssignments: number
@@ -1053,6 +1321,8 @@ export type UserCountOutputType = {
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  emailVerificationTokens?: boolean | UserCountOutputTypeCountEmailVerificationTokensArgs
+  passwordResetAuthorizations?: boolean | UserCountOutputTypeCountPasswordResetAuthorizationsArgs
   organizationMemberships?: boolean | UserCountOutputTypeCountOrganizationMembershipsArgs
   createdOrganizations?: boolean | UserCountOutputTypeCountCreatedOrganizationsArgs
   platformRoleAssignments?: boolean | UserCountOutputTypeCountPlatformRoleAssignmentsArgs
@@ -1076,6 +1346,20 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
  */
 export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SessionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountEmailVerificationTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EmailVerificationTokenWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetAuthorizationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetAuthorizationWhereInput
 }
 
 /**
@@ -1129,6 +1413,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  emailVerificationTokens?: boolean | Prisma.User$emailVerificationTokensArgs<ExtArgs>
+  passwordResetAuthorizations?: boolean | Prisma.User$passwordResetAuthorizationsArgs<ExtArgs>
   organizationMemberships?: boolean | Prisma.User$organizationMembershipsArgs<ExtArgs>
   createdOrganizations?: boolean | Prisma.User$createdOrganizationsArgs<ExtArgs>
   platformRoleAssignments?: boolean | Prisma.User$platformRoleAssignmentsArgs<ExtArgs>
@@ -1168,6 +1454,8 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "isVerified" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  emailVerificationTokens?: boolean | Prisma.User$emailVerificationTokensArgs<ExtArgs>
+  passwordResetAuthorizations?: boolean | Prisma.User$passwordResetAuthorizationsArgs<ExtArgs>
   organizationMemberships?: boolean | Prisma.User$organizationMembershipsArgs<ExtArgs>
   createdOrganizations?: boolean | Prisma.User$createdOrganizationsArgs<ExtArgs>
   platformRoleAssignments?: boolean | Prisma.User$platformRoleAssignmentsArgs<ExtArgs>
@@ -1183,6 +1471,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     sessions: Prisma.$SessionPayload<ExtArgs>[]
+    emailVerificationTokens: Prisma.$EmailVerificationTokenPayload<ExtArgs>[]
+    passwordResetAuthorizations: Prisma.$PasswordResetAuthorizationPayload<ExtArgs>[]
     organizationMemberships: Prisma.$OrganizationMembershipPayload<ExtArgs>[]
     createdOrganizations: Prisma.$OrganizationPayload<ExtArgs>[]
     platformRoleAssignments: Prisma.$PlatformUserRolePayload<ExtArgs>[]
@@ -1592,6 +1882,8 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  emailVerificationTokens<T extends Prisma.User$emailVerificationTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emailVerificationTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailVerificationTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResetAuthorizations<T extends Prisma.User$passwordResetAuthorizationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetAuthorizationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetAuthorizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   organizationMemberships<T extends Prisma.User$organizationMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$organizationMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdOrganizations<T extends Prisma.User$createdOrganizationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdOrganizationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   platformRoleAssignments<T extends Prisma.User$platformRoleAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$platformRoleAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlatformUserRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2047,6 +2339,54 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.emailVerificationTokens
+ */
+export type User$emailVerificationTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EmailVerificationToken
+   */
+  select?: Prisma.EmailVerificationTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EmailVerificationToken
+   */
+  omit?: Prisma.EmailVerificationTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailVerificationTokenInclude<ExtArgs> | null
+  where?: Prisma.EmailVerificationTokenWhereInput
+  orderBy?: Prisma.EmailVerificationTokenOrderByWithRelationInput | Prisma.EmailVerificationTokenOrderByWithRelationInput[]
+  cursor?: Prisma.EmailVerificationTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EmailVerificationTokenScalarFieldEnum | Prisma.EmailVerificationTokenScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResetAuthorizations
+ */
+export type User$passwordResetAuthorizationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordResetAuthorization
+   */
+  select?: Prisma.PasswordResetAuthorizationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordResetAuthorization
+   */
+  omit?: Prisma.PasswordResetAuthorizationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetAuthorizationInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetAuthorizationWhereInput
+  orderBy?: Prisma.PasswordResetAuthorizationOrderByWithRelationInput | Prisma.PasswordResetAuthorizationOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetAuthorizationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetAuthorizationScalarFieldEnum | Prisma.PasswordResetAuthorizationScalarFieldEnum[]
 }
 
 /**

@@ -1,0 +1,2 @@
+-- RenameIndex
+ALTER INDEX "password_reset_authorizations_user_id_consumed_at_revoked_at_id" RENAME TO "password_reset_authorizations_user_id_consumed_at_revoked_a_idx";

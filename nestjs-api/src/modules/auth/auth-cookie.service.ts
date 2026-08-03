@@ -66,6 +66,37 @@ export class AuthCookieService {
     );
   }
 
+  setPasswordResetCookie(
+    response: Response,
+    resetToken: string,
+    expiresInSeconds: number,
+  ): void {
+    response.cookie(
+      this.config.passwordResetCookieName,
+      resetToken,
+      this.getCookieOptions(
+        this.config.authPath,
+        new Date(Date.now() + expiresInSeconds * 1000),
+      ),
+    );
+    this.disableCaching(response);
+  }
+
+  clearPasswordResetCookie(response: Response): void {
+    response.clearCookie(
+      this.config.passwordResetCookieName,
+      this.getCookieOptions(this.config.authPath),
+    );
+    this.disableCaching(response);
+  }
+
+  getPasswordResetToken(request: Request): string | null {
+    return getCookieValue(
+      request.headers.cookie,
+      this.config.passwordResetCookieName,
+    );
+  }
+
   toBrowserResult(
     result: AuthenticatedSessionResult,
   ): BrowserAuthenticatedSessionResult {

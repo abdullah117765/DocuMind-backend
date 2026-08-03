@@ -9,6 +9,7 @@ describe('AuthCookieService', () => {
   const configuration: CookieConfiguration = {
     accessCookieName: 'access_token',
     refreshCookieName: 'refresh_token',
+    passwordResetCookieName: 'password_reset_token',
     csrfCookieName: 'csrf_token',
     secure: false,
     sameSite: 'lax',
@@ -106,6 +107,33 @@ describe('AuthCookieService', () => {
         user: result.data.user,
         session: result.data.session,
       },
+    });
+  });
+
+  it('keeps password-reset authorization in a scoped HttpOnly cookie', () => {
+    const request = {
+      headers: {
+        cookie: 'password_reset_token=reset%2Etoken',
+      },
+    } as Request;
+
+    service.setPasswordResetCookie(response, 'reset.token', 120);
+
+    expect(cookie).toHaveBeenCalledWith('password_reset_token', 'reset.token', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      path: '/api/auth',
+      expires: expect.any(Date) as Date,
+    });
+    expect(service.getPasswordResetToken(request)).toBe('reset.token');
+
+    service.clearPasswordResetCookie(response);
+    expect(clearCookie).toHaveBeenCalledWith('password_reset_token', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      path: '/api/auth',
     });
   });
 });
