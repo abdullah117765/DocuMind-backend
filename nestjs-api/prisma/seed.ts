@@ -99,6 +99,13 @@ const permissions = [
     scope: AccessScope.ORGANIZATION,
   },
   {
+    code: 'platform.organizations.manage',
+    name: 'Organizations',
+    description: 'Create and manage tenant organizations.',
+    category: 'Platform',
+    scope: AccessScope.PLATFORM,
+  },
+  {
     code: 'platform.super_admin.assign',
     name: 'Assign Super Admin',
     description: 'Assign or remove platform Super Admin roles.',

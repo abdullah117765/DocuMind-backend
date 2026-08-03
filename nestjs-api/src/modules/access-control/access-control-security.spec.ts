@@ -11,6 +11,7 @@ import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { CurrentUserAccessController } from './current-user-access.controller';
 import { OrganizationMembersController } from './organization-members.controller';
+import { OrganizationsController } from '../organizations/organizations.controller';
 import { RoleManagementController } from './role-management.controller';
 import { UpdateMemberStatusDto } from './dto/update-member-status.dto';
 
@@ -54,6 +55,23 @@ describe('Epic 2 security metadata', () => {
     },
   );
 
+  it('requires platform organization management to create tenant organizations', () => {
+    expect(getGuards(OrganizationsController)).toEqual([
+      JwtAuthGuard,
+      PermissionsGuard,
+    ]);
+    expect(
+      Reflect.getMetadata(
+        PERMISSION_REQUIREMENT_METADATA,
+        OrganizationsController,
+      ) as PermissionRequirement,
+    ).toEqual({
+      scope: AccessScope.PLATFORM,
+      permissionCodes: ['platform.organizations.manage'],
+      match: PermissionMatch.ALL,
+    });
+  });
+
   it.each([
     [RoleManagementController, 'createRole'],
     [RoleManagementController, 'updateRole'],
@@ -63,6 +81,7 @@ describe('Epic 2 security metadata', () => {
     [OrganizationMembersController, 'replaceMemberRoles'],
     [OrganizationMembersController, 'updateMemberStatus'],
     [OrganizationMembersController, 'removeMember'],
+    [OrganizationsController, 'createOrganization'],
   ])('requires CSRF protection on %p.%s', (controller, methodName) => {
     expect(getGuards(getHandler(controller, methodName))).toEqual([CsrfGuard]);
   });
@@ -73,6 +92,7 @@ describe('Epic 2 security metadata', () => {
     [RoleManagementController, 'getRole'],
     [OrganizationMembersController, 'listMembers'],
     [OrganizationMembersController, 'getMember'],
+    [OrganizationsController, 'listOrganizations'],
   ])('does not require CSRF on read-only %p.%s', (controller, methodName) => {
     expect(getGuards(getHandler(controller, methodName))).toEqual([]);
   });

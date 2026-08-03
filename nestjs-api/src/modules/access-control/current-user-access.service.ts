@@ -20,7 +20,7 @@ export interface CurrentOrganizationAccessView {
   membership: {
     id: string;
     status: OrganizationMembershipStatus;
-  };
+  } | null;
   roles: EffectiveRole[];
   permissions: string[];
 }
@@ -103,11 +103,24 @@ export class CurrentUserAccessService {
         },
       }),
     ]);
+    const membershipByOrganizationId = new Map(
+      memberships.map((membership) => [membership.organization.id, membership]),
+    );
+    const organizations = globalOrganizationGrant
+      ? await this.prisma.organization.findMany({
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+          orderBy: [{ name: 'asc' }, { id: 'asc' }],
+        })
+      : memberships.map((membership) => membership.organization);
     const organizationAccess = await Promise.all(
-      memberships.map((membership) =>
+      organizations.map((organization) =>
         this.accessControlService.resolveOrganizationAccess(
           userId,
-          membership.organization.id,
+          organization.id,
         ),
       ),
     );
@@ -115,15 +128,21 @@ export class CurrentUserAccessService {
     return {
       platform,
       hasGlobalOrganizationAccess: Boolean(globalOrganizationGrant),
-      organizations: memberships.map((membership, index) => ({
-        organization: membership.organization,
-        membership: {
-          id: membership.id,
-          status: membership.status,
-        },
-        roles: organizationAccess[index]?.roles ?? [],
-        permissions: organizationAccess[index]?.permissions ?? [],
-      })),
+      organizations: organizations.map((organization, index) => {
+        const membership = membershipByOrganizationId.get(organization.id);
+
+        return {
+          organization,
+          membership: membership
+            ? {
+                id: membership.id,
+                status: membership.status,
+              }
+            : null,
+          roles: organizationAccess[index]?.roles ?? [],
+          permissions: organizationAccess[index]?.permissions ?? [],
+        };
+      }),
     };
   }
 

@@ -14,6 +14,7 @@ import passwordResetConfig from './config/password-reset.config';
 import { AccessControlModule } from './modules/access-control/access-control.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './modules/mail/mail.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { RedisModule } from './modules/redis/redis.module';
 
@@ -37,6 +38,7 @@ import { RedisModule } from './modules/redis/redis.module';
     MailModule,
     AuthModule,
     AccessControlModule,
+    OrganizationsModule,
   ],
   controllers: [AppController],
   providers: [

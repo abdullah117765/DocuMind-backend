@@ -12,6 +12,7 @@ describe('CurrentUserAccessService', () => {
   const organizationId = '3c84ea89-6b30-4d90-a444-c12ba29777fb';
   const membershipFindMany = jest.fn();
   const platformRoleFindFirst = jest.fn();
+  const organizationFindMany = jest.fn();
   const organizationFindUnique = jest.fn();
   const prisma = {
     organizationMembership: {
@@ -21,6 +22,7 @@ describe('CurrentUserAccessService', () => {
       findFirst: platformRoleFindFirst,
     },
     organization: {
+      findMany: organizationFindMany,
       findUnique: organizationFindUnique,
     },
   } as unknown as PrismaService;
@@ -41,6 +43,7 @@ describe('CurrentUserAccessService', () => {
     jest.clearAllMocks();
     membershipFindMany.mockResolvedValue([]);
     platformRoleFindFirst.mockResolvedValue(null);
+    organizationFindMany.mockResolvedValue([]);
     organizationFindUnique.mockResolvedValue({
       id: organizationId,
       name: 'Example Organization',
@@ -93,6 +96,18 @@ describe('CurrentUserAccessService', () => {
     platformRoleFindFirst.mockResolvedValue({
       roleId: 'platform-role',
     });
+    organizationFindMany.mockResolvedValue([
+      {
+        id: organizationId,
+        name: 'Example Organization',
+        slug: 'example-organization',
+      },
+      {
+        id: suspendedOrganizationId,
+        name: 'Suspended Organization',
+        slug: 'suspended-organization',
+      },
+    ]);
     resolveOrganizationAccess
       .mockResolvedValueOnce({
         userId,
@@ -165,6 +180,84 @@ describe('CurrentUserAccessService', () => {
       userId,
       suspendedOrganizationId,
     );
+  });
+
+  it('lists every organization for a platform role with global organization permissions', async () => {
+    const otherOrganizationId = 'a31fcdfd-9612-450d-bf18-4b4160ba4cc1';
+    membershipFindMany.mockResolvedValue([
+      {
+        id: 'membership-active',
+        status: OrganizationMembershipStatus.ACTIVE,
+        organization: {
+          id: organizationId,
+          name: 'Example Organization',
+          slug: 'example-organization',
+        },
+      },
+    ]);
+    platformRoleFindFirst.mockResolvedValue({
+      roleId: 'platform-role',
+    });
+    organizationFindMany.mockResolvedValue([
+      {
+        id: organizationId,
+        name: 'Example Organization',
+        slug: 'example-organization',
+      },
+      {
+        id: otherOrganizationId,
+        name: 'Other Organization',
+        slug: 'other-organization',
+      },
+    ]);
+    resolveOrganizationAccess
+      .mockResolvedValueOnce({
+        userId,
+        organizationId,
+        membershipId: 'membership-active',
+        roles: [],
+        permissions: ['users.manage'],
+      })
+      .mockResolvedValueOnce({
+        userId,
+        organizationId: otherOrganizationId,
+        membershipId: null,
+        roles: [
+          {
+            id: 'platform-role',
+            name: 'Super Admin',
+            scope: AccessScope.PLATFORM,
+          },
+        ],
+        permissions: ['users.manage'],
+      });
+
+    await expect(service.getCurrentUserAccess(userId)).resolves.toMatchObject({
+      hasGlobalOrganizationAccess: true,
+      organizations: [
+        {
+          organization: { id: organizationId },
+          membership: {
+            id: 'membership-active',
+            status: OrganizationMembershipStatus.ACTIVE,
+          },
+          permissions: ['users.manage'],
+        },
+        {
+          organization: { id: otherOrganizationId },
+          membership: null,
+          permissions: ['users.manage'],
+        },
+      ],
+    });
+    expect(organizationFindMany).toHaveBeenCalledWith({
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+    });
   });
 
   it('detects global organization access through permission relationships', async () => {

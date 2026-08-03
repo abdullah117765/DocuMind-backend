@@ -25,6 +25,11 @@ import { RoleManagementService } from './role-management.service';
     PermissionsGuard,
     RoleManagementService,
   ],
-  exports: [AccessControlService, AuthModule, PermissionsGuard],
+  exports: [
+    AccessControlService,
+    AccessControlCacheService,
+    AuthModule,
+    PermissionsGuard,
+  ],
 })
 export class AccessControlModule {}
