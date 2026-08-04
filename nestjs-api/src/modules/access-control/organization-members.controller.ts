@@ -30,6 +30,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { RequireOrganizationPermissions } from '../../common/decorators/require-permissions.decorator';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
+import { ORGANIZATION_PERMISSIONS } from './rbac.constants';
 import { AddOrganizationMemberDto } from './dto/add-organization-member.dto';
 import { OrganizationIdDto } from './dto/organization-id.dto';
 import { OrganizationMemberParamsDto } from './dto/organization-member-params.dto';
@@ -83,9 +84,9 @@ const MEMBERSHIP_ID_PARAM = {
 })
 @ApiForbiddenResponse({
   description:
-    'The user does not have users.manage permission in this organization',
+    'The user does not have members.manage permission in this organization',
 })
-@RequireOrganizationPermissions('users.manage')
+@RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.membersManage)
 @Controller('organizations/:organizationId/members')
 export class OrganizationMembersController {
   constructor(

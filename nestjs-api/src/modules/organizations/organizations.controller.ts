@@ -21,7 +21,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { RequireAnyPlatformPermission } from '../../common/decorators/require-permissions.decorator';
+import { RequirePlatformSuperAdmin } from '../../common/decorators/require-permissions.decorator';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
@@ -42,9 +42,6 @@ interface OrganizationResult {
   };
 }
 
-const PLATFORM_ORGANIZATION_PERMISSION = 'platform.organizations.manage';
-const SUPER_ADMIN_PERMISSION = 'platform.super_admin.assign';
-
 @ApiTags('Platform Organizations')
 @ApiBearerAuth('access-token')
 @ApiCookieAuth('access-cookie')
@@ -54,10 +51,7 @@ const SUPER_ADMIN_PERMISSION = 'platform.super_admin.assign';
 @ApiForbiddenResponse({
   description: 'The user is not a platform Super Admin',
 })
-@RequireAnyPlatformPermission(
-  PLATFORM_ORGANIZATION_PERMISSION,
-  SUPER_ADMIN_PERMISSION,
-)
+@RequirePlatformSuperAdmin()
 @Controller('platform/organizations')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}

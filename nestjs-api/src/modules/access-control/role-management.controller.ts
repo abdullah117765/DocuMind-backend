@@ -40,6 +40,7 @@ import {
   RoleManagementService,
   RoleView,
 } from './role-management.service';
+import { ORGANIZATION_PERMISSIONS } from './rbac.constants';
 
 interface PermissionListResult {
   data: {
@@ -83,9 +84,9 @@ const CSRF_HEADER = {
 })
 @ApiForbiddenResponse({
   description:
-    'The user does not have users.manage permission in this organization',
+    'The user does not have roles.manage permission in this organization',
 })
-@RequireOrganizationPermissions('users.manage')
+@RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.rolesManage)
 @Controller('organizations/:organizationId')
 export class RoleManagementController {
   constructor(private readonly roleManagementService: RoleManagementService) {}
@@ -146,6 +147,10 @@ export class RoleManagementController {
   @Post('roles')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(CsrfGuard)
+  @RequireOrganizationPermissions(
+    ORGANIZATION_PERMISSIONS.rolesManage,
+    ORGANIZATION_PERMISSIONS.permissionsAssign,
+  )
   @ApiHeader(CSRF_HEADER)
   @ApiOperation({ summary: 'Create a custom organization role' })
   @ApiCreatedResponse({ description: 'Custom role created' })
@@ -213,6 +218,10 @@ export class RoleManagementController {
     format: 'uuid',
   })
   @UseGuards(CsrfGuard)
+  @RequireOrganizationPermissions(
+    ORGANIZATION_PERMISSIONS.rolesManage,
+    ORGANIZATION_PERMISSIONS.permissionsAssign,
+  )
   @ApiHeader(CSRF_HEADER)
   @ApiOperation({
     summary: 'Replace every permission assigned to a custom role',

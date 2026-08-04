@@ -5,128 +5,195 @@ import {
   PrismaClient,
   type Prisma,
 } from '../src/generated/prisma/client';
+import {
+  LEGACY_PERMISSIONS,
+  ORGANIZATION_PERMISSIONS,
+  PLATFORM_PERMISSIONS,
+} from '../src/modules/access-control/rbac.constants';
 
-const permissions = [
+type SeedPermission = Omit<Prisma.PermissionCreateInput, 'roles'>;
+
+const permissions: readonly SeedPermission[] = [
   {
-    code: 'documents.read',
+    code: ORGANIZATION_PERMISSIONS.documentsRead,
     name: 'Read',
     description: 'View documents and their processed data.',
     category: 'Documents',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'documents.create',
+    code: ORGANIZATION_PERMISSIONS.documentsCreate,
     name: 'Create',
     description: 'Create documents and related records.',
     category: 'Documents',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'documents.update',
+    code: ORGANIZATION_PERMISSIONS.documentsUpdate,
     name: 'Update',
     description: 'Update documents and related records.',
     category: 'Documents',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'documents.delete',
+    code: ORGANIZATION_PERMISSIONS.documentsDelete,
     name: 'Delete',
     description: 'Delete documents and related records.',
     category: 'Documents',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'documents.export',
+    code: ORGANIZATION_PERMISSIONS.documentsExport,
     name: 'Export',
     description: 'Export organization document data.',
     category: 'Documents',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'documents.upload',
+    code: ORGANIZATION_PERMISSIONS.documentsUpload,
     name: 'Upload',
     description: 'Upload documents for processing.',
     category: 'Documents',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'ai.access',
+    code: ORGANIZATION_PERMISSIONS.aiAccess,
     name: 'AI Access',
     description: 'Use AI-powered document features.',
     category: 'AI',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'billing.manage',
+    code: ORGANIZATION_PERMISSIONS.billingManage,
     name: 'Billing',
     description: 'View and manage organization billing.',
     category: 'Administration',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'users.manage',
-    name: 'User Management',
-    description: 'Manage organization members and their roles.',
+    code: ORGANIZATION_PERMISSIONS.membersManage,
+    name: 'Member Management',
+    description: 'Create, invite, update, deactivate, and remove organization members.',
     category: 'Administration',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'queues.manage',
+    code: ORGANIZATION_PERMISSIONS.rolesManage,
+    name: 'Role Management',
+    description: 'Create, update, deactivate, and assign organization roles.',
+    category: 'Administration',
+    scope: AccessScope.ORGANIZATION,
+  },
+  {
+    code: ORGANIZATION_PERMISSIONS.permissionsAssign,
+    name: 'Permission Assignment',
+    description: 'Assign organization permissions to custom roles.',
+    category: 'Administration',
+    scope: AccessScope.ORGANIZATION,
+  },
+  {
+    code: ORGANIZATION_PERMISSIONS.settingsManage,
+    name: 'Organization Settings',
+    description: 'Update organization profile and tenant settings.',
+    category: 'Administration',
+    scope: AccessScope.ORGANIZATION,
+  },
+  {
+    code: LEGACY_PERMISSIONS.usersManage,
+    name: 'User Management (legacy)',
+    description:
+      'Legacy broad organization user-management permission. Replaced by members.manage, roles.manage, and permissions.assign.',
+    category: 'Administration',
+    scope: AccessScope.ORGANIZATION,
+    isActive: false,
+  },
+  {
+    code: ORGANIZATION_PERMISSIONS.queuesManage,
     name: 'Queue Management',
     description: 'Manage document-processing queues.',
     category: 'Operations',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'analytics.view',
+    code: ORGANIZATION_PERMISSIONS.analyticsView,
     name: 'Analytics',
     description: 'View organization analytics.',
     category: 'Analytics',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'prompts.manage',
+    code: ORGANIZATION_PERMISSIONS.promptsManage,
     name: 'Prompt Management',
     description: 'Create and manage organization AI prompts.',
     category: 'AI',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'api.access',
+    code: ORGANIZATION_PERMISSIONS.apiAccess,
     name: 'API Access',
     description: 'Use organization API integrations.',
     category: 'Integrations',
     scope: AccessScope.ORGANIZATION,
   },
   {
-    code: 'platform.organizations.manage',
+    code: PLATFORM_PERMISSIONS.organizationsManage,
     name: 'Organizations',
     description: 'Create and manage tenant organizations.',
     category: 'Platform',
     scope: AccessScope.PLATFORM,
   },
   {
-    code: 'platform.super_admin.assign',
-    name: 'Assign Super Admin',
-    description: 'Assign or remove platform Super Admin roles.',
+    code: LEGACY_PERMISSIONS.superAdminAssign,
+    name: 'Assign Super Admin (legacy)',
+    description:
+      'Legacy Super Admin assignment permission. Super Admin is now backend/database-only.',
     category: 'Platform',
     scope: AccessScope.PLATFORM,
+    isActive: false,
   },
   {
-    code: 'platform.users.manage',
+    code: PLATFORM_PERMISSIONS.usersManage,
     name: 'Platform Users',
     description: 'Search, create, deactivate, and manage platform users.',
     category: 'Platform',
     scope: AccessScope.PLATFORM,
   },
   {
-    code: 'platform.audit_logs.view',
+    code: PLATFORM_PERMISSIONS.subscriptionsManage,
+    name: 'Platform Subscriptions',
+    description: 'Manage platform subscription plans and tenant plan state.',
+    category: 'Platform',
+    scope: AccessScope.PLATFORM,
+  },
+  {
+    code: PLATFORM_PERMISSIONS.aiConfigurationManage,
+    name: 'Global AI Configuration',
+    description: 'Manage global AI configuration and provider settings.',
+    category: 'Platform',
+    scope: AccessScope.PLATFORM,
+  },
+  {
+    code: PLATFORM_PERMISSIONS.settingsManage,
+    name: 'System Settings',
+    description: 'Manage platform-wide system settings.',
+    category: 'Platform',
+    scope: AccessScope.PLATFORM,
+  },
+  {
+    code: PLATFORM_PERMISSIONS.analyticsView,
+    name: 'Platform Analytics',
+    description: 'View platform-wide analytics.',
+    category: 'Platform',
+    scope: AccessScope.PLATFORM,
+  },
+  {
+    code: PLATFORM_PERMISSIONS.auditLogsView,
     name: 'Audit Logs',
     description: 'View platform-wide audit logs.',
     category: 'Platform',
     scope: AccessScope.PLATFORM,
   },
-] as const satisfies ReadonlyArray<Omit<Prisma.PermissionCreateInput, 'roles'>>;
+];
 
 const roleDefinitions = [
   {
@@ -136,7 +203,9 @@ const roleDefinitions = [
     description: 'Full access across the platform and every organization.',
     scope: AccessScope.PLATFORM,
     autoGrantNewPermissions: true,
-    permissionCodes: permissions.map(({ code }) => code),
+    permissionCodes: permissions
+      .filter(({ isActive }) => isActive !== false)
+      .map(({ code }) => code),
   },
   {
     systemKey: 'organization_admin',
@@ -146,53 +215,52 @@ const roleDefinitions = [
     scope: AccessScope.ORGANIZATION,
     autoGrantNewPermissions: true,
     permissionCodes: permissions
-      .filter(({ scope }) => scope === AccessScope.ORGANIZATION)
+      .filter(
+        ({ scope, isActive }) =>
+          scope === AccessScope.ORGANIZATION && isActive !== false,
+      )
       .map(({ code }) => code),
   },
   {
     systemKey: 'manager',
     name: 'Manager',
     normalizedName: 'manager',
-    description: 'Manage document operations, queues, analytics, and prompts.',
+    description:
+      'Manage assigned document workflows and use team analytics within one organization.',
     scope: AccessScope.ORGANIZATION,
     autoGrantNewPermissions: false,
     permissionCodes: [
-      'documents.read',
-      'documents.create',
-      'documents.update',
-      'documents.delete',
-      'documents.export',
-      'documents.upload',
-      'ai.access',
-      'queues.manage',
-      'analytics.view',
-      'prompts.manage',
+      ORGANIZATION_PERMISSIONS.documentsRead,
+      ORGANIZATION_PERMISSIONS.documentsCreate,
+      ORGANIZATION_PERMISSIONS.documentsUpdate,
+      ORGANIZATION_PERMISSIONS.documentsUpload,
+      ORGANIZATION_PERMISSIONS.aiAccess,
+      ORGANIZATION_PERMISSIONS.analyticsView,
     ],
   },
   {
     systemKey: 'employee',
     name: 'Employee',
     normalizedName: 'employee',
-    description: 'Create, update, upload, export, and process documents.',
+    description: 'Create, update, upload, and process assigned documents.',
     scope: AccessScope.ORGANIZATION,
     autoGrantNewPermissions: false,
     permissionCodes: [
-      'documents.read',
-      'documents.create',
-      'documents.update',
-      'documents.export',
-      'documents.upload',
-      'ai.access',
+      ORGANIZATION_PERMISSIONS.documentsRead,
+      ORGANIZATION_PERMISSIONS.documentsCreate,
+      ORGANIZATION_PERMISSIONS.documentsUpdate,
+      ORGANIZATION_PERMISSIONS.documentsUpload,
+      ORGANIZATION_PERMISSIONS.aiAccess,
     ],
   },
   {
     systemKey: 'viewer',
     name: 'Viewer',
     normalizedName: 'viewer',
-    description: 'Read documents and view organization analytics.',
+    description: 'Read documents and shared organization information.',
     scope: AccessScope.ORGANIZATION,
     autoGrantNewPermissions: false,
-    permissionCodes: ['documents.read', 'analytics.view'],
+    permissionCodes: [ORGANIZATION_PERMISSIONS.documentsRead],
   },
 ] as const;
 
@@ -216,12 +284,13 @@ async function seed(): Promise<void> {
       const permissionIds = new Map<string, string>();
 
       for (const permission of permissions) {
+        const isActive = permission.isActive ?? true;
         const persistedPermission = await transaction.permission.upsert({
           where: { code: permission.code },
           create: {
             ...permission,
             isSystem: true,
-            isActive: true,
+            isActive,
           },
           update: {
             name: permission.name,
@@ -229,7 +298,7 @@ async function seed(): Promise<void> {
             category: permission.category,
             scope: permission.scope,
             isSystem: true,
-            isActive: true,
+            isActive,
           },
           select: { id: true },
         });
@@ -278,6 +347,19 @@ async function seed(): Promise<void> {
             };
           }),
           skipDuplicates: true,
+        });
+
+        await transaction.rolePermission.deleteMany({
+          where: {
+            roleId: role.id,
+            permission: {
+              is: {
+                code: {
+                  notIn: [...roleDefinition.permissionCodes],
+                },
+              },
+            },
+          },
         });
       }
     });

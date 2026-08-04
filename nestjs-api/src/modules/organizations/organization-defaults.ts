@@ -13,5 +13,3 @@ export const DEFAULT_ORGANIZATION_SUBSCRIPTION = {
 } as const;
 
 export const ORGANIZATION_INVITE_TTL_DAYS = 7;
-export const PLATFORM_ORGANIZATION_PERMISSION = 'platform.organizations.manage';
-export const SUPER_ADMIN_PERMISSION = 'platform.super_admin.assign';

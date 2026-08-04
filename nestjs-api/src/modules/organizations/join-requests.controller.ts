@@ -25,6 +25,7 @@ import { RequireOrganizationPermissions } from '../../common/decorators/require-
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { OrganizationIdDto } from '../access-control/dto/organization-id.dto';
+import { ORGANIZATION_PERMISSIONS } from '../access-control/rbac.constants';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { AcceptJoinRequestDto } from './dto/accept-join-request.dto';
 import { CreateJoinRequestDto } from './dto/create-join-request.dto';
@@ -143,7 +144,7 @@ export class JoinRequestsController {
 
   @Get('organizations/:organizationId/join-requests')
   @HttpCode(HttpStatus.OK)
-  @RequireOrganizationPermissions('users.manage')
+  @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.membersManage)
   @ApiOperation({ summary: 'List organization join requests' })
   async listOrganizationRequests(
     @Param() params: OrganizationIdDto,
@@ -163,7 +164,7 @@ export class JoinRequestsController {
   @Patch('organizations/:organizationId/join-requests/:requestId/accept')
   @HttpCode(HttpStatus.OK)
   @UseGuards(CsrfGuard)
-  @RequireOrganizationPermissions('users.manage')
+  @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.membersManage)
   @ApiHeader(CSRF_HEADER)
   @ApiBody({ type: AcceptJoinRequestDto })
   @ApiOperation({ summary: 'Accept a pending join request' })
@@ -187,7 +188,7 @@ export class JoinRequestsController {
   @Patch('organizations/:organizationId/join-requests/:requestId/reject')
   @HttpCode(HttpStatus.OK)
   @UseGuards(CsrfGuard)
-  @RequireOrganizationPermissions('users.manage')
+  @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.membersManage)
   @ApiHeader(CSRF_HEADER)
   @ApiBody({ type: RejectJoinRequestDto })
   @ApiOperation({ summary: 'Reject a pending join request' })

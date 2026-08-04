@@ -6,7 +6,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { RequireAnyPlatformPermission } from '../../common/decorators/require-permissions.decorator';
+import { RequirePlatformSuperAdmin } from '../../common/decorators/require-permissions.decorator';
 import {
   AuditLogListResult,
   AuditLogsService,
@@ -17,13 +17,10 @@ interface AuditLogsResult {
   data: AuditLogListResult;
 }
 
-const AUDIT_LOGS_PERMISSION = 'platform.audit_logs.view';
-const SUPER_ADMIN_PERMISSION = 'platform.super_admin.assign';
-
 @ApiTags('Audit Logs')
 @ApiBearerAuth('access-token')
 @ApiCookieAuth('access-cookie')
-@RequireAnyPlatformPermission(AUDIT_LOGS_PERMISSION, SUPER_ADMIN_PERMISSION)
+@RequirePlatformSuperAdmin()
 @Controller('audit-logs')
 export class AuditLogsController {
   constructor(private readonly auditLogsService: AuditLogsService) {}

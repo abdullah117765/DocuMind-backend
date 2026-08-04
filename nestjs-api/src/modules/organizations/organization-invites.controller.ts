@@ -23,6 +23,7 @@ import { RequireOrganizationPermissions } from '../../common/decorators/require-
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { OrganizationIdDto } from '../access-control/dto/organization-id.dto';
+import { ORGANIZATION_PERMISSIONS } from '../access-control/rbac.constants';
 import { InviteOrganizationMemberDto } from './dto/invite-organization-member.dto';
 import { OrganizationInviteParamsDto } from './dto/organization-invite-params.dto';
 import {
@@ -45,7 +46,7 @@ interface InviteResult {
 @ApiTags('Organization Invites')
 @ApiBearerAuth('access-token')
 @ApiCookieAuth('access-cookie')
-@RequireOrganizationPermissions('users.manage')
+@RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.membersManage)
 @Controller('organizations/:organizationId/invites')
 export class OrganizationInvitesController {
   constructor(private readonly invitesService: OrganizationInvitesService) {}

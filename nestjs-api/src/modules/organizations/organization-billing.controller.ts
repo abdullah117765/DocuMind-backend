@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger';
 import {
   RequireAnyOrganizationPermission,
-  RequireAnyPlatformPermission,
+  RequirePlatformSuperAdmin,
 } from '../../common/decorators/require-permissions.decorator';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { OrganizationIdDto } from '../access-control/dto/organization-id.dto';
@@ -30,10 +30,6 @@ import {
   OrganizationLimitsView,
   OrganizationSubscriptionView,
 } from './organization-billing.service';
-import {
-  PLATFORM_ORGANIZATION_PERMISSION,
-  SUPER_ADMIN_PERMISSION,
-} from './organization-defaults';
 
 interface SubscriptionResult {
   data: {
@@ -62,7 +58,7 @@ export class OrganizationBillingController {
 
   @Get('organizations/:organizationId/subscription')
   @HttpCode(HttpStatus.OK)
-  @RequireAnyOrganizationPermission('billing.manage', 'users.manage')
+  @RequireAnyOrganizationPermission('billing.manage')
   @ApiOperation({ summary: 'Get organization subscription' })
   @ApiOkResponse({ description: 'Organization subscription' })
   async getSubscription(
@@ -79,7 +75,7 @@ export class OrganizationBillingController {
 
   @Get('organizations/:organizationId/limits')
   @HttpCode(HttpStatus.OK)
-  @RequireAnyOrganizationPermission('billing.manage', 'users.manage')
+  @RequireAnyOrganizationPermission('billing.manage')
   @ApiOperation({ summary: 'Get organization limits' })
   @ApiOkResponse({ description: 'Organization limits' })
   async getLimits(@Param() params: OrganizationIdDto): Promise<LimitsResult> {
@@ -93,10 +89,7 @@ export class OrganizationBillingController {
   @Patch('platform/organizations/:organizationId/subscription')
   @HttpCode(HttpStatus.OK)
   @UseGuards(CsrfGuard)
-  @RequireAnyPlatformPermission(
-    PLATFORM_ORGANIZATION_PERMISSION,
-    SUPER_ADMIN_PERMISSION,
-  )
+  @RequirePlatformSuperAdmin()
   @ApiHeader(CSRF_HEADER)
   @ApiBody({ type: UpdateOrganizationSubscriptionDto })
   @ApiOperation({ summary: 'Update organization subscription as Super Admin' })
@@ -117,10 +110,7 @@ export class OrganizationBillingController {
   @Patch('platform/organizations/:organizationId/limits')
   @HttpCode(HttpStatus.OK)
   @UseGuards(CsrfGuard)
-  @RequireAnyPlatformPermission(
-    PLATFORM_ORGANIZATION_PERMISSION,
-    SUPER_ADMIN_PERMISSION,
-  )
+  @RequirePlatformSuperAdmin()
   @ApiHeader(CSRF_HEADER)
   @ApiBody({ type: UpdateOrganizationLimitsDto })
   @ApiOperation({ summary: 'Update organization limits as Super Admin' })

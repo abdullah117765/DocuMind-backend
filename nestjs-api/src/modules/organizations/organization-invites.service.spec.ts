@@ -30,8 +30,10 @@ describe('OrganizationInvitesService', () => {
   const role = {
     id: roleId,
     organizationId: null,
+    systemKey: 'viewer',
     name: 'Viewer',
     isSystem: true,
+    permissions: [],
   };
   const inviteRecord = {
     id: inviteId,
@@ -55,6 +57,7 @@ describe('OrganizationInvitesService', () => {
     roles: [{ role }],
   };
   const roleFindMany = jest.fn();
+  const platformUserRoleFindFirst = jest.fn();
   const userFindUnique = jest.fn();
   const organizationLimitFindUnique = jest.fn();
   const organizationMembershipCount = jest.fn();
@@ -91,6 +94,9 @@ describe('OrganizationInvitesService', () => {
     user: {
       findUnique: userFindUnique,
     },
+    platformUserRole: {
+      findFirst: platformUserRoleFindFirst,
+    },
     organizationLimit: {
       findUnique: organizationLimitFindUnique,
     },
@@ -121,6 +127,7 @@ describe('OrganizationInvitesService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     roleFindMany.mockResolvedValue([role]);
+    platformUserRoleFindFirst.mockResolvedValue(null);
     userFindUnique.mockResolvedValue(null);
     organizationLimitFindUnique.mockResolvedValue({ maxMembers: 10 });
     organizationMembershipCount.mockResolvedValue(1);
@@ -172,8 +179,18 @@ describe('OrganizationInvitesService', () => {
       select: {
         id: true,
         organizationId: true,
+        systemKey: true,
         name: true,
         isSystem: true,
+        permissions: {
+          select: {
+            permission: {
+              select: {
+                code: true,
+              },
+            },
+          },
+        },
       },
     });
     expect(sendOrganizationInvite).toHaveBeenCalledWith(

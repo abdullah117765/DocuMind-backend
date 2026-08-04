@@ -14,6 +14,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AccessControlService } from './access-control.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import {
+  LEGACY_PERMISSIONS,
+  ORGANIZATION_PERMISSIONS,
+  ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
+  PLATFORM_ROLE_KEYS,
+} from './rbac.constants';
 
 interface PermissionRecord {
   id: string;
@@ -42,7 +48,7 @@ interface RoleRecord {
   };
 }
 
-const USER_MANAGEMENT_PERMISSION = 'users.manage';
+const MEMBER_MANAGEMENT_PERMISSION = ORGANIZATION_PERMISSIONS.membersManage;
 
 export interface PermissionView {
   id: string;
@@ -113,6 +119,7 @@ export class RoleManagementService {
       where: {
         scope: AccessScope.ORGANIZATION,
         isActive: true,
+        code: { notIn: [LEGACY_PERMISSIONS.usersManage] },
       },
       select: {
         id: true,
@@ -157,6 +164,7 @@ export class RoleManagementService {
   ): Promise<RoleView> {
     const permissionCodes = normalizePermissionCodes(dto.permissionCodes ?? []);
     const permissions = await this.resolvePermissions(permissionCodes);
+    await this.assertPermissionsAssignableByActor(actorUserId, permissions);
     const name = cleanRoleName(dto.name);
     const normalizedName = normalizeRoleName(name);
 
@@ -282,12 +290,13 @@ export class RoleManagementService {
 
     const permissionCodes = normalizePermissionCodes(permissionCodesInput);
     const permissions = await this.resolvePermissions(permissionCodes);
+    await this.assertPermissionsAssignableByActor(actorUserId, permissions);
     const revokesUserManagement =
       role.permissions.some(
-        ({ permission }) => permission.code === USER_MANAGEMENT_PERMISSION,
+        ({ permission }) => permission.code === MEMBER_MANAGEMENT_PERMISSION,
       ) &&
       !permissions.some(
-        (permission) => permission.code === USER_MANAGEMENT_PERMISSION,
+        (permission) => permission.code === MEMBER_MANAGEMENT_PERMISSION,
       );
 
     await this.runSerializableRoleMutation(async (transaction) => {
@@ -333,7 +342,7 @@ export class RoleManagementService {
       actorUserId,
     );
     const grantsUserManagement = role.permissions.some(
-      ({ permission }) => permission.code === USER_MANAGEMENT_PERMISSION,
+      ({ permission }) => permission.code === MEMBER_MANAGEMENT_PERMISSION,
     );
 
     await this.runSerializableRoleMutation(async (transaction) => {
@@ -437,7 +446,7 @@ export class RoleManagementService {
                     some: {
                       permission: {
                         is: {
-                          code: USER_MANAGEMENT_PERMISSION,
+                          code: MEMBER_MANAGEMENT_PERMISSION,
                           scope: AccessScope.ORGANIZATION,
                           isActive: true,
                         },
@@ -454,7 +463,7 @@ export class RoleManagementService {
 
     if (!alternativeManager) {
       throw new ConflictException(
-        'Organization must retain at least one active member with user management permission',
+        'Organization must retain at least one active member with member management permission',
       );
     }
   }
@@ -489,6 +498,11 @@ export class RoleManagementService {
         code: { in: permissionCodes },
         scope: AccessScope.ORGANIZATION,
         isActive: true,
+        NOT: {
+          code: {
+            in: [LEGACY_PERMISSIONS.usersManage],
+          },
+        },
       },
       select: {
         id: true,
@@ -512,6 +526,52 @@ export class RoleManagementService {
     }
 
     return permissions;
+  }
+
+  private async assertPermissionsAssignableByActor(
+    actorUserId: string,
+    permissions: Array<{ code: string }>,
+  ): Promise<void> {
+    if (
+      permissions.length === 0 ||
+      (await this.userHasSuperAdminRole(actorUserId))
+    ) {
+      return;
+    }
+
+    const blockedPermissionCodes = permissions
+      .map((permission) => permission.code)
+      .filter((permissionCode) =>
+        ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permissionCode),
+      );
+
+    if (blockedPermissionCodes.length > 0) {
+      throw new ForbiddenException({
+        message:
+          'Organization Admins cannot grant admin, billing, queue, prompt, or settings permissions to custom roles.',
+        details: {
+          blockedPermissionCodes,
+        },
+      });
+    }
+  }
+
+  private async userHasSuperAdminRole(userId: string): Promise<boolean> {
+    const assignment = await this.prisma.platformUserRole.findFirst({
+      where: {
+        userId,
+        role: {
+          is: {
+            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+            scope: AccessScope.PLATFORM,
+            isActive: true,
+          },
+        },
+      },
+      select: { roleId: true },
+    });
+
+    return Boolean(assignment);
   }
 
   private async ensureRoleNameAvailable(
