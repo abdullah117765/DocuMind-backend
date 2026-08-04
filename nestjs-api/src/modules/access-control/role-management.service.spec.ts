@@ -39,8 +39,8 @@ describe('RoleManagementService', () => {
   const userManagementPermission = {
     ...permission,
     id: 'fe78221c-c9a8-4536-aa54-a23a775ff130',
-    code: 'users.manage',
-    name: 'User Management',
+    code: 'members.manage',
+    name: 'Member Management',
     category: 'Administration',
   };
   const customUserManagerRole = {
@@ -56,6 +56,7 @@ describe('RoleManagementService', () => {
     isSystem: true,
   };
   const permissionFindMany = jest.fn();
+  const platformUserRoleFindFirst = jest.fn();
   const roleFindFirst = jest.fn();
   const roleFindMany = jest.fn();
   const roleCreate = jest.fn();
@@ -86,6 +87,9 @@ describe('RoleManagementService', () => {
     permission: {
       findMany: permissionFindMany,
     },
+    platformUserRole: {
+      findFirst: platformUserRoleFindFirst,
+    },
     role: {
       findFirst: roleFindFirst,
       findMany: roleFindMany,
@@ -109,6 +113,7 @@ describe('RoleManagementService', () => {
         callback(transactionClient),
     );
     permissionFindMany.mockResolvedValue([]);
+    platformUserRoleFindFirst.mockResolvedValue(null);
     roleFindMany.mockResolvedValue([]);
     roleCreate.mockResolvedValue({ id: roleId });
     roleUpdate.mockResolvedValue(customRole);
@@ -129,6 +134,7 @@ describe('RoleManagementService', () => {
         where: {
           scope: AccessScope.ORGANIZATION,
           isActive: true,
+          code: { notIn: ['users.manage'] },
         },
       }),
     );

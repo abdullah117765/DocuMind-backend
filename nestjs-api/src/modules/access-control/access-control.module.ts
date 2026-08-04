@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { PlatformSuperAdminGuard } from '../../common/guards/platform-super-admin.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { AuthModule } from '../auth/auth.module';
 import { AccessControlCacheService } from './access-control-cache.service';
@@ -22,6 +23,7 @@ import { RoleManagementService } from './role-management.service';
     AccessControlService,
     CurrentUserAccessService,
     OrganizationMembersService,
+    PlatformSuperAdminGuard,
     PermissionsGuard,
     RoleManagementService,
   ],
@@ -29,6 +31,7 @@ import { RoleManagementService } from './role-management.service';
     AccessControlService,
     AccessControlCacheService,
     AuthModule,
+    PlatformSuperAdminGuard,
     PermissionsGuard,
   ],
 })

@@ -15,6 +15,12 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
+import {
+  ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
+  ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
+  ORGANIZATION_ROLE_KEYS,
+  PLATFORM_ROLE_KEYS,
+} from '../access-control/rbac.constants';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,13 +30,20 @@ import {
   ORGANIZATION_INVITE_TTL_DAYS,
 } from './organization-defaults';
 
-const SUPER_ADMIN_SYSTEM_KEY = 'super_admin';
-
 interface InviteRoleRecord {
   id: string;
   organizationId: string | null;
   name: string;
   isSystem: boolean;
+}
+
+interface AssignableInviteRoleRecord extends InviteRoleRecord {
+  systemKey: string | null;
+  permissions: Array<{
+    permission: {
+      code: string;
+    };
+  }>;
 }
 
 interface InviteRecord {
@@ -132,6 +145,7 @@ export class OrganizationInvitesService {
     const email = normalizeEmail(dto.email);
     const roles = await this.resolveApplicableRoles(
       organizationId,
+      actor.userId,
       dto.roleIds ?? [],
     );
 
@@ -366,6 +380,7 @@ export class OrganizationInvitesService {
 
     const invite = await this.findInviteByToken(token);
     this.assertInviteCanBeAccepted(invite, now);
+    const inviteRoles = await this.resolveInviteRolesForAcceptance(invite);
 
     if (invite.email !== normalizeEmail(principal.email)) {
       throw new ForbiddenException({
@@ -471,9 +486,9 @@ export class OrganizationInvitesService {
               select: { id: true },
             });
 
-        if (invite.roles.length > 0) {
+        if (inviteRoles.length > 0) {
           await transaction.membershipRole.createMany({
-            data: invite.roles.map(({ role }) => ({
+            data: inviteRoles.map((role) => ({
               membershipId: membership.id,
               roleId: role.id,
               assignedByUserId: invite.invitedByUserId,
@@ -509,11 +524,12 @@ export class OrganizationInvitesService {
       where: { email },
       select: {
         id: true,
+        isActive: true,
         platformRoleAssignments: {
           where: {
             role: {
               is: {
-                systemKey: SUPER_ADMIN_SYSTEM_KEY,
+                systemKey: PLATFORM_ROLE_KEYS.superAdmin,
                 scope: AccessScope.PLATFORM,
                 isActive: true,
               },
@@ -545,6 +561,12 @@ export class OrganizationInvitesService {
           reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
         },
       });
+    }
+
+    if (user && !user.isActive) {
+      throw new ConflictException(
+        'This account is inactive and cannot be invited.',
+      );
     }
 
     if (user && user.organizationMemberships.length > 0) {
@@ -599,8 +621,9 @@ export class OrganizationInvitesService {
 
   private async resolveApplicableRoles(
     organizationId: string,
+    actorUserId: string,
     roleIdsInput: string[],
-  ): Promise<InviteRoleRecord[]> {
+  ): Promise<AssignableInviteRoleRecord[]> {
     const roleIds = normalizeRoleIds(roleIdsInput);
 
     if (roleIds.length === 0) {
@@ -617,8 +640,18 @@ export class OrganizationInvitesService {
       select: {
         id: true,
         organizationId: true,
+        systemKey: true,
         name: true,
         isSystem: true,
+        permissions: {
+          select: {
+            permission: {
+              select: {
+                code: true,
+              },
+            },
+          },
+        },
       },
     });
     const resolvedRoleIds = new Set(roles.map((role) => role.id));
@@ -633,7 +666,50 @@ export class OrganizationInvitesService {
       });
     }
 
+    await this.assertRolesAssignableByActor(actorUserId, roles);
+
     return roles;
+  }
+
+  private async assertRolesAssignableByActor(
+    actorUserId: string,
+    roles: AssignableInviteRoleRecord[],
+  ): Promise<void> {
+    if (roles.length === 0 || (await this.userHasSuperAdminRole(actorUserId))) {
+      return;
+    }
+
+    const blockedRoles = roles.filter(
+      (role) => !this.isAssignableByOrganizationAdmin(role),
+    );
+
+    if (blockedRoles.length > 0) {
+      throw new ForbiddenException({
+        message:
+          'Organization Admins can invite users only as Manager, Employee, Viewer, or non-admin custom roles.',
+        details: {
+          blockedRoleIds: blockedRoles.map((role) => role.id),
+        },
+      });
+    }
+  }
+
+  private isAssignableByOrganizationAdmin(
+    role: AssignableInviteRoleRecord,
+  ): boolean {
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.organizationAdmin) {
+      return false;
+    }
+
+    if (role.systemKey) {
+      return ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS.has(
+        role.systemKey,
+      );
+    }
+
+    return !role.permissions.some(({ permission }) =>
+      ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
+    );
   }
 
   private async findInviteByToken(token: string): Promise<
@@ -651,6 +727,75 @@ export class OrganizationInvitesService {
     }
 
     return invite;
+  }
+
+  private async resolveInviteRolesForAcceptance(
+    invite: InviteRecord & { invitedByUserId: string | null },
+  ): Promise<AssignableInviteRoleRecord[]> {
+    const roleIds = normalizeRoleIds(
+      invite.roles.map(({ role }) => role.id),
+    );
+
+    if (roleIds.length === 0) {
+      return [];
+    }
+
+    const roles = await this.prisma.role.findMany({
+      where: {
+        id: { in: roleIds },
+        scope: AccessScope.ORGANIZATION,
+        isActive: true,
+        OR: [{ organizationId: null }, { organizationId: invite.organizationId }],
+      },
+      select: {
+        id: true,
+        organizationId: true,
+        systemKey: true,
+        name: true,
+        isSystem: true,
+        permissions: {
+          select: {
+            permission: {
+              select: {
+                code: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const resolvedRoleIds = new Set(roles.map((role) => role.id));
+    const invalidRoleIds = roleIds.filter(
+      (roleId) => !resolvedRoleIds.has(roleId),
+    );
+
+    if (invalidRoleIds.length > 0) {
+      throw new ConflictException({
+        message: 'One or more invitation roles are no longer available.',
+        details: { invalidRoleIds },
+      });
+    }
+
+    if (
+      !invite.invitedByUserId ||
+      !(await this.userHasSuperAdminRole(invite.invitedByUserId))
+    ) {
+      const blockedRoles = roles.filter(
+        (role) => !this.isAssignableByOrganizationAdmin(role),
+      );
+
+      if (blockedRoles.length > 0) {
+        throw new ForbiddenException({
+          message:
+            'This invitation contains a role that only Super Admin can assign. Ask a Super Admin to resend it.',
+          details: {
+            blockedRoleIds: blockedRoles.map((role) => role.id),
+          },
+        });
+      }
+    }
+
+    return roles;
   }
 
   private assertInviteCanBeAccepted(invite: InviteRecord, now: Date): void {
@@ -783,7 +928,7 @@ export class OrganizationInvitesService {
         userId,
         role: {
           is: {
-            systemKey: SUPER_ADMIN_SYSTEM_KEY,
+            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
             scope: AccessScope.PLATFORM,
             isActive: true,
           },

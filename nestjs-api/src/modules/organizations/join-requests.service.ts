@@ -12,6 +12,12 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
+import {
+  ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
+  ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
+  ORGANIZATION_ROLE_KEYS,
+  PLATFORM_ROLE_KEYS,
+} from '../access-control/rbac.constants';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { AcceptJoinRequestDto } from './dto/accept-join-request.dto';
@@ -21,7 +27,16 @@ import { DEFAULT_ORGANIZATION_LIMITS } from './organization-defaults';
 
 const JOIN_REQUEST_RETRY_COOLDOWN_HOURS = 24;
 const EMPLOYEE_SYSTEM_KEY = 'employee';
-const SUPER_ADMIN_SYSTEM_KEY = 'super_admin';
+
+interface AssignableJoinRequestRoleRecord {
+  id: string;
+  systemKey: string | null;
+  permissions: Array<{
+    permission: {
+      code: string;
+    };
+  }>;
+}
 
 const joinRequestSelect = {
   id: true,
@@ -376,7 +391,11 @@ export class JoinRequestsService {
       });
     }
 
-    const roles = await this.resolveRoles(organizationId, dto.roleIds ?? []);
+    const roles = await this.resolveRoles(
+      organizationId,
+      dto.roleIds ?? [],
+      actorUserId,
+    );
     const acceptedRequest = await this.prisma.$transaction(
       async (transaction) => {
         const existingMembership =
@@ -538,7 +557,11 @@ export class JoinRequestsService {
     return this.toView(request);
   }
 
-  private async resolveRoles(organizationId: string, roleIdsInput: string[]) {
+  private async resolveRoles(
+    organizationId: string,
+    roleIdsInput: string[],
+    actorUserId?: string,
+  ): Promise<AssignableJoinRequestRoleRecord[]> {
     const roleIds = normalizeRoleIds(roleIdsInput);
 
     if (roleIds.length === 0) {
@@ -550,6 +573,16 @@ export class JoinRequestsService {
         },
         select: {
           id: true,
+          systemKey: true,
+          permissions: {
+            select: {
+              permission: {
+                select: {
+                  code: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -567,7 +600,19 @@ export class JoinRequestsService {
         isActive: true,
         OR: [{ organizationId: null }, { organizationId }],
       },
-      select: { id: true },
+      select: {
+        id: true,
+        systemKey: true,
+        permissions: {
+          select: {
+            permission: {
+              select: {
+                code: true,
+              },
+            },
+          },
+        },
+      },
     });
     const resolvedRoleIds = new Set(roles.map((role) => role.id));
     const invalidRoleIds = roleIds.filter(
@@ -581,7 +626,52 @@ export class JoinRequestsService {
       });
     }
 
+    if (actorUserId) {
+      await this.assertRolesAssignableByActor(actorUserId, roles);
+    }
+
     return roles;
+  }
+
+  private async assertRolesAssignableByActor(
+    actorUserId: string,
+    roles: AssignableJoinRequestRoleRecord[],
+  ): Promise<void> {
+    if (roles.length === 0 || (await this.userHasSuperAdminRole(actorUserId))) {
+      return;
+    }
+
+    const blockedRoles = roles.filter(
+      (role) => !this.isAssignableByOrganizationAdmin(role),
+    );
+
+    if (blockedRoles.length > 0) {
+      throw new ForbiddenException({
+        message:
+          'Organization Admins can accept join requests only as Manager, Employee, Viewer, or non-admin custom roles.',
+        details: {
+          blockedRoleIds: blockedRoles.map((role) => role.id),
+        },
+      });
+    }
+  }
+
+  private isAssignableByOrganizationAdmin(
+    role: AssignableJoinRequestRoleRecord,
+  ): boolean {
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.organizationAdmin) {
+      return false;
+    }
+
+    if (role.systemKey) {
+      return ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS.has(
+        role.systemKey,
+      );
+    }
+
+    return !role.permissions.some(({ permission }) =>
+      ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
+    );
   }
 
   private toView(request: JoinRequestRecord): JoinRequestView {
@@ -607,7 +697,7 @@ export class JoinRequestsService {
         userId,
         role: {
           is: {
-            systemKey: SUPER_ADMIN_SYSTEM_KEY,
+            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
             scope: AccessScope.PLATFORM,
             isActive: true,
           },

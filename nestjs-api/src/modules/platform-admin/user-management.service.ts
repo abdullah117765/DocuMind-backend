@@ -17,6 +17,7 @@ import {
   SessionService,
 } from '../auth/session.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { PLATFORM_ROLE_KEYS } from '../access-control/rbac.constants';
 import { CreateManagedUserDto } from './dto/create-managed-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { ReplacePlatformRolesDto } from './dto/replace-platform-roles.dto';
@@ -224,6 +225,9 @@ export class UserManagementService {
         organizationId: null,
         scope: AccessScope.PLATFORM,
         isActive: true,
+        NOT: {
+          systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+        },
       },
       select: {
         id: true,
@@ -300,7 +304,23 @@ export class UserManagementService {
 
     const existingUser = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, isActive: true },
+      select: {
+        id: true,
+        isActive: true,
+        platformRoleAssignments: {
+          where: {
+            role: {
+              is: {
+                systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+                scope: AccessScope.PLATFORM,
+                isActive: true,
+              },
+            },
+          },
+          select: { roleId: true },
+          take: 1,
+        },
+      },
     });
 
     if (!existingUser) {
@@ -308,6 +328,15 @@ export class UserManagementService {
     }
 
     const nextIsActive = dto.isActive ?? existingUser.isActive;
+
+    if (
+      existingUser.platformRoleAssignments.length > 0 &&
+      (dto.isActive !== undefined || dto.isVerified !== undefined)
+    ) {
+      throw new ForbiddenException(
+        'Super Admin accounts are protected and cannot be changed from user management.',
+      );
+    }
 
     await this.prisma.user.update({
       where: { id: userId },
@@ -349,7 +378,22 @@ export class UserManagementService {
     const [user, roles] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true },
+        select: {
+          id: true,
+          platformRoleAssignments: {
+            where: {
+              role: {
+                is: {
+                  systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+                  scope: AccessScope.PLATFORM,
+                  isActive: true,
+                },
+              },
+            },
+            select: { roleId: true },
+            take: 1,
+          },
+        },
       }),
       this.prisma.role.findMany({
         where: {
@@ -358,12 +402,28 @@ export class UserManagementService {
           scope: AccessScope.PLATFORM,
           isActive: true,
         },
-        select: { id: true },
+        select: { id: true, systemKey: true },
       }),
     ]);
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    if (user.platformRoleAssignments.length > 0) {
+      throw new ForbiddenException(
+        'Super Admin platform roles are backend/database-only and cannot be changed from the application.',
+      );
+    }
+
+    const requestedSuperAdminRole = roles.find(
+      (role) => role.systemKey === PLATFORM_ROLE_KEYS.superAdmin,
+    );
+
+    if (requestedSuperAdminRole) {
+      throw new ForbiddenException(
+        'Super Admin cannot be assigned from the application.',
+      );
     }
 
     const validRoleIds = new Set(roles.map((role) => role.id));

@@ -14,12 +14,20 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AccessControlService } from './access-control.service';
 import { AddOrganizationMemberDto } from './dto/add-organization-member.dto';
 import { DEFAULT_ORGANIZATION_LIMITS } from '../organizations/organization-defaults';
+import {
+  ORGANIZATION_PERMISSIONS,
+  ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
+  ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
+  ORGANIZATION_ROLE_KEYS,
+  PLATFORM_ROLE_KEYS,
+} from './rbac.constants';
 
-const USER_MANAGEMENT_PERMISSION = 'users.manage';
+const MEMBER_MANAGEMENT_PERMISSION = ORGANIZATION_PERMISSIONS.membersManage;
 
 interface MemberRoleRecord {
   id: string;
   organizationId: string | null;
+  systemKey: string | null;
   name: string;
   isSystem: boolean;
   permissions: Array<{
@@ -40,6 +48,7 @@ interface MembershipRecord {
     id: string;
     email: string;
     isVerified: boolean;
+    isActive: boolean;
   };
   roles: Array<{
     role: MemberRoleRecord;
@@ -139,14 +148,38 @@ export class OrganizationMembersService {
       where: {
         email: normalizeEmail(dto.email),
         isVerified: true,
+        isActive: true,
       },
       select: {
         id: true,
+        platformRoleAssignments: {
+          where: {
+            role: {
+              is: {
+                systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+                scope: AccessScope.PLATFORM,
+                isActive: true,
+              },
+            },
+          },
+          select: { roleId: true },
+          take: 1,
+        },
       },
     });
 
     if (!user) {
-      throw new NotFoundException('Verified user not found');
+      throw new NotFoundException('Active verified user not found');
+    }
+
+    if (user.platformRoleAssignments.length > 0) {
+      throw new ConflictException({
+        message:
+          'Super Admin accounts operate from the platform level and cannot become organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
+        },
+      });
     }
 
     if (user.id === actorUserId) {
@@ -157,6 +190,7 @@ export class OrganizationMembersService {
 
     const roles = await this.resolveApplicableRoles(
       organizationId,
+      actorUserId,
       dto.roleIds ?? [],
     );
     const existingMembership =
@@ -257,6 +291,7 @@ export class OrganizationMembersService {
 
     const roles = await this.resolveApplicableRoles(
       organizationId,
+      actorUserId,
       roleIdsInput,
     );
     const currentlyManagesUsers =
@@ -383,6 +418,7 @@ export class OrganizationMembersService {
 
   private async resolveApplicableRoles(
     organizationId: string,
+    actorUserId: string,
     roleIdsInput: string[],
   ): Promise<MemberRoleRecord[]> {
     const roleIds = normalizeRoleIds(roleIdsInput);
@@ -401,18 +437,10 @@ export class OrganizationMembersService {
       select: {
         id: true,
         organizationId: true,
+        systemKey: true,
         name: true,
         isSystem: true,
         permissions: {
-          where: {
-            permission: {
-              is: {
-                code: USER_MANAGEMENT_PERMISSION,
-                scope: AccessScope.ORGANIZATION,
-                isActive: true,
-              },
-            },
-          },
           select: {
             permission: {
               select: {
@@ -437,7 +465,48 @@ export class OrganizationMembersService {
       });
     }
 
+    await this.assertRolesAssignableByActor(actorUserId, roles);
+
     return roles;
+  }
+
+  private async assertRolesAssignableByActor(
+    actorUserId: string,
+    roles: MemberRoleRecord[],
+  ): Promise<void> {
+    if (roles.length === 0 || (await this.userHasSuperAdminRole(actorUserId))) {
+      return;
+    }
+
+    const blockedRoles = roles.filter(
+      (role) => !this.isAssignableByOrganizationAdmin(role),
+    );
+
+    if (blockedRoles.length > 0) {
+      throw new ForbiddenException({
+        message:
+          'Organization Admins can assign only Manager, Employee, Viewer, or non-admin custom roles.',
+        details: {
+          blockedRoleIds: blockedRoles.map((role) => role.id),
+        },
+      });
+    }
+  }
+
+  private isAssignableByOrganizationAdmin(role: MemberRoleRecord): boolean {
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.organizationAdmin) {
+      return false;
+    }
+
+    if (role.systemKey) {
+      return ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS.has(
+        role.systemKey,
+      );
+    }
+
+    return !role.permissions.some(({ permission }) =>
+      ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
+    );
   }
 
   private async ensureAnotherUserManager(
@@ -453,6 +522,7 @@ export class OrganizationMembersService {
         user: {
           is: {
             isVerified: true,
+            isActive: true,
           },
         },
         roles: {
@@ -466,7 +536,7 @@ export class OrganizationMembersService {
                   some: {
                     permission: {
                       is: {
-                        code: USER_MANAGEMENT_PERMISSION,
+                        code: MEMBER_MANAGEMENT_PERMISSION,
                         scope: AccessScope.ORGANIZATION,
                         isActive: true,
                       },
@@ -483,7 +553,7 @@ export class OrganizationMembersService {
 
     if (!anotherManager) {
       throw new ConflictException(
-        'Organization must retain at least one active member with user management permission',
+        'Organization must retain at least one active member with member management permission',
       );
     }
   }
@@ -509,9 +579,27 @@ export class OrganizationMembersService {
   private rolesGrantUserManagement(roles: MemberRoleRecord[]): boolean {
     return roles.some((role) =>
       role.permissions.some(
-        ({ permission }) => permission.code === USER_MANAGEMENT_PERMISSION,
+        ({ permission }) => permission.code === MEMBER_MANAGEMENT_PERMISSION,
       ),
     );
+  }
+
+  private async userHasSuperAdminRole(userId: string): Promise<boolean> {
+    const assignment = await this.prisma.platformUserRole.findFirst({
+      where: {
+        userId,
+        role: {
+          is: {
+            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+            scope: AccessScope.PLATFORM,
+            isActive: true,
+          },
+        },
+      },
+      select: { roleId: true },
+    });
+
+    return Boolean(assignment);
   }
 
   private async assertMemberLimitAllowsAdd(
@@ -592,6 +680,7 @@ export class OrganizationMembersService {
           id: true,
           email: true,
           isVerified: true,
+          isActive: true,
         },
       },
       roles: {
@@ -609,13 +698,14 @@ export class OrganizationMembersService {
             select: {
               id: true,
               organizationId: true,
+              systemKey: true,
               name: true,
               isSystem: true,
               permissions: {
                 where: {
                   permission: {
                     is: {
-                      code: USER_MANAGEMENT_PERMISSION,
+                      code: MEMBER_MANAGEMENT_PERMISSION,
                       scope: AccessScope.ORGANIZATION,
                       isActive: true,
                     },

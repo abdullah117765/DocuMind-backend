@@ -20,12 +20,13 @@ describe('OrganizationMembersService', () => {
   const adminRole = {
     id: 'b429b596-1865-4ace-bd6d-9ca3b52da710',
     organizationId: null,
+    systemKey: 'organization_admin',
     name: 'Organization Admin',
     isSystem: true,
     permissions: [
       {
         permission: {
-          code: 'users.manage',
+          code: 'members.manage',
         },
       },
     ],
@@ -33,6 +34,7 @@ describe('OrganizationMembersService', () => {
   const viewerRole = {
     id: 'e49feaf4-2d74-4d94-ae9b-1ac8a35be9ea',
     organizationId: null,
+    systemKey: 'viewer',
     name: 'Viewer',
     isSystem: true,
     permissions: [],
@@ -48,10 +50,12 @@ describe('OrganizationMembersService', () => {
       id: memberUserId,
       email: 'member@example.com',
       isVerified: true,
+      isActive: true,
     },
     roles: [{ role: adminRole }],
   };
   const userFindFirst = jest.fn();
+  const platformUserRoleFindFirst = jest.fn();
   const membershipFindMany = jest.fn();
   const membershipFindFirst = jest.fn();
   const membershipFindUnique = jest.fn();
@@ -78,6 +82,9 @@ describe('OrganizationMembersService', () => {
   const prisma = {
     user: {
       findFirst: userFindFirst,
+    },
+    platformUserRole: {
+      findFirst: platformUserRoleFindFirst,
     },
     organizationMembership: {
       findMany: membershipFindMany,
@@ -106,7 +113,11 @@ describe('OrganizationMembersService', () => {
       (callback: (transaction: typeof transactionClient) => Promise<unknown>) =>
         callback(transactionClient),
     );
-    userFindFirst.mockResolvedValue({ id: memberUserId });
+    userFindFirst.mockResolvedValue({
+      id: memberUserId,
+      platformRoleAssignments: [],
+    });
+    platformUserRoleFindFirst.mockResolvedValue(null);
     membershipFindMany.mockResolvedValue([]);
     membershipFindUnique.mockResolvedValue(null);
     membershipCount.mockResolvedValue(0);
@@ -197,7 +208,10 @@ describe('OrganizationMembersService', () => {
   });
 
   it('prevents adding your own account through member management', async () => {
-    userFindFirst.mockResolvedValue({ id: actorUserId });
+    userFindFirst.mockResolvedValue({
+      id: actorUserId,
+      platformRoleAssignments: [],
+    });
 
     await expect(
       service.addMember(organizationId, actorUserId, {
@@ -233,8 +247,24 @@ describe('OrganizationMembersService', () => {
       where: {
         email: 'member@example.com',
         isVerified: true,
+        isActive: true,
       },
-      select: { id: true },
+      select: {
+        id: true,
+        platformRoleAssignments: {
+          where: {
+            role: {
+              is: {
+                systemKey: 'super_admin',
+                scope: AccessScope.PLATFORM,
+                isActive: true,
+              },
+            },
+          },
+          select: { roleId: true },
+          take: 1,
+        },
+      },
     });
     expect(organizationLimitFindUnique).toHaveBeenCalledWith({
       where: { organizationId },

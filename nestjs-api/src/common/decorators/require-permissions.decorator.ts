@@ -7,6 +7,7 @@ import {
   PermissionRequirementOptions,
 } from '../../modules/access-control/permission-requirement';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { PlatformSuperAdminGuard } from '../guards/platform-super-admin.guard';
 import { PermissionsGuard } from '../guards/permissions.guard';
 
 function normalizePermissionCodes(permissionCodes: string[]): string[] {
@@ -65,6 +66,10 @@ export function RequireAnyPlatformPermission(
     },
     ...permissionCodes,
   );
+}
+
+export function RequirePlatformSuperAdmin(): MethodDecorator & ClassDecorator {
+  return applyDecorators(UseGuards(JwtAuthGuard, PlatformSuperAdminGuard));
 }
 
 export function RequireOrganizationPermissions(

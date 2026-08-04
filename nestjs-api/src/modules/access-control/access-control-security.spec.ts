@@ -7,6 +7,7 @@ import {
   PermissionRequirement,
 } from './permission-requirement';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { PlatformSuperAdminGuard } from '../../common/guards/platform-super-admin.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { CurrentUserAccessController } from './current-user-access.controller';
@@ -41,10 +42,12 @@ function getGuards(target: object): unknown[] {
 
 describe('Epic 2 security metadata', () => {
   it.each([
-    RoleManagementController,
-    OrganizationInvitesController,
-    OrganizationMembersController,
-  ])('requires JWT and dynamic permission guards on %p', (controller) => {
+    [RoleManagementController, ['roles.manage']],
+    [OrganizationInvitesController, ['members.manage']],
+    [OrganizationMembersController, ['members.manage']],
+  ])(
+    'requires JWT and dynamic permission guards on %p',
+    (controller, permissionCodes) => {
     expect(getGuards(controller)).toEqual([JwtAuthGuard, PermissionsGuard]);
     expect(
       Reflect.getMetadata(
@@ -53,30 +56,23 @@ describe('Epic 2 security metadata', () => {
       ) as PermissionRequirement,
     ).toEqual({
       scope: AccessScope.ORGANIZATION,
-      permissionCodes: ['users.manage'],
+      permissionCodes,
       match: PermissionMatch.ALL,
       organizationIdParam: 'organizationId',
     });
   });
 
-  it('requires platform organization management to create tenant organizations', () => {
+  it('requires Super Admin role to create tenant organizations', () => {
     expect(getGuards(OrganizationsController)).toEqual([
       JwtAuthGuard,
-      PermissionsGuard,
+      PlatformSuperAdminGuard,
     ]);
     expect(
       Reflect.getMetadata(
         PERMISSION_REQUIREMENT_METADATA,
         OrganizationsController,
-      ) as PermissionRequirement,
-    ).toEqual({
-      scope: AccessScope.PLATFORM,
-      permissionCodes: [
-        'platform.organizations.manage',
-        'platform.super_admin.assign',
-      ],
-      match: PermissionMatch.ANY,
-    });
+      ),
+    ).toBeUndefined();
   });
 
   it.each([
@@ -92,7 +88,7 @@ describe('Epic 2 security metadata', () => {
     [OrganizationInvitesController, 'revokeInvite'],
     [OrganizationsController, 'createOrganization'],
   ])('requires CSRF protection on %p.%s', (controller, methodName) => {
-    expect(getGuards(getHandler(controller, methodName))).toEqual([CsrfGuard]);
+    expect(getGuards(getHandler(controller, methodName))).toContain(CsrfGuard);
   });
 
   it.each([
@@ -122,7 +118,7 @@ describe('Epic 2 security metadata', () => {
       'getSubscription',
       {
         scope: AccessScope.ORGANIZATION,
-        permissionCodes: ['billing.manage', 'users.manage'],
+        permissionCodes: ['billing.manage'],
         match: PermissionMatch.ANY,
         organizationIdParam: 'organizationId',
       },
@@ -132,33 +128,9 @@ describe('Epic 2 security metadata', () => {
       'getLimits',
       {
         scope: AccessScope.ORGANIZATION,
-        permissionCodes: ['billing.manage', 'users.manage'],
+        permissionCodes: ['billing.manage'],
         match: PermissionMatch.ANY,
         organizationIdParam: 'organizationId',
-      },
-    ],
-    [
-      OrganizationBillingController,
-      'updateSubscription',
-      {
-        scope: AccessScope.PLATFORM,
-        permissionCodes: [
-          'platform.organizations.manage',
-          'platform.super_admin.assign',
-        ],
-        match: PermissionMatch.ANY,
-      },
-    ],
-    [
-      OrganizationBillingController,
-      'updateLimits',
-      {
-        scope: AccessScope.PLATFORM,
-        permissionCodes: [
-          'platform.organizations.manage',
-          'platform.super_admin.assign',
-        ],
-        match: PermissionMatch.ANY,
       },
     ],
   ])(
@@ -177,6 +149,24 @@ describe('Epic 2 security metadata', () => {
       ).toEqual(requirement);
     },
   );
+
+  it.each([
+    [OrganizationBillingController, 'updateSubscription'],
+    [OrganizationBillingController, 'updateLimits'],
+  ])('requires Super Admin role for billing mutation %p.%s', (controller, methodName) => {
+    const handler = getHandler(controller, methodName);
+
+    expect(getGuards(handler)).toEqual(
+      expect.arrayContaining([
+        JwtAuthGuard,
+        PlatformSuperAdminGuard,
+        CsrfGuard,
+      ]),
+    );
+    expect(
+      Reflect.getMetadata(PERMISSION_REQUIREMENT_METADATA, handler),
+    ).toBeUndefined();
+  });
 
   it('protects current-user access with JWT without requiring users.manage', () => {
     expect(getGuards(CurrentUserAccessController)).toEqual([JwtAuthGuard]);

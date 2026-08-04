@@ -20,7 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { RequireAnyPlatformPermission } from '../../common/decorators/require-permissions.decorator';
+import { RequirePlatformSuperAdmin } from '../../common/decorators/require-permissions.decorator';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { CreateManagedUserDto } from './dto/create-managed-user.dto';
@@ -57,13 +57,10 @@ const CSRF_HEADER = {
   description: 'Token returned by GET /auth/csrf',
 } as const;
 
-const PLATFORM_USERS_PERMISSION = 'platform.users.manage';
-const SUPER_ADMIN_PERMISSION = 'platform.super_admin.assign';
-
 @ApiTags('Platform Users')
 @ApiBearerAuth('access-token')
 @ApiCookieAuth('access-cookie')
-@RequireAnyPlatformPermission(PLATFORM_USERS_PERMISSION, SUPER_ADMIN_PERMISSION)
+@RequirePlatformSuperAdmin()
 @Controller('users')
 export class UserManagementController {
   constructor(private readonly usersService: UserManagementService) {}
