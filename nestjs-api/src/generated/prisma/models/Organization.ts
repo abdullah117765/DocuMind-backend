@@ -29,6 +29,7 @@ export type OrganizationMinAggregateOutputType = {
   name: string | null
   slug: string | null
   createdByUserId: string | null
+  allowJoinRequests: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -38,6 +39,7 @@ export type OrganizationMaxAggregateOutputType = {
   name: string | null
   slug: string | null
   createdByUserId: string | null
+  allowJoinRequests: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -47,6 +49,7 @@ export type OrganizationCountAggregateOutputType = {
   name: number
   slug: number
   createdByUserId: number
+  allowJoinRequests: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -58,6 +61,7 @@ export type OrganizationMinAggregateInputType = {
   name?: true
   slug?: true
   createdByUserId?: true
+  allowJoinRequests?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -67,6 +71,7 @@ export type OrganizationMaxAggregateInputType = {
   name?: true
   slug?: true
   createdByUserId?: true
+  allowJoinRequests?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -76,6 +81,7 @@ export type OrganizationCountAggregateInputType = {
   name?: true
   slug?: true
   createdByUserId?: true
+  allowJoinRequests?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -158,6 +164,7 @@ export type OrganizationGroupByOutputType = {
   name: string
   slug: string
   createdByUserId: string | null
+  allowJoinRequests: boolean
   createdAt: Date
   updatedAt: Date
   _count: OrganizationCountAggregateOutputType | null
@@ -188,12 +195,15 @@ export type OrganizationWhereInput = {
   name?: Prisma.StringFilter<"Organization"> | string
   slug?: Prisma.StringFilter<"Organization"> | string
   createdByUserId?: Prisma.UuidNullableFilter<"Organization"> | string | null
+  allowJoinRequests?: Prisma.BoolFilter<"Organization"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   memberships?: Prisma.OrganizationMembershipListRelationFilter
   roles?: Prisma.RoleListRelationFilter
   invites?: Prisma.OrganizationInviteListRelationFilter
+  joinRequests?: Prisma.JoinRequestListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
   subscription?: Prisma.XOR<Prisma.OrganizationSubscriptionNullableScalarRelationFilter, Prisma.OrganizationSubscriptionWhereInput> | null
   limits?: Prisma.XOR<Prisma.OrganizationLimitNullableScalarRelationFilter, Prisma.OrganizationLimitWhereInput> | null
 }
@@ -203,12 +213,15 @@ export type OrganizationOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   createdBy?: Prisma.UserOrderByWithRelationInput
   memberships?: Prisma.OrganizationMembershipOrderByRelationAggregateInput
   roles?: Prisma.RoleOrderByRelationAggregateInput
   invites?: Prisma.OrganizationInviteOrderByRelationAggregateInput
+  joinRequests?: Prisma.JoinRequestOrderByRelationAggregateInput
+  auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   subscription?: Prisma.OrganizationSubscriptionOrderByWithRelationInput
   limits?: Prisma.OrganizationLimitOrderByWithRelationInput
 }
@@ -221,12 +234,15 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
   name?: Prisma.StringFilter<"Organization"> | string
   createdByUserId?: Prisma.UuidNullableFilter<"Organization"> | string | null
+  allowJoinRequests?: Prisma.BoolFilter<"Organization"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   memberships?: Prisma.OrganizationMembershipListRelationFilter
   roles?: Prisma.RoleListRelationFilter
   invites?: Prisma.OrganizationInviteListRelationFilter
+  joinRequests?: Prisma.JoinRequestListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
   subscription?: Prisma.XOR<Prisma.OrganizationSubscriptionNullableScalarRelationFilter, Prisma.OrganizationSubscriptionWhereInput> | null
   limits?: Prisma.XOR<Prisma.OrganizationLimitNullableScalarRelationFilter, Prisma.OrganizationLimitWhereInput> | null
 }, "id" | "slug">
@@ -236,6 +252,7 @@ export type OrganizationOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.OrganizationCountOrderByAggregateInput
@@ -251,6 +268,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   slug?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   createdByUserId?: Prisma.UuidNullableWithAggregatesFilter<"Organization"> | string | null
+  allowJoinRequests?: Prisma.BoolWithAggregatesFilter<"Organization"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
 }
@@ -259,12 +277,15 @@ export type OrganizationCreateInput = {
   id?: string
   name: string
   slug: string
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
   memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
 }
@@ -274,11 +295,14 @@ export type OrganizationUncheckedCreateInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
 }
@@ -287,12 +311,15 @@ export type OrganizationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
   memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
 }
@@ -302,11 +329,14 @@ export type OrganizationUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
 }
@@ -316,6 +346,7 @@ export type OrganizationCreateManyInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -324,6 +355,7 @@ export type OrganizationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -333,6 +365,7 @@ export type OrganizationUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -352,6 +385,7 @@ export type OrganizationCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -361,6 +395,7 @@ export type OrganizationMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -370,6 +405,7 @@ export type OrganizationMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -498,15 +534,48 @@ export type OrganizationUpdateOneRequiredWithoutLimitsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutLimitsInput, Prisma.OrganizationUpdateWithoutLimitsInput>, Prisma.OrganizationUncheckedUpdateWithoutLimitsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutJoinRequestsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutJoinRequestsInput, Prisma.OrganizationUncheckedCreateWithoutJoinRequestsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutJoinRequestsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutJoinRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutJoinRequestsInput, Prisma.OrganizationUncheckedCreateWithoutJoinRequestsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutJoinRequestsInput
+  upsert?: Prisma.OrganizationUpsertWithoutJoinRequestsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutJoinRequestsInput, Prisma.OrganizationUpdateWithoutJoinRequestsInput>, Prisma.OrganizationUncheckedUpdateWithoutJoinRequestsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutAuditLogsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditLogsInput, Prisma.OrganizationUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutAuditLogsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneWithoutAuditLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditLogsInput, Prisma.OrganizationUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutAuditLogsInput
+  upsert?: Prisma.OrganizationUpsertWithoutAuditLogsInput
+  disconnect?: Prisma.OrganizationWhereInput | boolean
+  delete?: Prisma.OrganizationWhereInput | boolean
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.OrganizationUpdateWithoutAuditLogsInput>, Prisma.OrganizationUncheckedUpdateWithoutAuditLogsInput>
+}
+
 export type OrganizationCreateWithoutCreatedByInput = {
   id?: string
   name: string
   slug: string
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
 }
@@ -515,11 +584,14 @@ export type OrganizationUncheckedCreateWithoutCreatedByInput = {
   id?: string
   name: string
   slug: string
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
 }
@@ -558,6 +630,7 @@ export type OrganizationScalarWhereInput = {
   name?: Prisma.StringFilter<"Organization"> | string
   slug?: Prisma.StringFilter<"Organization"> | string
   createdByUserId?: Prisma.UuidNullableFilter<"Organization"> | string | null
+  allowJoinRequests?: Prisma.BoolFilter<"Organization"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
 }
@@ -566,11 +639,14 @@ export type OrganizationCreateWithoutMembershipsInput = {
   id?: string
   name: string
   slug: string
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
   roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
 }
@@ -580,10 +656,13 @@ export type OrganizationUncheckedCreateWithoutMembershipsInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
 }
@@ -608,11 +687,14 @@ export type OrganizationUpdateWithoutMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
   roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
 }
@@ -622,10 +704,13 @@ export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
 }
@@ -634,11 +719,14 @@ export type OrganizationCreateWithoutRolesInput = {
   id?: string
   name: string
   slug: string
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
   memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
 }
@@ -648,10 +736,13 @@ export type OrganizationUncheckedCreateWithoutRolesInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
 }
@@ -676,11 +767,14 @@ export type OrganizationUpdateWithoutRolesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
   memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
 }
@@ -690,10 +784,13 @@ export type OrganizationUncheckedUpdateWithoutRolesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
 }
@@ -702,11 +799,14 @@ export type OrganizationCreateWithoutInvitesInput = {
   id?: string
   name: string
   slug: string
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
   memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
 }
@@ -716,10 +816,13 @@ export type OrganizationUncheckedCreateWithoutInvitesInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
 }
@@ -744,11 +847,14 @@ export type OrganizationUpdateWithoutInvitesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
   memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
 }
@@ -758,10 +864,13 @@ export type OrganizationUncheckedUpdateWithoutInvitesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
 }
@@ -770,12 +879,15 @@ export type OrganizationCreateWithoutSubscriptionInput = {
   id?: string
   name: string
   slug: string
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
   memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
 }
 
@@ -784,11 +896,14 @@ export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
 }
 
@@ -812,12 +927,15 @@ export type OrganizationUpdateWithoutSubscriptionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
   memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
 }
 
@@ -826,11 +944,14 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
 }
 
@@ -838,12 +959,15 @@ export type OrganizationCreateWithoutLimitsInput = {
   id?: string
   name: string
   slug: string
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
   memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
 }
 
@@ -852,11 +976,14 @@ export type OrganizationUncheckedCreateWithoutLimitsInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
 }
 
@@ -880,12 +1007,15 @@ export type OrganizationUpdateWithoutLimitsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
   memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
 }
 
@@ -894,18 +1024,182 @@ export type OrganizationUncheckedUpdateWithoutLimitsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutJoinRequestsInput = {
+  id?: string
+  name: string
+  slug: string
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutJoinRequestsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdByUserId?: string | null
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutJoinRequestsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutJoinRequestsInput, Prisma.OrganizationUncheckedCreateWithoutJoinRequestsInput>
+}
+
+export type OrganizationUpsertWithoutJoinRequestsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutJoinRequestsInput, Prisma.OrganizationUncheckedUpdateWithoutJoinRequestsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutJoinRequestsInput, Prisma.OrganizationUncheckedCreateWithoutJoinRequestsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutJoinRequestsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutJoinRequestsInput, Prisma.OrganizationUncheckedUpdateWithoutJoinRequestsInput>
+}
+
+export type OrganizationUpdateWithoutJoinRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutJoinRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutAuditLogsInput = {
+  id?: string
+  name: string
+  slug: string
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutAuditLogsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdByUserId?: string | null
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutAuditLogsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditLogsInput, Prisma.OrganizationUncheckedCreateWithoutAuditLogsInput>
+}
+
+export type OrganizationUpsertWithoutAuditLogsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutAuditLogsInput, Prisma.OrganizationUncheckedUpdateWithoutAuditLogsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditLogsInput, Prisma.OrganizationUncheckedCreateWithoutAuditLogsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutAuditLogsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutAuditLogsInput, Prisma.OrganizationUncheckedUpdateWithoutAuditLogsInput>
+}
+
+export type OrganizationUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateManyCreatedByInput = {
   id?: string
   name: string
   slug: string
+  allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -914,11 +1208,14 @@ export type OrganizationUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
 }
@@ -927,11 +1224,14 @@ export type OrganizationUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
 }
@@ -940,6 +1240,7 @@ export type OrganizationUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -953,12 +1254,16 @@ export type OrganizationCountOutputType = {
   memberships: number
   roles: number
   invites: number
+  joinRequests: number
+  auditLogs: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | OrganizationCountOutputTypeCountMembershipsArgs
   roles?: boolean | OrganizationCountOutputTypeCountRolesArgs
   invites?: boolean | OrganizationCountOutputTypeCountInvitesArgs
+  joinRequests?: boolean | OrganizationCountOutputTypeCountJoinRequestsArgs
+  auditLogs?: boolean | OrganizationCountOutputTypeCountAuditLogsArgs
 }
 
 /**
@@ -992,18 +1297,35 @@ export type OrganizationCountOutputTypeCountInvitesArgs<ExtArgs extends runtime.
   where?: Prisma.OrganizationInviteWhereInput
 }
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountJoinRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JoinRequestWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditLogWhereInput
+}
+
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   slug?: boolean
   createdByUserId?: boolean
+  allowJoinRequests?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   createdBy?: boolean | Prisma.Organization$createdByArgs<ExtArgs>
   memberships?: boolean | Prisma.Organization$membershipsArgs<ExtArgs>
   roles?: boolean | Prisma.Organization$rolesArgs<ExtArgs>
   invites?: boolean | Prisma.Organization$invitesArgs<ExtArgs>
+  joinRequests?: boolean | Prisma.Organization$joinRequestsArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>
   subscription?: boolean | Prisma.Organization$subscriptionArgs<ExtArgs>
   limits?: boolean | Prisma.Organization$limitsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
@@ -1014,6 +1336,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   name?: boolean
   slug?: boolean
   createdByUserId?: boolean
+  allowJoinRequests?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   createdBy?: boolean | Prisma.Organization$createdByArgs<ExtArgs>
@@ -1024,6 +1347,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   name?: boolean
   slug?: boolean
   createdByUserId?: boolean
+  allowJoinRequests?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   createdBy?: boolean | Prisma.Organization$createdByArgs<ExtArgs>
@@ -1034,16 +1358,19 @@ export type OrganizationSelectScalar = {
   name?: boolean
   slug?: boolean
   createdByUserId?: boolean
+  allowJoinRequests?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "createdByUserId" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "createdByUserId" | "allowJoinRequests" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.Organization$createdByArgs<ExtArgs>
   memberships?: boolean | Prisma.Organization$membershipsArgs<ExtArgs>
   roles?: boolean | Prisma.Organization$rolesArgs<ExtArgs>
   invites?: boolean | Prisma.Organization$invitesArgs<ExtArgs>
+  joinRequests?: boolean | Prisma.Organization$joinRequestsArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>
   subscription?: boolean | Prisma.Organization$subscriptionArgs<ExtArgs>
   limits?: boolean | Prisma.Organization$limitsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
@@ -1062,6 +1389,8 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     memberships: Prisma.$OrganizationMembershipPayload<ExtArgs>[]
     roles: Prisma.$RolePayload<ExtArgs>[]
     invites: Prisma.$OrganizationInvitePayload<ExtArgs>[]
+    joinRequests: Prisma.$JoinRequestPayload<ExtArgs>[]
+    auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     subscription: Prisma.$OrganizationSubscriptionPayload<ExtArgs> | null
     limits: Prisma.$OrganizationLimitPayload<ExtArgs> | null
   }
@@ -1070,6 +1399,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     name: string
     slug: string
     createdByUserId: string | null
+    allowJoinRequests: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["organization"]>
@@ -1470,6 +1800,8 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   memberships<T extends Prisma.Organization$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   roles<T extends Prisma.Organization$rolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$rolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invites<T extends Prisma.Organization$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  joinRequests<T extends Prisma.Organization$joinRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$joinRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  auditLogs<T extends Prisma.Organization$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   subscription<T extends Prisma.Organization$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$subscriptionArgs<ExtArgs>>): Prisma.Prisma__OrganizationSubscriptionClient<runtime.Types.Result.GetResult<Prisma.$OrganizationSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   limits<T extends Prisma.Organization$limitsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$limitsArgs<ExtArgs>>): Prisma.Prisma__OrganizationLimitClient<runtime.Types.Result.GetResult<Prisma.$OrganizationLimitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1505,6 +1837,7 @@ export interface OrganizationFieldRefs {
   readonly name: Prisma.FieldRef<"Organization", 'String'>
   readonly slug: Prisma.FieldRef<"Organization", 'String'>
   readonly createdByUserId: Prisma.FieldRef<"Organization", 'String'>
+  readonly allowJoinRequests: Prisma.FieldRef<"Organization", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Organization", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Organization", 'DateTime'>
 }
@@ -1996,6 +2329,54 @@ export type Organization$invitesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.OrganizationInviteScalarFieldEnum | Prisma.OrganizationInviteScalarFieldEnum[]
+}
+
+/**
+ * Organization.joinRequests
+ */
+export type Organization$joinRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the JoinRequest
+   */
+  select?: Prisma.JoinRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the JoinRequest
+   */
+  omit?: Prisma.JoinRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JoinRequestInclude<ExtArgs> | null
+  where?: Prisma.JoinRequestWhereInput
+  orderBy?: Prisma.JoinRequestOrderByWithRelationInput | Prisma.JoinRequestOrderByWithRelationInput[]
+  cursor?: Prisma.JoinRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JoinRequestScalarFieldEnum | Prisma.JoinRequestScalarFieldEnum[]
+}
+
+/**
+ * Organization.auditLogs
+ */
+export type Organization$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditLog
+   */
+  select?: Prisma.AuditLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditLog
+   */
+  omit?: Prisma.AuditLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditLogInclude<ExtArgs> | null
+  where?: Prisma.AuditLogWhereInput
+  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.AuditLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
 }
 
 /**

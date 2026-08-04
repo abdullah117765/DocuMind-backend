@@ -41,6 +41,9 @@ describe('OrganizationInvitesService', () => {
     expiresAt: new Date('2026-08-11T09:00:00.000Z'),
     acceptedAt: null,
     revokedAt: null,
+    lastSentAt: null,
+    lastSendFailureAt: null,
+    lastSendFailureReason: null,
     createdAt: now,
     updatedAt: now,
     invitedByUserId: actorUserId,
@@ -56,6 +59,7 @@ describe('OrganizationInvitesService', () => {
   const organizationLimitFindUnique = jest.fn();
   const organizationMembershipCount = jest.fn();
   const organizationInviteCount = jest.fn();
+  const organizationInviteUpdate = jest.fn();
   const organizationInviteUpdateMany = jest.fn() as jest.Mock<
     Promise<{ count: number }>,
     [OrganizationInviteUpdateManyArgs]
@@ -95,6 +99,7 @@ describe('OrganizationInvitesService', () => {
     },
     organizationInvite: {
       count: organizationInviteCount,
+      update: organizationInviteUpdate,
       updateMany: organizationInviteUpdateMany,
     },
     $transaction: runTransaction,
@@ -128,6 +133,12 @@ describe('OrganizationInvitesService', () => {
     transactionInviteCreate.mockResolvedValue({ id: inviteId });
     transactionInviteFindUniqueOrThrow.mockResolvedValue(inviteRecord);
     transactionInviteRoleCreateMany.mockResolvedValue({ count: 1 });
+    organizationInviteUpdate.mockImplementation(
+      async ({ data }: { data: Record<string, unknown> }) => ({
+        ...inviteRecord,
+        ...data,
+      }),
+    );
     organizationInviteUpdateMany.mockResolvedValue({ count: 1 });
     sendOrganizationInvite.mockResolvedValue(undefined);
     invalidateUserAccess.mockResolvedValue(undefined);
@@ -205,24 +216,26 @@ describe('OrganizationInvitesService', () => {
       expect((error as HttpException).getStatus()).toBe(424);
       expect((error as HttpException).getResponse()).toEqual({
         message:
-          'Invitation email could not be delivered. Check SMTP settings and try again.',
+          'Invitation was created, but the email could not be delivered. Check SMTP settings, then resend or revoke the invite.',
         details: { reason: 'INVITE_EMAIL_DELIVERY_FAILED' },
       });
     }
     const failedInviteCleanup = organizationInviteUpdateMany.mock.calls[0]?.[0];
 
     if (!failedInviteCleanup?.data) {
-      throw new Error('Expected failed invite to be revoked');
+      throw new Error('Expected failed invite to be marked with delivery data');
     }
 
     expect(failedInviteCleanup.where).toEqual({
       id: inviteId,
       status: OrganizationInviteStatus.PENDING,
     });
-    expect(failedInviteCleanup.data.status).toBe(
-      OrganizationInviteStatus.REVOKED,
+    expect(failedInviteCleanup.data.status).toBeUndefined();
+    expect(failedInviteCleanup.data.revokedAt).toBeUndefined();
+    expect(failedInviteCleanup.data.lastSendFailureAt).toBeInstanceOf(Date);
+    expect(failedInviteCleanup.data.lastSendFailureReason).toBe(
+      'SMTP unavailable',
     );
-    expect(failedInviteCleanup.data.revokedAt).toBeInstanceOf(Date);
   });
 
   it('revokes a pending invitation by organization and invite id', async () => {

@@ -109,4 +109,26 @@ export class OrganizationInvitesController {
 
     return { message: 'Invitation revoked successfully' };
   }
+
+  @Post(':inviteId/resend')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
+  })
+  @ApiOperation({ summary: 'Resend a pending or expired organization invite' })
+  async resendInvite(
+    @Param() params: OrganizationInviteParamsDto,
+  ): Promise<InviteResult> {
+    return {
+      data: {
+        invite: await this.invitesService.resendInvite(
+          params.organizationId,
+          params.inviteId,
+        ),
+      },
+    };
+  }
 }

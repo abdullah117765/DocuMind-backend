@@ -70,18 +70,22 @@ export class MailService {
     expiresInDays: number,
   ): Promise<void> {
     const inviteUrl = this.createInviteUrl(token);
+    const invitedEmail = email.trim().toLowerCase();
 
     await this.mailerService.sendMail({
-      to: email.trim().toLowerCase(),
+      to: invitedEmail,
       subject: `You're invited to ${organizationName}`,
       template: 'organization-invite',
       context: {
         expiresInDays,
+        invitedEmail,
         inviteUrl,
         organizationName,
       },
       text: [
         `You have been invited to join ${organizationName} on AI Document Intelligence.`,
+        '',
+        `This invitation is for ${invitedEmail}.`,
         '',
         'Accept your invitation by opening this link:',
         inviteUrl,

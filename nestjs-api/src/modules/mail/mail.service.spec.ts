@@ -88,6 +88,7 @@ describe('MailService', () => {
         template: 'organization-invite',
         context: {
           expiresInDays: 7,
+          invitedEmail: 'member@example.com',
           inviteUrl: 'http://localhost:5173/accept-invite#token=invite-token',
           organizationName: 'Acme Finance',
         },

@@ -403,10 +403,6 @@ export type EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.EmailVerificationTokenScalarWhereInput | Prisma.EmailVerificationTokenScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type EmailVerificationTokenCreateWithoutUserInput = {
   id?: string
   tokenHash: string

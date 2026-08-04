@@ -90,7 +90,7 @@ export class OrganizationsController {
   })
   @ApiCreatedResponse({
     description:
-      'Organization created and the creator assigned organization admin access',
+      'Organization created with default subscription and limits. Platform Super Admin remains outside tenant membership.',
   })
   @ApiConflictResponse({
     description: 'Organization slug is already in use',

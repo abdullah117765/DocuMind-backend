@@ -66,7 +66,9 @@ export const ModelName = {
   OrganizationInvite: 'OrganizationInvite',
   OrganizationInviteRole: 'OrganizationInviteRole',
   OrganizationSubscription: 'OrganizationSubscription',
-  OrganizationLimit: 'OrganizationLimit'
+  OrganizationLimit: 'OrganizationLimit',
+  JoinRequest: 'JoinRequest',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -90,6 +92,8 @@ export const UserScalarFieldEnum = {
   email: 'email',
   passwordHash: 'passwordHash',
   isVerified: 'isVerified',
+  isActive: 'isActive',
+  deactivatedAt: 'deactivatedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -157,6 +161,7 @@ export const OrganizationScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   createdByUserId: 'createdByUserId',
+  allowJoinRequests: 'allowJoinRequests',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -253,6 +258,9 @@ export const OrganizationInviteScalarFieldEnum = {
   expiresAt: 'expiresAt',
   acceptedAt: 'acceptedAt',
   revokedAt: 'revokedAt',
+  lastSentAt: 'lastSentAt',
+  lastSendFailureAt: 'lastSendFailureAt',
+  lastSendFailureReason: 'lastSendFailureReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -296,12 +304,54 @@ export const OrganizationLimitScalarFieldEnum = {
 export type OrganizationLimitScalarFieldEnum = (typeof OrganizationLimitScalarFieldEnum)[keyof typeof OrganizationLimitScalarFieldEnum]
 
 
+export const JoinRequestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  message: 'message',
+  status: 'status',
+  reviewedByUserId: 'reviewedByUserId',
+  rejectionReason: 'rejectionReason',
+  reviewedAt: 'reviewedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JoinRequestScalarFieldEnum = (typeof JoinRequestScalarFieldEnum)[keyof typeof JoinRequestScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  actorUserId: 'actorUserId',
+  organizationId: 'organizationId',
+  action: 'action',
+  method: 'method',
+  path: 'path',
+  resource: 'resource',
+  statusCode: 'statusCode',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -318,4 +368,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

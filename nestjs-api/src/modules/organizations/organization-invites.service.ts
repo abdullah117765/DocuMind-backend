@@ -24,6 +24,8 @@ import {
   ORGANIZATION_INVITE_TTL_DAYS,
 } from './organization-defaults';
 
+const SUPER_ADMIN_SYSTEM_KEY = 'super_admin';
+
 interface InviteRoleRecord {
   id: string;
   organizationId: string | null;
@@ -39,6 +41,9 @@ interface InviteRecord {
   expiresAt: Date;
   acceptedAt: Date | null;
   revokedAt: Date | null;
+  lastSentAt: Date | null;
+  lastSendFailureAt: Date | null;
+  lastSendFailureReason: string | null;
   createdAt: Date;
   updatedAt: Date;
   organization: {
@@ -59,6 +64,9 @@ export interface OrganizationInviteView {
   expiresAt: Date;
   acceptedAt: Date | null;
   revokedAt: Date | null;
+  lastSentAt: Date | null;
+  lastSendFailureAt: Date | null;
+  lastSendFailureReason: string | null;
   createdAt: Date;
   updatedAt: Date;
   roles: InviteRoleRecord[];
@@ -172,6 +180,8 @@ export class OrganizationInvitesService {
       },
     );
 
+    let sentInvite: InviteRecord;
+
     try {
       await this.mailService.sendOrganizationInvite(
         email,
@@ -179,6 +189,15 @@ export class OrganizationInvitesService {
         token,
         ORGANIZATION_INVITE_TTL_DAYS,
       );
+      sentInvite = await this.prisma.organizationInvite.update({
+        where: { id: createdInvite.id },
+        data: {
+          lastSentAt: new Date(),
+          lastSendFailureAt: null,
+          lastSendFailureReason: null,
+        },
+        include: this.inviteInclude(organizationId),
+      });
     } catch (error: unknown) {
       await this.prisma.organizationInvite
         .updateMany({
@@ -187,8 +206,8 @@ export class OrganizationInvitesService {
             status: OrganizationInviteStatus.PENDING,
           },
           data: {
-            status: OrganizationInviteStatus.REVOKED,
-            revokedAt: new Date(),
+            lastSendFailureAt: new Date(),
+            lastSendFailureReason: this.getDeliveryFailureReason(error),
           },
         })
         .catch(() => {});
@@ -196,7 +215,7 @@ export class OrganizationInvitesService {
       throw new HttpException(
         {
           message:
-            'Invitation email could not be delivered. Check SMTP settings and try again.',
+            'Invitation was created, but the email could not be delivered. Check SMTP settings, then resend or revoke the invite.',
           details: { reason: 'INVITE_EMAIL_DELIVERY_FAILED' },
         },
         HttpStatus.FAILED_DEPENDENCY,
@@ -218,7 +237,93 @@ export class OrganizationInvitesService {
       },
     });
 
-    return this.toInviteView(createdInvite);
+    return this.toInviteView(sentInvite);
+  }
+
+  async resendInvite(
+    organizationId: string,
+    inviteId: string,
+    now = new Date(),
+  ): Promise<OrganizationInviteView> {
+    const existingInvite = await this.prisma.organizationInvite.findFirst({
+      where: {
+        id: inviteId,
+        organizationId,
+      },
+      include: this.inviteInclude(organizationId),
+    });
+
+    if (!existingInvite) {
+      throw new NotFoundException('Invitation not found');
+    }
+
+    const resolvedStatus = this.resolveInviteStatus(existingInvite, now);
+
+    if (resolvedStatus === OrganizationInviteStatus.ACCEPTED) {
+      throw new ConflictException('Accepted invitations cannot be resent.');
+    }
+
+    if (resolvedStatus === OrganizationInviteStatus.REVOKED) {
+      throw new ConflictException('Revoked invitations cannot be resent.');
+    }
+
+    const token = randomUUID();
+    const expiresAt = new Date(
+      now.getTime() + ORGANIZATION_INVITE_TTL_DAYS * 24 * 60 * 60 * 1000,
+    );
+    const preparedInvite = await this.prisma.organizationInvite.update({
+      where: { id: existingInvite.id },
+      data: {
+        tokenHash: this.hashToken(token),
+        status: OrganizationInviteStatus.PENDING,
+        expiresAt,
+        revokedAt: null,
+        lastSendFailureAt: null,
+        lastSendFailureReason: null,
+      },
+      include: this.inviteInclude(organizationId),
+    });
+
+    try {
+      await this.mailService.sendOrganizationInvite(
+        preparedInvite.email,
+        preparedInvite.organization.name,
+        token,
+        ORGANIZATION_INVITE_TTL_DAYS,
+      );
+
+      const sentInvite = await this.prisma.organizationInvite.update({
+        where: { id: preparedInvite.id },
+        data: {
+          lastSentAt: new Date(),
+          lastSendFailureAt: null,
+          lastSendFailureReason: null,
+        },
+        include: this.inviteInclude(organizationId),
+      });
+
+      return this.toInviteView(sentInvite);
+    } catch (error: unknown) {
+      await this.prisma.organizationInvite
+        .updateMany({
+          where: { id: preparedInvite.id },
+          data: {
+            lastSendFailureAt: new Date(),
+            lastSendFailureReason: this.getDeliveryFailureReason(error),
+          },
+        })
+        .catch(() => {});
+
+      throw new HttpException(
+        {
+          message:
+            'Invitation email could not be delivered. Check SMTP settings and try again.',
+          details: { reason: 'INVITE_EMAIL_DELIVERY_FAILED' },
+        },
+        HttpStatus.FAILED_DEPENDENCY,
+        { cause: error },
+      );
+    }
   }
 
   async revokeInvite(organizationId: string, inviteId: string): Promise<void> {
@@ -263,9 +368,24 @@ export class OrganizationInvitesService {
     this.assertInviteCanBeAccepted(invite, now);
 
     if (invite.email !== normalizeEmail(principal.email)) {
-      throw new ForbiddenException(
-        'This invitation was sent to a different email address.',
-      );
+      throw new ForbiddenException({
+        message: 'This invitation was sent to a different email address.',
+        details: {
+          reason: 'INVITE_EMAIL_MISMATCH',
+          invitedEmail: invite.email,
+          signedInEmail: normalizeEmail(principal.email),
+        },
+      });
+    }
+
+    if (await this.userHasSuperAdminRole(principal.userId)) {
+      throw new ForbiddenException({
+        message:
+          'Super Admin accounts manage organizations from the platform level and cannot become organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_ACCEPT_ORGANIZATION_INVITE',
+        },
+      });
     }
 
     const membershipId = await this.prisma.$transaction(
@@ -389,6 +509,19 @@ export class OrganizationInvitesService {
       where: { email },
       select: {
         id: true,
+        platformRoleAssignments: {
+          where: {
+            role: {
+              is: {
+                systemKey: SUPER_ADMIN_SYSTEM_KEY,
+                scope: AccessScope.PLATFORM,
+                isActive: true,
+              },
+            },
+          },
+          select: { roleId: true },
+          take: 1,
+        },
         organizationMemberships: {
           where: {
             organizationId,
@@ -403,6 +536,16 @@ export class OrganizationInvitesService {
         },
       },
     });
+
+    if (user && user.platformRoleAssignments.length > 0) {
+      throw new ConflictException({
+        message:
+          'Super Admin accounts manage organizations from the platform level and cannot be invited as organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
+        },
+      });
+    }
 
     if (user && user.organizationMemberships.length > 0) {
       throw new ConflictException(
@@ -580,6 +723,9 @@ export class OrganizationInvitesService {
       expiresAt: invite.expiresAt,
       acceptedAt: invite.acceptedAt,
       revokedAt: invite.revokedAt,
+      lastSentAt: invite.lastSentAt,
+      lastSendFailureAt: invite.lastSendFailureAt,
+      lastSendFailureReason: invite.lastSendFailureReason,
       createdAt: invite.createdAt,
       updatedAt: invite.updatedAt,
       roles: invite.roles
@@ -619,7 +765,33 @@ export class OrganizationInvitesService {
     return invite.status;
   }
 
+  private getDeliveryFailureReason(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message.slice(0, 500);
+    }
+
+    return 'Email delivery failed';
+  }
+
   private hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
+  }
+
+  private async userHasSuperAdminRole(userId: string): Promise<boolean> {
+    const assignment = await this.prisma.platformUserRole.findFirst({
+      where: {
+        userId,
+        role: {
+          is: {
+            systemKey: SUPER_ADMIN_SYSTEM_KEY,
+            scope: AccessScope.PLATFORM,
+            isActive: true,
+          },
+        },
+      },
+      select: { roleId: true },
+    });
+
+    return Boolean(assignment);
   }
 }

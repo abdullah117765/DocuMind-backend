@@ -20,7 +20,9 @@
     "test:e2e": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config ./test/jest-e2e.json",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "db:reset-users": "ts-node -r tsconfig-paths/register prisma/reset-users.ts",
+    "db:reset-users:dry-run": "ts-node -r tsconfig-paths/register prisma/reset-users.ts --dry-run"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.3.7",

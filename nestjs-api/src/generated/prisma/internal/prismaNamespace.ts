@@ -412,7 +412,9 @@ export const ModelName = {
   OrganizationInvite: 'OrganizationInvite',
   OrganizationInviteRole: 'OrganizationInviteRole',
   OrganizationSubscription: 'OrganizationSubscription',
-  OrganizationLimit: 'OrganizationLimit'
+  OrganizationLimit: 'OrganizationLimit',
+  JoinRequest: 'JoinRequest',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -428,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "emailVerificationToken" | "passwordResetAuthorization" | "session" | "refreshToken" | "organization" | "organizationMembership" | "role" | "permission" | "rolePermission" | "membershipRole" | "platformUserRole" | "organizationInvite" | "organizationInviteRole" | "organizationSubscription" | "organizationLimit"
+    modelProps: "user" | "emailVerificationToken" | "passwordResetAuthorization" | "session" | "refreshToken" | "organization" | "organizationMembership" | "role" | "permission" | "rolePermission" | "membershipRole" | "platformUserRole" | "organizationInvite" | "organizationInviteRole" | "organizationSubscription" | "organizationLimit" | "joinRequest" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1616,6 +1618,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    JoinRequest: {
+      payload: Prisma.$JoinRequestPayload<ExtArgs>
+      fields: Prisma.JoinRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.JoinRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.JoinRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.JoinRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.JoinRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload>
+        }
+        findMany: {
+          args: Prisma.JoinRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload>[]
+        }
+        create: {
+          args: Prisma.JoinRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload>
+        }
+        createMany: {
+          args: Prisma.JoinRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.JoinRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.JoinRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload>
+        }
+        update: {
+          args: Prisma.JoinRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.JoinRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.JoinRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.JoinRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.JoinRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JoinRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.JoinRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJoinRequest>
+        }
+        groupBy: {
+          args: Prisma.JoinRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JoinRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.JoinRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JoinRequestCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuditLog: {
+      payload: Prisma.$AuditLogPayload<ExtArgs>
+      fields: Prisma.AuditLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuditLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuditLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findFirst: {
+          args: Prisma.AuditLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuditLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findMany: {
+          args: Prisma.AuditLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        create: {
+          args: Prisma.AuditLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        createMany: {
+          args: Prisma.AuditLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuditLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        delete: {
+          args: Prisma.AuditLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        update: {
+          args: Prisma.AuditLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuditLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuditLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuditLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuditLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        aggregate: {
+          args: Prisma.AuditLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuditLog>
+        }
+        groupBy: {
+          args: Prisma.AuditLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuditLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1660,6 +1810,8 @@ export const UserScalarFieldEnum = {
   email: 'email',
   passwordHash: 'passwordHash',
   isVerified: 'isVerified',
+  isActive: 'isActive',
+  deactivatedAt: 'deactivatedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1727,6 +1879,7 @@ export const OrganizationScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   createdByUserId: 'createdByUserId',
+  allowJoinRequests: 'allowJoinRequests',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1823,6 +1976,9 @@ export const OrganizationInviteScalarFieldEnum = {
   expiresAt: 'expiresAt',
   acceptedAt: 'acceptedAt',
   revokedAt: 'revokedAt',
+  lastSentAt: 'lastSentAt',
+  lastSendFailureAt: 'lastSendFailureAt',
+  lastSendFailureReason: 'lastSendFailureReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1866,12 +2022,54 @@ export const OrganizationLimitScalarFieldEnum = {
 export type OrganizationLimitScalarFieldEnum = (typeof OrganizationLimitScalarFieldEnum)[keyof typeof OrganizationLimitScalarFieldEnum]
 
 
+export const JoinRequestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  message: 'message',
+  status: 'status',
+  reviewedByUserId: 'reviewedByUserId',
+  rejectionReason: 'rejectionReason',
+  reviewedAt: 'reviewedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JoinRequestScalarFieldEnum = (typeof JoinRequestScalarFieldEnum)[keyof typeof JoinRequestScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  actorUserId: 'actorUserId',
+  organizationId: 'organizationId',
+  action: 'action',
+  method: 'method',
+  path: 'path',
+  resource: 'resource',
+  statusCode: 'statusCode',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1888,6 +2086,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -2012,6 +2219,34 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'JoinRequestStatus'
+ */
+export type EnumJoinRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JoinRequestStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'JoinRequestStatus[]'
+ */
+export type ListEnumJoinRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JoinRequestStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -2195,6 +2430,8 @@ export type GlobalOmitConfig = {
   organizationInviteRole?: Prisma.OrganizationInviteRoleOmit
   organizationSubscription?: Prisma.OrganizationSubscriptionOmit
   organizationLimit?: Prisma.OrganizationLimitOmit
+  joinRequest?: Prisma.JoinRequestOmit
+  auditLog?: Prisma.AuditLogOmit
 }
 
 /* Types for Logging */

@@ -45,6 +45,16 @@ export const OrganizationInviteStatus = {
 export type OrganizationInviteStatus = (typeof OrganizationInviteStatus)[keyof typeof OrganizationInviteStatus]
 
 
+export const JoinRequestStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+  CANCELED: 'CANCELED'
+} as const
+
+export type JoinRequestStatus = (typeof JoinRequestStatus)[keyof typeof JoinRequestStatus]
+
+
 export const SubscriptionStatus = {
   TRIALING: 'TRIALING',
   ACTIVE: 'ACTIVE',
