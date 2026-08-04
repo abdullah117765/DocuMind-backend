@@ -60,6 +60,7 @@ describe('RoleManagementService', () => {
   const roleFindMany = jest.fn();
   const roleCreate = jest.fn();
   const roleUpdate = jest.fn();
+  const membershipFindFirst = jest.fn();
   const rolePermissionCreateMany = jest.fn();
   const rolePermissionDeleteMany = jest.fn();
   const membershipRoleDeleteMany = jest.fn();
@@ -90,6 +91,9 @@ describe('RoleManagementService', () => {
       findMany: roleFindMany,
       update: roleUpdate,
     },
+    organizationMembership: {
+      findFirst: membershipFindFirst,
+    },
     $transaction: runTransaction,
   } as unknown as PrismaService;
   const invalidateOrganizationAccess = jest.fn();
@@ -108,6 +112,7 @@ describe('RoleManagementService', () => {
     roleFindMany.mockResolvedValue([]);
     roleCreate.mockResolvedValue({ id: roleId });
     roleUpdate.mockResolvedValue(customRole);
+    membershipFindFirst.mockResolvedValue(null);
     rolePermissionCreateMany.mockResolvedValue({ count: 1 });
     rolePermissionDeleteMany.mockResolvedValue({ count: 1 });
     membershipRoleDeleteMany.mockResolvedValue({ count: 1 });
@@ -225,7 +230,7 @@ describe('RoleManagementService', () => {
     roleFindFirst.mockResolvedValue(systemRole);
 
     await expect(
-      service.updateRole(organizationId, systemRole.id, {
+      service.updateRole(organizationId, systemRole.id, actorUserId, {
         name: 'Changed',
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
@@ -236,8 +241,20 @@ describe('RoleManagementService', () => {
     roleFindFirst.mockResolvedValue(customRole);
 
     await expect(
-      service.updateRole(organizationId, roleId, {}),
+      service.updateRole(organizationId, roleId, actorUserId, {}),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('prevents updating a custom role assigned to the acting user', async () => {
+    roleFindFirst.mockResolvedValue(customRole);
+    membershipFindFirst.mockResolvedValue({ id: 'own-membership' });
+
+    await expect(
+      service.updateRole(organizationId, roleId, actorUserId, {
+        name: 'Senior Reviewer',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(roleUpdate).not.toHaveBeenCalled();
   });
 
   it('updates a custom role and invalidates its organization cache', async () => {
@@ -251,7 +268,7 @@ describe('RoleManagementService', () => {
       .mockResolvedValueOnce(updatedRole);
 
     await expect(
-      service.updateRole(organizationId, roleId, {
+      service.updateRole(organizationId, roleId, actorUserId, {
         name: 'Senior Reviewer',
       }),
     ).resolves.toEqual(
@@ -296,6 +313,18 @@ describe('RoleManagementService', () => {
     expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
   });
 
+  it('prevents changing permissions on a role assigned to the acting user', async () => {
+    roleFindFirst.mockResolvedValue(customRole);
+    membershipFindFirst.mockResolvedValue({ id: 'own-membership' });
+
+    await expect(
+      service.replaceRolePermissions(organizationId, roleId, actorUserId, [
+        'documents.read',
+      ]),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(rolePermissionDeleteMany).not.toHaveBeenCalled();
+  });
+
   it('allows clearing every permission from a custom role', async () => {
     roleFindFirst.mockResolvedValueOnce(customRole).mockResolvedValueOnce({
       ...customRole,
@@ -334,7 +363,7 @@ describe('RoleManagementService', () => {
       .mockResolvedValueOnce(null);
 
     await expect(
-      service.deleteRole(organizationId, roleId),
+      service.deleteRole(organizationId, roleId, actorUserId),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(membershipRoleDeleteMany).not.toHaveBeenCalled();
   });
@@ -342,7 +371,7 @@ describe('RoleManagementService', () => {
   it('soft-deletes a custom role and revokes every member assignment', async () => {
     roleFindFirst.mockResolvedValue(customRole);
 
-    await service.deleteRole(organizationId, roleId);
+    await service.deleteRole(organizationId, roleId, actorUserId);
 
     expect(membershipRoleDeleteMany).toHaveBeenCalledWith({
       where: { roleId },
@@ -355,5 +384,15 @@ describe('RoleManagementService', () => {
       },
     });
     expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
+  });
+
+  it('prevents deleting a custom role assigned to the acting user', async () => {
+    roleFindFirst.mockResolvedValue(customRole);
+    membershipFindFirst.mockResolvedValue({ id: 'own-membership' });
+
+    await expect(
+      service.deleteRole(organizationId, roleId, actorUserId),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(membershipRoleDeleteMany).not.toHaveBeenCalled();
   });
 });

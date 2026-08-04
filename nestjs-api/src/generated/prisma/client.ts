@@ -99,3 +99,23 @@ export type MembershipRole = Prisma.MembershipRoleModel
  * 
  */
 export type PlatformUserRole = Prisma.PlatformUserRoleModel
+/**
+ * Model OrganizationInvite
+ * 
+ */
+export type OrganizationInvite = Prisma.OrganizationInviteModel
+/**
+ * Model OrganizationInviteRole
+ * 
+ */
+export type OrganizationInviteRole = Prisma.OrganizationInviteRoleModel
+/**
+ * Model OrganizationSubscription
+ * 
+ */
+export type OrganizationSubscription = Prisma.OrganizationSubscriptionModel
+/**
+ * Model OrganizationLimit
+ * 
+ */
+export type OrganizationLimit = Prisma.OrganizationLimitModel

@@ -72,4 +72,26 @@ describe('MailService', () => {
       }),
     );
   });
+
+  it('sends an organization invite with an accept link', async () => {
+    await service.sendOrganizationInvite(
+      '  MEMBER@Example.COM ',
+      'Acme Finance',
+      'invite-token',
+      7,
+    );
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'member@example.com',
+        subject: "You're invited to Acme Finance",
+        template: 'organization-invite',
+        context: {
+          expiresInDays: 7,
+          inviteUrl: 'http://localhost:5173/accept-invite#token=invite-token',
+          organizationName: 'Acme Finance',
+        },
+      }),
+    );
+  });
 });

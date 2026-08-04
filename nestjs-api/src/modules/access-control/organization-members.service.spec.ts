@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -54,8 +55,10 @@ describe('OrganizationMembersService', () => {
   const membershipFindMany = jest.fn();
   const membershipFindFirst = jest.fn();
   const membershipFindUnique = jest.fn();
+  const membershipCount = jest.fn();
   const membershipCreate = jest.fn();
   const membershipUpdate = jest.fn();
+  const organizationLimitFindUnique = jest.fn();
   const roleFindMany = jest.fn();
   const membershipRoleCreateMany = jest.fn();
   const membershipRoleDeleteMany = jest.fn();
@@ -80,7 +83,11 @@ describe('OrganizationMembersService', () => {
       findMany: membershipFindMany,
       findFirst: membershipFindFirst,
       findUnique: membershipFindUnique,
+      count: membershipCount,
       update: membershipUpdate,
+    },
+    organizationLimit: {
+      findUnique: organizationLimitFindUnique,
     },
     role: {
       findMany: roleFindMany,
@@ -102,8 +109,10 @@ describe('OrganizationMembersService', () => {
     userFindFirst.mockResolvedValue({ id: memberUserId });
     membershipFindMany.mockResolvedValue([]);
     membershipFindUnique.mockResolvedValue(null);
+    membershipCount.mockResolvedValue(0);
     membershipCreate.mockResolvedValue({ id: membershipId });
     membershipUpdate.mockResolvedValue({ id: membershipId });
+    organizationLimitFindUnique.mockResolvedValue({ maxMembers: 10 });
     roleFindMany.mockResolvedValue([]);
     membershipRoleCreateMany.mockResolvedValue({ count: 1 });
     membershipRoleDeleteMany.mockResolvedValue({ count: 1 });
@@ -187,6 +196,17 @@ describe('OrganizationMembersService', () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
+  it('prevents adding your own account through member management', async () => {
+    userFindFirst.mockResolvedValue({ id: actorUserId });
+
+    await expect(
+      service.addMember(organizationId, actorUserId, {
+        email: 'owner@example.com',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(membershipCreate).not.toHaveBeenCalled();
+  });
+
   it('creates a membership with initial roles and invalidates user access', async () => {
     roleFindMany.mockResolvedValue([viewerRole]);
     membershipFindFirst.mockResolvedValue({
@@ -216,6 +236,21 @@ describe('OrganizationMembersService', () => {
       },
       select: { id: true },
     });
+    expect(organizationLimitFindUnique).toHaveBeenCalledWith({
+      where: { organizationId },
+      select: { maxMembers: true },
+    });
+    expect(membershipCount).toHaveBeenCalledWith({
+      where: {
+        organizationId,
+        status: {
+          in: [
+            OrganizationMembershipStatus.ACTIVE,
+            OrganizationMembershipStatus.SUSPENDED,
+          ],
+        },
+      },
+    });
     expect(membershipCreate).toHaveBeenCalledWith({
       data: {
         organizationId,
@@ -234,6 +269,18 @@ describe('OrganizationMembersService', () => {
       ],
     });
     expect(invalidateUserAccess).toHaveBeenCalledWith(memberUserId);
+  });
+
+  it('blocks adding a member when the organization member limit is reached', async () => {
+    organizationLimitFindUnique.mockResolvedValue({ maxMembers: 1 });
+    membershipCount.mockResolvedValue(1);
+
+    await expect(
+      service.addMember(organizationId, actorUserId, {
+        email: 'member@example.com',
+      }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(membershipCreate).not.toHaveBeenCalled();
   });
 
   it('safely restores a removed membership after clearing stale roles', async () => {
@@ -272,6 +319,24 @@ describe('OrganizationMembersService', () => {
         viewerRole.id,
       ]),
     ).rejects.toBeInstanceOf(ConflictException);
+    expect(membershipRoleDeleteMany).not.toHaveBeenCalled();
+  });
+
+  it('prevents changing your own organization roles', async () => {
+    membershipFindFirst.mockResolvedValue({
+      ...membership,
+      userId: actorUserId,
+      user: {
+        ...membership.user,
+        id: actorUserId,
+      },
+    });
+
+    await expect(
+      service.replaceMemberRoles(organizationId, membershipId, actorUserId, [
+        viewerRole.id,
+      ]),
+    ).rejects.toBeInstanceOf(ForbiddenException);
     expect(membershipRoleDeleteMany).not.toHaveBeenCalled();
   });
 
@@ -318,9 +383,31 @@ describe('OrganizationMembersService', () => {
       service.updateMemberStatus(
         organizationId,
         membershipId,
+        actorUserId,
         OrganizationMembershipStatus.SUSPENDED,
       ),
     ).rejects.toBeInstanceOf(ConflictException);
+    expect(membershipUpdate).not.toHaveBeenCalled();
+  });
+
+  it('prevents suspending or reactivating your own membership', async () => {
+    membershipFindFirst.mockResolvedValue({
+      ...membership,
+      userId: actorUserId,
+      user: {
+        ...membership.user,
+        id: actorUserId,
+      },
+    });
+
+    await expect(
+      service.updateMemberStatus(
+        organizationId,
+        membershipId,
+        actorUserId,
+        OrganizationMembershipStatus.SUSPENDED,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
     expect(membershipUpdate).not.toHaveBeenCalled();
   });
 
@@ -336,6 +423,7 @@ describe('OrganizationMembersService', () => {
     await service.updateMemberStatus(
       organizationId,
       membershipId,
+      actorUserId,
       OrganizationMembershipStatus.ACTIVE,
     );
 
@@ -354,7 +442,7 @@ describe('OrganizationMembersService', () => {
       roles: [{ role: viewerRole }],
     });
 
-    await service.removeMember(organizationId, membershipId);
+    await service.removeMember(organizationId, membershipId, actorUserId);
 
     expect(membershipRoleDeleteMany).toHaveBeenCalledWith({
       where: { membershipId },
@@ -366,6 +454,22 @@ describe('OrganizationMembersService', () => {
       },
     });
     expect(invalidateUserAccess).toHaveBeenCalledWith(memberUserId);
+  });
+
+  it('prevents removing your own membership', async () => {
+    membershipFindFirst.mockResolvedValue({
+      ...membership,
+      userId: actorUserId,
+      user: {
+        ...membership.user,
+        id: actorUserId,
+      },
+    });
+
+    await expect(
+      service.removeMember(organizationId, membershipId, actorUserId),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(membershipUpdate).not.toHaveBeenCalled();
   });
 
   it('queries only active organization-scoped applicable roles', async () => {

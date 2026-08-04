@@ -33,3 +33,23 @@ export const RoleAssignmentSource = {
 } as const
 
 export type RoleAssignmentSource = (typeof RoleAssignmentSource)[keyof typeof RoleAssignmentSource]
+
+
+export const OrganizationInviteStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REVOKED: 'REVOKED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type OrganizationInviteStatus = (typeof OrganizationInviteStatus)[keyof typeof OrganizationInviteStatus]
+
+
+export const SubscriptionStatus = {
+  TRIALING: 'TRIALING',
+  ACTIVE: 'ACTIVE',
+  PAST_DUE: 'PAST_DUE',
+  CANCELED: 'CANCELED'
+} as const
+
+export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]

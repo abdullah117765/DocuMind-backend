@@ -6,9 +6,11 @@ import {
   AccessScope,
   OrganizationMembershipStatus,
   Prisma,
+  SubscriptionStatus,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { DEFAULT_ORGANIZATION_LIMITS } from './organization-defaults';
 import { OrganizationsService } from './organizations.service';
 
 describe('OrganizationsService', () => {
@@ -33,6 +35,8 @@ describe('OrganizationsService', () => {
   const organizationCreate = jest.fn();
   const organizationFindUniqueOrThrow = jest.fn();
   const organizationMembershipCreate = jest.fn();
+  const organizationSubscriptionCreate = jest.fn();
+  const organizationLimitCreate = jest.fn();
   const membershipRoleCreate = jest.fn();
   const roleFindFirst = jest.fn();
   const transaction = {
@@ -42,6 +46,12 @@ describe('OrganizationsService', () => {
     },
     organizationMembership: {
       create: organizationMembershipCreate,
+    },
+    organizationSubscription: {
+      create: organizationSubscriptionCreate,
+    },
+    organizationLimit: {
+      create: organizationLimitCreate,
     },
     membershipRole: {
       create: membershipRoleCreate,
@@ -74,6 +84,8 @@ describe('OrganizationsService', () => {
     organizationCreate.mockResolvedValue({ id: organizationId });
     organizationFindUniqueOrThrow.mockResolvedValue(organizationRecord);
     organizationMembershipCreate.mockResolvedValue({ id: membershipId });
+    organizationSubscriptionCreate.mockResolvedValue({});
+    organizationLimitCreate.mockResolvedValue({});
     membershipRoleCreate.mockResolvedValue({ membershipId, roleId });
     roleFindFirst.mockResolvedValue({ id: roleId });
     invalidateUserAccess.mockResolvedValue(undefined);
@@ -147,6 +159,19 @@ describe('OrganizationsService', () => {
         status: OrganizationMembershipStatus.ACTIVE,
       },
       select: { id: true },
+    });
+    expect(organizationSubscriptionCreate).toHaveBeenCalledWith({
+      data: {
+        organizationId,
+        plan: 'FREE',
+        status: SubscriptionStatus.ACTIVE,
+      },
+    });
+    expect(organizationLimitCreate).toHaveBeenCalledWith({
+      data: {
+        organizationId,
+        ...DEFAULT_ORGANIZATION_LIMITS,
+      },
     });
     expect(membershipRoleCreate).toHaveBeenCalledWith({
       data: {

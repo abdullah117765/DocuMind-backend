@@ -62,7 +62,11 @@ export const ModelName = {
   Permission: 'Permission',
   RolePermission: 'RolePermission',
   MembershipRole: 'MembershipRole',
-  PlatformUserRole: 'PlatformUserRole'
+  PlatformUserRole: 'PlatformUserRole',
+  OrganizationInvite: 'OrganizationInvite',
+  OrganizationInviteRole: 'OrganizationInviteRole',
+  OrganizationSubscription: 'OrganizationSubscription',
+  OrganizationLimit: 'OrganizationLimit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -236,6 +240,60 @@ export const PlatformUserRoleScalarFieldEnum = {
 } as const
 
 export type PlatformUserRoleScalarFieldEnum = (typeof PlatformUserRoleScalarFieldEnum)[keyof typeof PlatformUserRoleScalarFieldEnum]
+
+
+export const OrganizationInviteScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  email: 'email',
+  tokenHash: 'tokenHash',
+  status: 'status',
+  invitedByUserId: 'invitedByUserId',
+  acceptedByUserId: 'acceptedByUserId',
+  expiresAt: 'expiresAt',
+  acceptedAt: 'acceptedAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrganizationInviteScalarFieldEnum = (typeof OrganizationInviteScalarFieldEnum)[keyof typeof OrganizationInviteScalarFieldEnum]
+
+
+export const OrganizationInviteRoleScalarFieldEnum = {
+  inviteId: 'inviteId',
+  roleId: 'roleId',
+  assignedAt: 'assignedAt'
+} as const
+
+export type OrganizationInviteRoleScalarFieldEnum = (typeof OrganizationInviteRoleScalarFieldEnum)[keyof typeof OrganizationInviteRoleScalarFieldEnum]
+
+
+export const OrganizationSubscriptionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  plan: 'plan',
+  status: 'status',
+  currentPeriodEndsAt: 'currentPeriodEndsAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrganizationSubscriptionScalarFieldEnum = (typeof OrganizationSubscriptionScalarFieldEnum)[keyof typeof OrganizationSubscriptionScalarFieldEnum]
+
+
+export const OrganizationLimitScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  maxMembers: 'maxMembers',
+  maxDocuments: 'maxDocuments',
+  maxStorageMb: 'maxStorageMb',
+  maxMonthlyAiRequests: 'maxMonthlyAiRequests',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrganizationLimitScalarFieldEnum = (typeof OrganizationLimitScalarFieldEnum)[keyof typeof OrganizationLimitScalarFieldEnum]
 
 
 export const SortOrder = {

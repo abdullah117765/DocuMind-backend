@@ -206,6 +206,7 @@ export class OrganizationMembersController {
   @ApiNotFoundResponse({ description: 'Organization member not found' })
   async updateMemberStatus(
     @Param() params: OrganizationMemberParamsDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
     @Body() dto: UpdateMemberStatusDto,
   ): Promise<MemberResult> {
     return {
@@ -213,6 +214,7 @@ export class OrganizationMembersController {
         member: await this.organizationMembersService.updateMemberStatus(
           params.organizationId,
           params.membershipId,
+          principal.userId,
           dto.status,
         ),
       },
@@ -234,10 +236,12 @@ export class OrganizationMembersController {
   @ApiNotFoundResponse({ description: 'Organization member not found' })
   async removeMember(
     @Param() params: OrganizationMemberParamsDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
   ): Promise<ActionResult> {
     await this.organizationMembersService.removeMember(
       params.organizationId,
       params.membershipId,
+      principal.userId,
     );
 
     return {

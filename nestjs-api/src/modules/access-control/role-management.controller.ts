@@ -190,6 +190,7 @@ export class RoleManagementController {
   @ApiNotFoundResponse({ description: 'Role not found' })
   async updateRole(
     @Param() params: OrganizationRoleParamsDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
     @Body() dto: UpdateRoleDto,
   ): Promise<RoleResult> {
     return {
@@ -197,6 +198,7 @@ export class RoleManagementController {
         role: await this.roleManagementService.updateRole(
           params.organizationId,
           params.roleId,
+          principal.userId,
           dto,
         ),
       },
@@ -255,10 +257,12 @@ export class RoleManagementController {
   @ApiNotFoundResponse({ description: 'Role not found' })
   async deleteRole(
     @Param() params: OrganizationRoleParamsDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
   ): Promise<ActionResult> {
     await this.roleManagementService.deleteRole(
       params.organizationId,
       params.roleId,
+      principal.userId,
     );
 
     return {

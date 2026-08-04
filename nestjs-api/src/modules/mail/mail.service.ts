@@ -63,6 +63,35 @@ export class MailService {
     });
   }
 
+  async sendOrganizationInvite(
+    email: string,
+    organizationName: string,
+    token: string,
+    expiresInDays: number,
+  ): Promise<void> {
+    const inviteUrl = this.createInviteUrl(token);
+
+    await this.mailerService.sendMail({
+      to: email.trim().toLowerCase(),
+      subject: `You're invited to ${organizationName}`,
+      template: 'organization-invite',
+      context: {
+        expiresInDays,
+        inviteUrl,
+        organizationName,
+      },
+      text: [
+        `You have been invited to join ${organizationName} on AI Document Intelligence.`,
+        '',
+        'Accept your invitation by opening this link:',
+        inviteUrl,
+        '',
+        `This invitation expires in ${expiresInDays} ${expiresInDays === 1 ? 'day' : 'days'}.`,
+        'If you did not expect this invite, you can ignore this email.',
+      ].join('\n'),
+    });
+  }
+
   private createVerificationUrl(token: string): string {
     const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
     const verificationUrl = new URL(
@@ -73,6 +102,18 @@ export class MailService {
     verificationUrl.hash = new URLSearchParams({ token }).toString();
 
     return verificationUrl.toString();
+  }
+
+  private createInviteUrl(token: string): string {
+    const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
+    const inviteUrl = new URL(
+      '/accept-invite',
+      this.ensureTrailingSlash(frontendUrl),
+    );
+
+    inviteUrl.hash = new URLSearchParams({ token }).toString();
+
+    return inviteUrl.toString();
   }
 
   private ensureTrailingSlash(value: string): string {

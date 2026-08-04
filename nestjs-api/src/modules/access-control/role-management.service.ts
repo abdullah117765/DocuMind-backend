@@ -212,9 +212,15 @@ export class RoleManagementService {
   async updateRole(
     organizationId: string,
     roleId: string,
+    actorUserId: string,
     dto: UpdateRoleDto,
   ): Promise<RoleView> {
     await this.requireMutableRole(organizationId, roleId);
+    await this.ensureRoleIsNotAssignedToActor(
+      organizationId,
+      roleId,
+      actorUserId,
+    );
 
     if (dto.name === undefined && dto.description === undefined) {
       throw new BadRequestException('At least one role field must be provided');
@@ -268,6 +274,11 @@ export class RoleManagementService {
     permissionCodesInput: string[],
   ): Promise<RoleView> {
     const role = await this.requireMutableRole(organizationId, roleId);
+    await this.ensureRoleIsNotAssignedToActor(
+      organizationId,
+      roleId,
+      actorUserId,
+    );
 
     const permissionCodes = normalizePermissionCodes(permissionCodesInput);
     const permissions = await this.resolvePermissions(permissionCodes);
@@ -310,8 +321,17 @@ export class RoleManagementService {
     return this.getRole(organizationId, roleId);
   }
 
-  async deleteRole(organizationId: string, roleId: string): Promise<void> {
+  async deleteRole(
+    organizationId: string,
+    roleId: string,
+    actorUserId: string,
+  ): Promise<void> {
     const role = await this.requireMutableRole(organizationId, roleId);
+    await this.ensureRoleIsNotAssignedToActor(
+      organizationId,
+      roleId,
+      actorUserId,
+    );
     const grantsUserManagement = role.permissions.some(
       ({ permission }) => permission.code === USER_MANAGEMENT_PERMISSION,
     );
@@ -340,6 +360,32 @@ export class RoleManagementService {
     await this.accessControlService.invalidateOrganizationAccess(
       organizationId,
     );
+  }
+
+  private async ensureRoleIsNotAssignedToActor(
+    organizationId: string,
+    roleId: string,
+    actorUserId: string,
+  ): Promise<void> {
+    const ownAssignment = await this.prisma.organizationMembership.findFirst({
+      where: {
+        organizationId,
+        userId: actorUserId,
+        status: {
+          not: OrganizationMembershipStatus.REMOVED,
+        },
+        roles: {
+          some: { roleId },
+        },
+      },
+      select: { id: true },
+    });
+
+    if (ownAssignment) {
+      throw new ForbiddenException(
+        'You cannot modify a role assigned to your own account',
+      );
+    }
   }
 
   private async ensureRoleCanLoseUserManagement(

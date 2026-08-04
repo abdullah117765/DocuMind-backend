@@ -26,6 +26,20 @@ enum RoleAssignmentSource {
   SYSTEM
 }
 
+enum OrganizationInviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
 model User {
   id                            String                   @id @default(uuid()) @db.Uuid
   email                         String                   @unique
@@ -38,6 +52,8 @@ model User {
   passwordResetAuthorizations   PasswordResetAuthorization[]
   organizationMemberships       OrganizationMembership[]
   createdOrganizations          Organization[]           @relation("OrganizationCreator")
+  organizationInvitesSent       OrganizationInvite[]     @relation("OrganizationInviteInviter")
+  organizationInvitesAccepted   OrganizationInvite[]     @relation("OrganizationInviteAccepter")
   platformRoleAssignments       PlatformUserRole[]       @relation("PlatformRoleAssignee")
   platformRoleAssignmentsMade   PlatformUserRole[]       @relation("PlatformRoleAssigner")
   membershipRoleAssignmentsMade MembershipRole[]         @relation("MembershipRoleAssigner")
@@ -123,6 +139,9 @@ model Organization {
   createdBy       User?                    @relation("OrganizationCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
   memberships     OrganizationMembership[]
   roles           Role[]
+  invites         OrganizationInvite[]
+  subscription    OrganizationSubscription?
+  limits          OrganizationLimit?
 
   @@index([createdByUserId])
   @@map("organizations")
@@ -161,6 +180,7 @@ model Role {
   organization            Organization?      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   permissions             RolePermission[]
   membershipAssignments   MembershipRole[]
+  inviteAssignments       OrganizationInviteRole[]
   platformAssignments     PlatformUserRole[]
 
   @@unique([organizationId, normalizedName])
@@ -232,4 +252,69 @@ model PlatformUserRole {
   @@index([roleId])
   @@index([assignedByUserId])
   @@map("platform_user_roles")
+}
+
+model OrganizationInvite {
+  id               String                   @id @default(uuid()) @db.Uuid
+  organizationId   String                   @map("organization_id") @db.Uuid
+  email            String                   @db.VarChar(254)
+  tokenHash        String                   @unique @map("token_hash") @db.VarChar(64)
+  status           OrganizationInviteStatus @default(PENDING)
+  invitedByUserId  String?                  @map("invited_by_user_id") @db.Uuid
+  acceptedByUserId String?                  @map("accepted_by_user_id") @db.Uuid
+  expiresAt        DateTime                 @map("expires_at")
+  acceptedAt       DateTime?                @map("accepted_at")
+  revokedAt        DateTime?                @map("revoked_at")
+  createdAt        DateTime                 @default(now()) @map("created_at")
+  updatedAt        DateTime                 @updatedAt @map("updated_at")
+  organization     Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy        User?                    @relation("OrganizationInviteInviter", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  acceptedBy       User?                    @relation("OrganizationInviteAccepter", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+  roles            OrganizationInviteRole[]
+
+  @@index([organizationId, status, expiresAt])
+  @@index([email, status])
+  @@index([invitedByUserId])
+  @@index([acceptedByUserId])
+  @@map("organization_invites")
+}
+
+model OrganizationInviteRole {
+  inviteId   String             @map("invite_id") @db.Uuid
+  roleId     String             @map("role_id") @db.Uuid
+  assignedAt DateTime           @default(now()) @map("assigned_at")
+  invite     OrganizationInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  role       Role               @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([inviteId, roleId])
+  @@index([roleId])
+  @@map("organization_invite_roles")
+}
+
+model OrganizationSubscription {
+  id                  String             @id @default(uuid()) @db.Uuid
+  organizationId      String             @unique @map("organization_id") @db.Uuid
+  plan                String             @default("FREE") @db.VarChar(40)
+  status              SubscriptionStatus @default(ACTIVE)
+  currentPeriodEndsAt DateTime?          @map("current_period_ends_at")
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+  organization        Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([plan, status])
+  @@map("organization_subscriptions")
+}
+
+model OrganizationLimit {
+  id                   String       @id @default(uuid()) @db.Uuid
+  organizationId       String       @unique @map("organization_id") @db.Uuid
+  maxMembers           Int          @default(10) @map("max_members")
+  maxDocuments         Int          @default(1000) @map("max_documents")
+  maxStorageMb         Int          @default(1024) @map("max_storage_mb")
+  maxMonthlyAiRequests Int          @default(1000) @map("max_monthly_ai_requests")
+  createdAt            DateTime     @default(now()) @map("created_at")
+  updatedAt            DateTime     @updatedAt @map("updated_at")
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("organization_limits")
 }

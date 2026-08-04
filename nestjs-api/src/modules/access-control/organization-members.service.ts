@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { AccessControlService } from './access-control.service';
 import { AddOrganizationMemberDto } from './dto/add-organization-member.dto';
+import { DEFAULT_ORGANIZATION_LIMITS } from '../organizations/organization-defaults';
 
 const USER_MANAGEMENT_PERMISSION = 'users.manage';
 
@@ -147,6 +149,12 @@ export class OrganizationMembersService {
       throw new NotFoundException('Verified user not found');
     }
 
+    if (user.id === actorUserId) {
+      throw new ForbiddenException(
+        'You cannot add your own account from member management',
+      );
+    }
+
     const roles = await this.resolveApplicableRoles(
       organizationId,
       dto.roleIds ?? [],
@@ -173,6 +181,8 @@ export class OrganizationMembersService {
         'User is already a current organization member',
       );
     }
+
+    await this.assertMemberLimitAllowsAdd(organizationId);
 
     let membershipId: string;
 
@@ -238,6 +248,13 @@ export class OrganizationMembersService {
       organizationId,
       membershipId,
     );
+
+    if (membership.userId === actorUserId) {
+      throw new ForbiddenException(
+        'You cannot change your own organization roles',
+      );
+    }
+
     const roles = await this.resolveApplicableRoles(
       organizationId,
       roleIdsInput,
@@ -279,6 +296,7 @@ export class OrganizationMembersService {
   async updateMemberStatus(
     organizationId: string,
     membershipId: string,
+    actorUserId: string,
     status:
       | typeof OrganizationMembershipStatus.ACTIVE
       | typeof OrganizationMembershipStatus.SUSPENDED,
@@ -287,6 +305,12 @@ export class OrganizationMembersService {
       organizationId,
       membershipId,
     );
+
+    if (membership.userId === actorUserId) {
+      throw new ForbiddenException(
+        'You cannot suspend or reactivate your own organization membership',
+      );
+    }
 
     if (membership.status === status) {
       return this.toMemberView(membership);
@@ -318,11 +342,18 @@ export class OrganizationMembersService {
   async removeMember(
     organizationId: string,
     membershipId: string,
+    actorUserId: string,
   ): Promise<void> {
     const membership = await this.requireCurrentMembership(
       organizationId,
       membershipId,
     );
+
+    if (membership.userId === actorUserId) {
+      throw new ForbiddenException(
+        'You cannot remove your own organization membership',
+      );
+    }
 
     await this.runSerializableMembershipMutation(async (transaction) => {
       if (
@@ -481,6 +512,36 @@ export class OrganizationMembersService {
         ({ permission }) => permission.code === USER_MANAGEMENT_PERMISSION,
       ),
     );
+  }
+
+  private async assertMemberLimitAllowsAdd(
+    organizationId: string,
+  ): Promise<void> {
+    const [limits, memberCount] = await Promise.all([
+      this.prisma.organizationLimit.findUnique({
+        where: { organizationId },
+        select: { maxMembers: true },
+      }),
+      this.prisma.organizationMembership.count({
+        where: {
+          organizationId,
+          status: {
+            in: [
+              OrganizationMembershipStatus.ACTIVE,
+              OrganizationMembershipStatus.SUSPENDED,
+            ],
+          },
+        },
+      }),
+    ]);
+    const maxMembers =
+      limits?.maxMembers ?? DEFAULT_ORGANIZATION_LIMITS.maxMembers;
+
+    if (memberCount + 1 > maxMembers) {
+      throw new ConflictException(
+        'Organization member limit reached. Increase the limit before adding more members.',
+      );
+    }
   }
 
   private async requireCurrentMembership(

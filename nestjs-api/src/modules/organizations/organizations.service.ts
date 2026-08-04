@@ -11,6 +11,10 @@ import {
 import { AccessControlService } from '../access-control/access-control.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
+import {
+  DEFAULT_ORGANIZATION_LIMITS,
+  DEFAULT_ORGANIZATION_SUBSCRIPTION,
+} from './organization-defaults';
 
 const ORGANIZATION_ADMIN_SYSTEM_KEY = 'organization_admin';
 const MAX_SLUG_ATTEMPTS = 50;
@@ -139,6 +143,19 @@ export class OrganizationsService {
               membershipId: membership.id,
               roleId: adminRole.id,
               assignedByUserId: actorUserId,
+            },
+          });
+          await transaction.organizationSubscription.create({
+            data: {
+              organizationId: createdOrganization.id,
+              plan: DEFAULT_ORGANIZATION_SUBSCRIPTION.plan,
+              status: DEFAULT_ORGANIZATION_SUBSCRIPTION.status,
+            },
+          });
+          await transaction.organizationLimit.create({
+            data: {
+              organizationId: createdOrganization.id,
+              ...DEFAULT_ORGANIZATION_LIMITS,
             },
           });
 
