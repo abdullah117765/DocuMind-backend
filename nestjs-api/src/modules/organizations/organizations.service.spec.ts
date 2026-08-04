@@ -1,9 +1,5 @@
+import { ConflictException } from '@nestjs/common';
 import {
-  ConflictException,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import {
-  AccessScope,
   OrganizationMembershipStatus,
   Prisma,
   SubscriptionStatus,
@@ -16,48 +12,35 @@ import { OrganizationsService } from './organizations.service';
 describe('OrganizationsService', () => {
   const actorUserId = '7ee81b20-3a9a-4303-b370-89abf77f1bfc';
   const organizationId = '3c84ea89-6b30-4d90-a444-c12ba29777fb';
-  const membershipId = '58e00226-8217-40cc-aa59-f8e688cdcc52';
-  const roleId = 'b91886ad-8bc0-4f3f-b8b2-31c196f1fe50';
   const now = new Date('2026-08-03T12:00:00.000Z');
   const organizationRecord = {
     id: organizationId,
     name: 'Acme Finance',
     slug: 'acme-finance',
     createdByUserId: actorUserId,
+    allowJoinRequests: true,
     createdAt: now,
     updatedAt: now,
     _count: {
-      memberships: 1,
+      memberships: 0,
     },
   };
   const organizationFindMany = jest.fn();
   const organizationFindUnique = jest.fn();
   const organizationCreate = jest.fn();
   const organizationFindUniqueOrThrow = jest.fn();
-  const organizationMembershipCreate = jest.fn();
   const organizationSubscriptionCreate = jest.fn();
   const organizationLimitCreate = jest.fn();
-  const membershipRoleCreate = jest.fn();
-  const roleFindFirst = jest.fn();
   const transaction = {
     organization: {
       create: organizationCreate,
       findUniqueOrThrow: organizationFindUniqueOrThrow,
-    },
-    organizationMembership: {
-      create: organizationMembershipCreate,
     },
     organizationSubscription: {
       create: organizationSubscriptionCreate,
     },
     organizationLimit: {
       create: organizationLimitCreate,
-    },
-    membershipRole: {
-      create: membershipRoleCreate,
-    },
-    role: {
-      findFirst: roleFindFirst,
     },
   };
   const runTransaction = jest.fn(
@@ -71,9 +54,9 @@ describe('OrganizationsService', () => {
     },
     $transaction: runTransaction,
   } as unknown as PrismaService;
-  const invalidateUserAccess = jest.fn();
+  const invalidateOrganizationAccess = jest.fn();
   const accessControlService = {
-    invalidateUserAccess,
+    invalidateOrganizationAccess,
   } as unknown as AccessControlService;
   const service = new OrganizationsService(prisma, accessControlService);
 
@@ -83,12 +66,9 @@ describe('OrganizationsService', () => {
     organizationFindUnique.mockResolvedValue(null);
     organizationCreate.mockResolvedValue({ id: organizationId });
     organizationFindUniqueOrThrow.mockResolvedValue(organizationRecord);
-    organizationMembershipCreate.mockResolvedValue({ id: membershipId });
     organizationSubscriptionCreate.mockResolvedValue({});
     organizationLimitCreate.mockResolvedValue({});
-    membershipRoleCreate.mockResolvedValue({ membershipId, roleId });
-    roleFindFirst.mockResolvedValue({ id: roleId });
-    invalidateUserAccess.mockResolvedValue(undefined);
+    invalidateOrganizationAccess.mockResolvedValue(undefined);
   });
 
   it('lists platform organization views', async () => {
@@ -98,9 +78,10 @@ describe('OrganizationsService', () => {
         name: 'Acme Finance',
         slug: 'acme-finance',
         createdByUserId: actorUserId,
+        allowJoinRequests: true,
         createdAt: now,
         updatedAt: now,
-        memberCount: 1,
+        memberCount: 0,
       },
     ]);
     expect(organizationFindMany).toHaveBeenCalledWith({
@@ -109,6 +90,7 @@ describe('OrganizationsService', () => {
         name: true,
         slug: true,
         createdByUserId: true,
+        allowJoinRequests: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -127,36 +109,20 @@ describe('OrganizationsService', () => {
     });
   });
 
-  it('creates an organization and makes the Super Admin an organization admin', async () => {
+  it('creates an organization without making the Super Admin a tenant member', async () => {
     await expect(
       service.createOrganization(actorUserId, { name: ' Acme   Finance ' }),
     ).resolves.toMatchObject({
       id: organizationId,
       name: 'Acme Finance',
       slug: 'acme-finance',
-      memberCount: 1,
-    });
-    expect(roleFindFirst).toHaveBeenCalledWith({
-      where: {
-        systemKey: 'organization_admin',
-        scope: AccessScope.ORGANIZATION,
-        isActive: true,
-      },
-      select: { id: true },
+      memberCount: 0,
     });
     expect(organizationCreate).toHaveBeenCalledWith({
       data: {
         name: 'Acme Finance',
         slug: 'acme-finance',
         createdByUserId: actorUserId,
-      },
-      select: { id: true },
-    });
-    expect(organizationMembershipCreate).toHaveBeenCalledWith({
-      data: {
-        organizationId,
-        userId: actorUserId,
-        status: OrganizationMembershipStatus.ACTIVE,
       },
       select: { id: true },
     });
@@ -173,14 +139,7 @@ describe('OrganizationsService', () => {
         ...DEFAULT_ORGANIZATION_LIMITS,
       },
     });
-    expect(membershipRoleCreate).toHaveBeenCalledWith({
-      data: {
-        membershipId,
-        roleId,
-        assignedByUserId: actorUserId,
-      },
-    });
-    expect(invalidateUserAccess).toHaveBeenCalledWith(actorUserId);
+    expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
   });
 
   it('generates a unique slug when the name slug is already used', async () => {
@@ -224,12 +183,4 @@ describe('OrganizationsService', () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
-  it('fails closed when the system organization admin role is missing', async () => {
-    roleFindFirst.mockResolvedValue(null);
-
-    await expect(
-      service.createOrganization(actorUserId, { name: 'Acme Finance' }),
-    ).rejects.toBeInstanceOf(InternalServerErrorException);
-    expect(organizationCreate).not.toHaveBeenCalled();
-  });
 });

@@ -112,6 +112,20 @@ const permissions = [
     category: 'Platform',
     scope: AccessScope.PLATFORM,
   },
+  {
+    code: 'platform.users.manage',
+    name: 'Platform Users',
+    description: 'Search, create, deactivate, and manage platform users.',
+    category: 'Platform',
+    scope: AccessScope.PLATFORM,
+  },
+  {
+    code: 'platform.audit_logs.view',
+    name: 'Audit Logs',
+    description: 'View platform-wide audit logs.',
+    category: 'Platform',
+    scope: AccessScope.PLATFORM,
+  },
 ] as const satisfies ReadonlyArray<Omit<Prisma.PermissionCreateInput, 'roles'>>;
 
 const roleDefinitions = [

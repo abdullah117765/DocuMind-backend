@@ -15,6 +15,8 @@ import { AccessControlModule } from './modules/access-control/access-control.mod
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './modules/mail/mail.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { AuditLogInterceptor } from './modules/platform-admin/audit-log.interceptor';
+import { PlatformAdminModule } from './modules/platform-admin/platform-admin.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { RedisModule } from './modules/redis/redis.module';
 
@@ -39,6 +41,7 @@ import { RedisModule } from './modules/redis/redis.module';
     AuthModule,
     AccessControlModule,
     OrganizationsModule,
+    PlatformAdminModule,
   ],
   controllers: [AppController],
   providers: [
@@ -50,6 +53,10 @@ import { RedisModule } from './modules/redis/redis.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditLogInterceptor,
     },
   ],
 })

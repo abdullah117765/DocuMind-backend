@@ -119,3 +119,13 @@ export type OrganizationSubscription = Prisma.OrganizationSubscriptionModel
  * 
  */
 export type OrganizationLimit = Prisma.OrganizationLimitModel
+/**
+ * Model JoinRequest
+ * 
+ */
+export type JoinRequest = Prisma.JoinRequestModel
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel

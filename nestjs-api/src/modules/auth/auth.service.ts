@@ -81,11 +81,11 @@ export interface PasswordResetSessionResult {
 
 export interface AuthenticatedSessionResult {
   data: {
-    user: {
-      id: string;
-      email: string;
-      isVerified: boolean;
-    };
+        user: {
+          id: string;
+          email: string;
+          isVerified: boolean;
+        };
     session: {
       id: string;
       expiresAt: Date;
@@ -242,6 +242,10 @@ export class AuthService {
       });
     }
 
+    if (user.isActive === false) {
+      throw new ForbiddenException('This account has been deactivated.');
+    }
+
     const session = await this.sessionService.createSession(user.id, metadata);
 
     return this.createAuthenticatedSessionResult(user, session);
@@ -254,7 +258,7 @@ export class AuthService {
       rotatedSession.session.userId,
     );
 
-    if (!user || !user.isVerified) {
+    if (!user || !user.isVerified || user.isActive === false) {
       await this.sessionService.revokeSession(
         rotatedSession.session.id,
         SESSION_REVOCATION_REASONS.accountUnavailable,
