@@ -1,4 +1,4 @@
-import { AccessScope } from '../../generated/prisma/client';
+import { AccessScope, OrganizationStatus } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AccessControlCacheService } from './access-control-cache.service';
 import { AccessControlService } from './access-control.service';
@@ -57,7 +57,10 @@ describe('AccessControlService', () => {
     invalidateOrganization.mockResolvedValue();
     invalidateUser.mockResolvedValue();
     platformRoleFindMany.mockResolvedValue([]);
-    organizationFindUnique.mockResolvedValue({ id: 'organization-1' });
+    organizationFindUnique.mockResolvedValue({
+      id: 'organization-1',
+      status: OrganizationStatus.ACTIVE,
+    });
     membershipFindFirst.mockResolvedValue(null);
   });
 
@@ -145,6 +148,18 @@ describe('AccessControlService', () => {
 
     await expect(
       service.resolveOrganizationAccess('user-1', 'missing-organization'),
+    ).resolves.toBeNull();
+    expect(setOrganizationAccess).not.toHaveBeenCalled();
+  });
+
+  it('returns null and does not cache access for a suspended organization', async () => {
+    organizationFindUnique.mockResolvedValue({
+      id: 'organization-1',
+      status: OrganizationStatus.SUSPENDED,
+    });
+
+    await expect(
+      service.resolveOrganizationAccess('user-1', 'organization-1'),
     ).resolves.toBeNull();
     expect(setOrganizationAccess).not.toHaveBeenCalled();
   });

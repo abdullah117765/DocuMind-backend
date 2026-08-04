@@ -29,6 +29,7 @@ export type OrganizationMinAggregateOutputType = {
   name: string | null
   slug: string | null
   createdByUserId: string | null
+  status: $Enums.OrganizationStatus | null
   allowJoinRequests: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -39,6 +40,7 @@ export type OrganizationMaxAggregateOutputType = {
   name: string | null
   slug: string | null
   createdByUserId: string | null
+  status: $Enums.OrganizationStatus | null
   allowJoinRequests: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -49,6 +51,7 @@ export type OrganizationCountAggregateOutputType = {
   name: number
   slug: number
   createdByUserId: number
+  status: number
   allowJoinRequests: number
   createdAt: number
   updatedAt: number
@@ -61,6 +64,7 @@ export type OrganizationMinAggregateInputType = {
   name?: true
   slug?: true
   createdByUserId?: true
+  status?: true
   allowJoinRequests?: true
   createdAt?: true
   updatedAt?: true
@@ -71,6 +75,7 @@ export type OrganizationMaxAggregateInputType = {
   name?: true
   slug?: true
   createdByUserId?: true
+  status?: true
   allowJoinRequests?: true
   createdAt?: true
   updatedAt?: true
@@ -81,6 +86,7 @@ export type OrganizationCountAggregateInputType = {
   name?: true
   slug?: true
   createdByUserId?: true
+  status?: true
   allowJoinRequests?: true
   createdAt?: true
   updatedAt?: true
@@ -164,6 +170,7 @@ export type OrganizationGroupByOutputType = {
   name: string
   slug: string
   createdByUserId: string | null
+  status: $Enums.OrganizationStatus
   allowJoinRequests: boolean
   createdAt: Date
   updatedAt: Date
@@ -195,6 +202,7 @@ export type OrganizationWhereInput = {
   name?: Prisma.StringFilter<"Organization"> | string
   slug?: Prisma.StringFilter<"Organization"> | string
   createdByUserId?: Prisma.UuidNullableFilter<"Organization"> | string | null
+  status?: Prisma.EnumOrganizationStatusFilter<"Organization"> | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFilter<"Organization"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
@@ -213,6 +221,7 @@ export type OrganizationOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrder
   allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -234,6 +243,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
   name?: Prisma.StringFilter<"Organization"> | string
   createdByUserId?: Prisma.UuidNullableFilter<"Organization"> | string | null
+  status?: Prisma.EnumOrganizationStatusFilter<"Organization"> | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFilter<"Organization"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
@@ -252,6 +262,7 @@ export type OrganizationOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrder
   allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -268,6 +279,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   slug?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   createdByUserId?: Prisma.UuidNullableWithAggregatesFilter<"Organization"> | string | null
+  status?: Prisma.EnumOrganizationStatusWithAggregatesFilter<"Organization"> | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolWithAggregatesFilter<"Organization"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
@@ -277,6 +289,7 @@ export type OrganizationCreateInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -295,6 +308,7 @@ export type OrganizationUncheckedCreateInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -311,6 +325,7 @@ export type OrganizationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -329,6 +344,7 @@ export type OrganizationUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -346,6 +362,7 @@ export type OrganizationCreateManyInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -355,6 +372,7 @@ export type OrganizationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -365,6 +383,7 @@ export type OrganizationUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -385,6 +404,7 @@ export type OrganizationCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -395,6 +415,7 @@ export type OrganizationMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -405,6 +426,7 @@ export type OrganizationMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   allowJoinRequests?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -460,6 +482,10 @@ export type OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput = {
   update?: Prisma.OrganizationUpdateWithWhereUniqueWithoutCreatedByInput | Prisma.OrganizationUpdateWithWhereUniqueWithoutCreatedByInput[]
   updateMany?: Prisma.OrganizationUpdateManyWithWhereWithoutCreatedByInput | Prisma.OrganizationUpdateManyWithWhereWithoutCreatedByInput[]
   deleteMany?: Prisma.OrganizationScalarWhereInput | Prisma.OrganizationScalarWhereInput[]
+}
+
+export type EnumOrganizationStatusFieldUpdateOperationsInput = {
+  set?: $Enums.OrganizationStatus
 }
 
 export type OrganizationCreateNestedOneWithoutMembershipsInput = {
@@ -568,6 +594,7 @@ export type OrganizationCreateWithoutCreatedByInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -584,6 +611,7 @@ export type OrganizationUncheckedCreateWithoutCreatedByInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -630,6 +658,7 @@ export type OrganizationScalarWhereInput = {
   name?: Prisma.StringFilter<"Organization"> | string
   slug?: Prisma.StringFilter<"Organization"> | string
   createdByUserId?: Prisma.UuidNullableFilter<"Organization"> | string | null
+  status?: Prisma.EnumOrganizationStatusFilter<"Organization"> | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFilter<"Organization"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
@@ -639,6 +668,7 @@ export type OrganizationCreateWithoutMembershipsInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -656,6 +686,7 @@ export type OrganizationUncheckedCreateWithoutMembershipsInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -687,6 +718,7 @@ export type OrganizationUpdateWithoutMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -704,6 +736,7 @@ export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -719,6 +752,7 @@ export type OrganizationCreateWithoutRolesInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -736,6 +770,7 @@ export type OrganizationUncheckedCreateWithoutRolesInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -767,6 +802,7 @@ export type OrganizationUpdateWithoutRolesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -784,6 +820,7 @@ export type OrganizationUncheckedUpdateWithoutRolesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -799,6 +836,7 @@ export type OrganizationCreateWithoutInvitesInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -816,6 +854,7 @@ export type OrganizationUncheckedCreateWithoutInvitesInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -847,6 +886,7 @@ export type OrganizationUpdateWithoutInvitesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -864,6 +904,7 @@ export type OrganizationUncheckedUpdateWithoutInvitesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -879,6 +920,7 @@ export type OrganizationCreateWithoutSubscriptionInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -896,6 +938,7 @@ export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -927,6 +970,7 @@ export type OrganizationUpdateWithoutSubscriptionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -944,6 +988,7 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -959,6 +1004,7 @@ export type OrganizationCreateWithoutLimitsInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -976,6 +1022,7 @@ export type OrganizationUncheckedCreateWithoutLimitsInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1007,6 +1054,7 @@ export type OrganizationUpdateWithoutLimitsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1024,6 +1072,7 @@ export type OrganizationUncheckedUpdateWithoutLimitsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1039,6 +1088,7 @@ export type OrganizationCreateWithoutJoinRequestsInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1056,6 +1106,7 @@ export type OrganizationUncheckedCreateWithoutJoinRequestsInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1087,6 +1138,7 @@ export type OrganizationUpdateWithoutJoinRequestsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1104,6 +1156,7 @@ export type OrganizationUncheckedUpdateWithoutJoinRequestsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1119,6 +1172,7 @@ export type OrganizationCreateWithoutAuditLogsInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1136,6 +1190,7 @@ export type OrganizationUncheckedCreateWithoutAuditLogsInput = {
   name: string
   slug: string
   createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1167,6 +1222,7 @@ export type OrganizationUpdateWithoutAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1184,6 +1240,7 @@ export type OrganizationUncheckedUpdateWithoutAuditLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1199,6 +1256,7 @@ export type OrganizationCreateManyCreatedByInput = {
   id?: string
   name: string
   slug: string
+  status?: $Enums.OrganizationStatus
   allowJoinRequests?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1208,6 +1266,7 @@ export type OrganizationUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1224,6 +1283,7 @@ export type OrganizationUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1240,6 +1300,7 @@ export type OrganizationUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
   allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1317,6 +1378,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   name?: boolean
   slug?: boolean
   createdByUserId?: boolean
+  status?: boolean
   allowJoinRequests?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1336,6 +1398,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   name?: boolean
   slug?: boolean
   createdByUserId?: boolean
+  status?: boolean
   allowJoinRequests?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1347,6 +1410,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   name?: boolean
   slug?: boolean
   createdByUserId?: boolean
+  status?: boolean
   allowJoinRequests?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1358,12 +1422,13 @@ export type OrganizationSelectScalar = {
   name?: boolean
   slug?: boolean
   createdByUserId?: boolean
+  status?: boolean
   allowJoinRequests?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "createdByUserId" | "allowJoinRequests" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "createdByUserId" | "status" | "allowJoinRequests" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.Organization$createdByArgs<ExtArgs>
   memberships?: boolean | Prisma.Organization$membershipsArgs<ExtArgs>
@@ -1399,6 +1464,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     name: string
     slug: string
     createdByUserId: string | null
+    status: $Enums.OrganizationStatus
     allowJoinRequests: boolean
     createdAt: Date
     updatedAt: Date
@@ -1837,6 +1903,7 @@ export interface OrganizationFieldRefs {
   readonly name: Prisma.FieldRef<"Organization", 'String'>
   readonly slug: Prisma.FieldRef<"Organization", 'String'>
   readonly createdByUserId: Prisma.FieldRef<"Organization", 'String'>
+  readonly status: Prisma.FieldRef<"Organization", 'OrganizationStatus'>
   readonly allowJoinRequests: Prisma.FieldRef<"Organization", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Organization", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Organization", 'DateTime'>

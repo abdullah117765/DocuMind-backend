@@ -12,6 +12,7 @@ import {
   AccessScope,
   OrganizationInviteStatus,
   OrganizationMembershipStatus,
+  OrganizationStatus,
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
@@ -63,6 +64,7 @@ interface InviteRecord {
     id: string;
     name: string;
     slug: string;
+    status: OrganizationStatus;
   };
   roles: Array<{
     role: InviteRoleRecord;
@@ -380,6 +382,7 @@ export class OrganizationInvitesService {
 
     const invite = await this.findInviteByToken(token);
     this.assertInviteCanBeAccepted(invite, now);
+    this.assertInviteOrganizationActive(invite);
     const inviteRoles = await this.resolveInviteRolesForAcceptance(invite);
 
     if (invite.email !== normalizeEmail(principal.email)) {
@@ -821,6 +824,14 @@ export class OrganizationInvitesService {
     }
   }
 
+  private assertInviteOrganizationActive(invite: InviteRecord): void {
+    if (invite.organization.status !== OrganizationStatus.ACTIVE) {
+      throw new ForbiddenException(
+        'This organization is suspended and cannot accept invitations.',
+      );
+    }
+  }
+
   private inviteInclude(organizationId: string | null) {
     return {
       organization: {
@@ -828,6 +839,7 @@ export class OrganizationInvitesService {
           id: true,
           name: true,
           slug: true,
+          status: true,
         },
       },
       roles: {

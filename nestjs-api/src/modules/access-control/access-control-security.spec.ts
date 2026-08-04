@@ -12,7 +12,10 @@ import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { CurrentUserAccessController } from './current-user-access.controller';
 import { OrganizationMembersController } from './organization-members.controller';
-import { OrganizationsController } from '../organizations/organizations.controller';
+import {
+  OrganizationSettingsController,
+  OrganizationsController,
+} from '../organizations/organizations.controller';
 import { RoleManagementController } from './role-management.controller';
 import { UpdateMemberStatusDto } from './dto/update-member-status.dto';
 import { InviteAcceptanceController } from '../organizations/invite-acceptance.controller';
@@ -87,6 +90,9 @@ describe('Epic 2 security metadata', () => {
     [OrganizationInvitesController, 'inviteMember'],
     [OrganizationInvitesController, 'revokeInvite'],
     [OrganizationsController, 'createOrganization'],
+    [OrganizationsController, 'updatePlatformOrganization'],
+    [OrganizationsController, 'deleteOrganization'],
+    [OrganizationSettingsController, 'updateOrganizationSettings'],
   ])('requires CSRF protection on %p.%s', (controller, methodName) => {
     expect(getGuards(getHandler(controller, methodName))).toContain(CsrfGuard);
   });
@@ -107,9 +113,12 @@ describe('Epic 2 security metadata', () => {
     [OrganizationMembersController, 'getMember'],
     [OrganizationInvitesController, 'listInvites'],
     [InviteAcceptanceController, 'previewInvite'],
+    [OrganizationSettingsController, 'getOrganizationSettings'],
     [OrganizationsController, 'listOrganizations'],
   ])('does not require CSRF on read-only %p.%s', (controller, methodName) => {
-    expect(getGuards(getHandler(controller, methodName))).toEqual([]);
+    expect(getGuards(getHandler(controller, methodName))).not.toContain(
+      CsrfGuard,
+    );
   });
 
   it.each([
@@ -153,10 +162,13 @@ describe('Epic 2 security metadata', () => {
   it.each([
     [OrganizationBillingController, 'updateSubscription'],
     [OrganizationBillingController, 'updateLimits'],
-  ])('requires Super Admin role for billing mutation %p.%s', (controller, methodName) => {
+    [OrganizationsController, 'updatePlatformOrganization'],
+    [OrganizationsController, 'deleteOrganization'],
+  ])('requires Super Admin role for platform mutation %p.%s', (controller, methodName) => {
     const handler = getHandler(controller, methodName);
+    const effectiveGuards = [...getGuards(controller), ...getGuards(handler)];
 
-    expect(getGuards(handler)).toEqual(
+    expect(effectiveGuards).toEqual(
       expect.arrayContaining([
         JwtAuthGuard,
         PlatformSuperAdminGuard,
@@ -166,6 +178,28 @@ describe('Epic 2 security metadata', () => {
     expect(
       Reflect.getMetadata(PERMISSION_REQUIREMENT_METADATA, handler),
     ).toBeUndefined();
+  });
+
+  it.each([
+    [OrganizationSettingsController, 'getOrganizationSettings'],
+    [OrganizationSettingsController, 'updateOrganizationSettings'],
+  ])('requires organization settings permission on %p.%s', (controller, methodName) => {
+    const handler = getHandler(controller, methodName);
+
+    expect(getGuards(handler)).toEqual(
+      expect.arrayContaining([JwtAuthGuard, PermissionsGuard]),
+    );
+    expect(
+      Reflect.getMetadata(
+        PERMISSION_REQUIREMENT_METADATA,
+        handler,
+      ) as PermissionRequirement,
+    ).toEqual({
+      scope: AccessScope.ORGANIZATION,
+      permissionCodes: ['settings.manage'],
+      match: PermissionMatch.ANY,
+      organizationIdParam: 'organizationId',
+    });
   });
 
   it('protects current-user access with JWT without requiring users.manage', () => {

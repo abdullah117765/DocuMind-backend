@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   AccessScope,
   OrganizationMembershipStatus,
+  OrganizationStatus,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AccessControlService } from './access-control.service';
@@ -56,6 +57,11 @@ export class CurrentUserAccessService {
           status: {
             not: OrganizationMembershipStatus.REMOVED,
           },
+          organization: {
+            is: {
+              status: OrganizationStatus.ACTIVE,
+            },
+          },
         },
         select: {
           id: true,
@@ -108,6 +114,7 @@ export class CurrentUserAccessService {
     );
     const organizations = globalOrganizationGrant
       ? await this.prisma.organization.findMany({
+          where: { status: OrganizationStatus.ACTIVE },
           select: {
             id: true,
             name: true,

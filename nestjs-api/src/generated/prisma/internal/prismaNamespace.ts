@@ -1879,6 +1879,7 @@ export const OrganizationScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   createdByUserId: 'createdByUserId',
+  status: 'status',
   allowJoinRequests: 'allowJoinRequests',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2135,6 +2136,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'OrganizationStatus'
+ */
+export type EnumOrganizationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrganizationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'OrganizationStatus[]'
+ */
+export type ListEnumOrganizationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrganizationStatus[]'>
     
 
 

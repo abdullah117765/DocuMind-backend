@@ -1,6 +1,8 @@
 import { ConflictException } from '@nestjs/common';
 import {
+  AccessScope,
   OrganizationMembershipStatus,
+  OrganizationStatus,
   Prisma,
   SubscriptionStatus,
 } from '../../generated/prisma/client';
@@ -18,6 +20,7 @@ describe('OrganizationsService', () => {
     name: 'Acme Finance',
     slug: 'acme-finance',
     createdByUserId: actorUserId,
+    status: OrganizationStatus.ACTIVE,
     allowJoinRequests: true,
     createdAt: now,
     updatedAt: now,
@@ -28,9 +31,15 @@ describe('OrganizationsService', () => {
   const organizationFindMany = jest.fn();
   const organizationFindUnique = jest.fn();
   const organizationCreate = jest.fn();
+  const organizationUpdate = jest.fn();
+  const organizationDelete = jest.fn();
   const organizationFindUniqueOrThrow = jest.fn();
   const organizationSubscriptionCreate = jest.fn();
   const organizationLimitCreate = jest.fn();
+  const organizationMembershipCreate = jest.fn();
+  const membershipRoleCreate = jest.fn();
+  const userFindUnique = jest.fn();
+  const roleFindFirst = jest.fn();
   const transaction = {
     organization: {
       create: organizationCreate,
@@ -42,6 +51,12 @@ describe('OrganizationsService', () => {
     organizationLimit: {
       create: organizationLimitCreate,
     },
+    organizationMembership: {
+      create: organizationMembershipCreate,
+    },
+    membershipRole: {
+      create: membershipRoleCreate,
+    },
   };
   const runTransaction = jest.fn(
     async (callback: (client: typeof transaction) => Promise<unknown>) =>
@@ -51,12 +66,22 @@ describe('OrganizationsService', () => {
     organization: {
       findMany: organizationFindMany,
       findUnique: organizationFindUnique,
+      update: organizationUpdate,
+      delete: organizationDelete,
+    },
+    user: {
+      findUnique: userFindUnique,
+    },
+    role: {
+      findFirst: roleFindFirst,
     },
     $transaction: runTransaction,
   } as unknown as PrismaService;
   const invalidateOrganizationAccess = jest.fn();
+  const invalidateUserAccess = jest.fn();
   const accessControlService = {
     invalidateOrganizationAccess,
+    invalidateUserAccess,
   } as unknown as AccessControlService;
   const service = new OrganizationsService(prisma, accessControlService);
 
@@ -65,10 +90,17 @@ describe('OrganizationsService', () => {
     organizationFindMany.mockResolvedValue([organizationRecord]);
     organizationFindUnique.mockResolvedValue(null);
     organizationCreate.mockResolvedValue({ id: organizationId });
+    organizationUpdate.mockResolvedValue(organizationRecord);
+    organizationDelete.mockResolvedValue(organizationRecord);
     organizationFindUniqueOrThrow.mockResolvedValue(organizationRecord);
     organizationSubscriptionCreate.mockResolvedValue({});
     organizationLimitCreate.mockResolvedValue({});
+    organizationMembershipCreate.mockResolvedValue({ id: 'membership-1' });
+    membershipRoleCreate.mockResolvedValue({});
+    userFindUnique.mockResolvedValue(null);
+    roleFindFirst.mockResolvedValue(null);
     invalidateOrganizationAccess.mockResolvedValue(undefined);
+    invalidateUserAccess.mockResolvedValue(undefined);
   });
 
   it('lists platform organization views', async () => {
@@ -78,6 +110,7 @@ describe('OrganizationsService', () => {
         name: 'Acme Finance',
         slug: 'acme-finance',
         createdByUserId: actorUserId,
+        status: OrganizationStatus.ACTIVE,
         allowJoinRequests: true,
         createdAt: now,
         updatedAt: now,
@@ -90,6 +123,7 @@ describe('OrganizationsService', () => {
         name: true,
         slug: true,
         createdByUserId: true,
+        status: true,
         allowJoinRequests: true,
         createdAt: true,
         updatedAt: true,
@@ -123,6 +157,7 @@ describe('OrganizationsService', () => {
         name: 'Acme Finance',
         slug: 'acme-finance',
         createdByUserId: actorUserId,
+        allowJoinRequests: true,
       },
       select: { id: true },
     });
@@ -131,6 +166,7 @@ describe('OrganizationsService', () => {
         organizationId,
         plan: 'FREE',
         status: SubscriptionStatus.ACTIVE,
+        currentPeriodEndsAt: null,
       },
     });
     expect(organizationLimitCreate).toHaveBeenCalledWith({
@@ -162,9 +198,102 @@ describe('OrganizationsService', () => {
         name: 'Acme Finance',
         slug: 'acme-finance-2',
         createdByUserId: actorUserId,
+        allowJoinRequests: true,
       },
       select: { id: true },
     });
+  });
+
+  it('can assign the first Organization Admin while keeping Super Admin platform-only', async () => {
+    userFindUnique.mockResolvedValue({
+      id: 'first-admin-user',
+      isActive: true,
+      isVerified: true,
+      platformRoleAssignments: [],
+    });
+    roleFindFirst.mockResolvedValue({
+      id: 'organization-admin-role',
+    });
+    organizationFindUniqueOrThrow.mockResolvedValue({
+      ...organizationRecord,
+      _count: { memberships: 1 },
+    });
+
+    await expect(
+      service.createOrganization(actorUserId, {
+        name: 'Acme Finance',
+        firstAdminEmail: 'admin@example.com',
+        allowJoinRequests: false,
+        subscription: {
+          plan: 'PROFESSIONAL',
+          status: SubscriptionStatus.TRIALING,
+          currentPeriodEndsAt: '2026-09-01T00:00:00.000Z',
+        },
+        limits: {
+          maxMembers: 25,
+        },
+      }),
+    ).resolves.toMatchObject({
+      memberCount: 1,
+    });
+
+    expect(userFindUnique).toHaveBeenCalledWith({
+      where: { email: 'admin@example.com' },
+      select: expect.objectContaining({
+        id: true,
+        isActive: true,
+        isVerified: true,
+      }),
+    });
+    expect(roleFindFirst).toHaveBeenCalledWith({
+      where: {
+        systemKey: 'organization_admin',
+        scope: AccessScope.ORGANIZATION,
+        organizationId: null,
+        isActive: true,
+      },
+      select: { id: true },
+    });
+    expect(organizationCreate).toHaveBeenCalledWith({
+      data: {
+        name: 'Acme Finance',
+        slug: 'acme-finance',
+        createdByUserId: actorUserId,
+        allowJoinRequests: false,
+      },
+      select: { id: true },
+    });
+    expect(organizationSubscriptionCreate).toHaveBeenCalledWith({
+      data: {
+        organizationId,
+        plan: 'PROFESSIONAL',
+        status: SubscriptionStatus.TRIALING,
+        currentPeriodEndsAt: new Date('2026-09-01T00:00:00.000Z'),
+      },
+    });
+    expect(organizationLimitCreate).toHaveBeenCalledWith({
+      data: {
+        organizationId,
+        ...DEFAULT_ORGANIZATION_LIMITS,
+        maxMembers: 25,
+      },
+    });
+    expect(organizationMembershipCreate).toHaveBeenCalledWith({
+      data: {
+        organizationId,
+        userId: 'first-admin-user',
+        status: OrganizationMembershipStatus.ACTIVE,
+      },
+      select: { id: true },
+    });
+    expect(membershipRoleCreate).toHaveBeenCalledWith({
+      data: {
+        membershipId: 'membership-1',
+        roleId: 'organization-admin-role',
+        assignedByUserId: actorUserId,
+      },
+    });
+    expect(invalidateUserAccess).toHaveBeenCalledWith('first-admin-user');
   });
 
   it('rejects an explicit slug that races with another organization', async () => {

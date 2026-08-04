@@ -7,7 +7,10 @@ import { OrganizationBillingController } from './organization-billing.controller
 import { OrganizationBillingService } from './organization-billing.service';
 import { OrganizationInvitesController } from './organization-invites.controller';
 import { OrganizationInvitesService } from './organization-invites.service';
-import { OrganizationsController } from './organizations.controller';
+import {
+  OrganizationSettingsController,
+  OrganizationsController,
+} from './organizations.controller';
 import { OrganizationsService } from './organizations.service';
 
 @Module({
@@ -17,6 +20,7 @@ import { OrganizationsService } from './organizations.service';
     JoinRequestsController,
     OrganizationBillingController,
     OrganizationInvitesController,
+    OrganizationSettingsController,
     OrganizationsController,
   ],
   providers: [

@@ -9,6 +9,7 @@ import {
   AccessScope,
   JoinRequestStatus,
   OrganizationMembershipStatus,
+  OrganizationStatus,
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
@@ -147,7 +148,10 @@ export class JoinRequestsService {
         select: { organizationId: true },
       }),
       this.prisma.organization.findMany({
-        where: { allowJoinRequests: true },
+        where: {
+          allowJoinRequests: true,
+          status: OrganizationStatus.ACTIVE,
+        },
         select: {
           id: true,
           name: true,
@@ -243,7 +247,7 @@ export class JoinRequestsService {
     const [organization, membership, latestRequest] = await Promise.all([
       this.prisma.organization.findUnique({
         where: { id: organizationId },
-        select: { id: true, allowJoinRequests: true },
+        select: { id: true, allowJoinRequests: true, status: true },
       }),
       this.prisma.organizationMembership.findUnique({
         where: {
@@ -269,6 +273,12 @@ export class JoinRequestsService {
 
     if (!organization) {
       throw new NotFoundException('Organization not found');
+    }
+
+    if (organization.status !== OrganizationStatus.ACTIVE) {
+      throw new ForbiddenException(
+        'This organization is suspended and is not accepting join requests.',
+      );
     }
 
     if (!organization.allowJoinRequests) {

@@ -63,3 +63,11 @@ export const SubscriptionStatus = {
 } as const
 
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
+
+
+export const OrganizationStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED'
+} as const
+
+export type OrganizationStatus = (typeof OrganizationStatus)[keyof typeof OrganizationStatus]

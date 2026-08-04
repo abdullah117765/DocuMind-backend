@@ -9,8 +9,10 @@ import {
   Patch,
   Post,
   Put,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
+import { AccessScope } from '../../generated/prisma/client';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -30,6 +32,10 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { RequireOrganizationPermissions } from '../../common/decorators/require-permissions.decorator';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
+import {
+  PERMISSION_REQUIREMENT_METADATA,
+  PermissionMatch,
+} from './permission-requirement';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { OrganizationIdDto } from './dto/organization-id.dto';
 import { OrganizationRoleParamsDto } from './dto/organization-role-params.dto';
@@ -106,6 +112,15 @@ export class RoleManagementController {
   }
 
   @Get('roles')
+  @SetMetadata(PERMISSION_REQUIREMENT_METADATA, {
+    scope: AccessScope.ORGANIZATION,
+    match: PermissionMatch.ANY,
+    permissionCodes: [
+      ORGANIZATION_PERMISSIONS.rolesManage,
+      ORGANIZATION_PERMISSIONS.membersManage,
+    ],
+    organizationIdParam: 'organizationId',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'List system and custom roles available in an organization',

@@ -161,6 +161,7 @@ export const OrganizationScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   createdByUserId: 'createdByUserId',
+  status: 'status',
   allowJoinRequests: 'allowJoinRequests',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

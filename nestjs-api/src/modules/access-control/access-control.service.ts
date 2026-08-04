@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   AccessScope,
   OrganizationMembershipStatus,
+  OrganizationStatus,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AccessControlCacheService } from './access-control-cache.service';
@@ -133,7 +134,7 @@ export class AccessControlService {
     const [organization, platformAssignments, membership] = await Promise.all([
       this.prisma.organization.findUnique({
         where: { id: organizationId },
-        select: { id: true },
+        select: { id: true, status: true },
       }),
       this.prisma.platformUserRole.findMany({
         where: {
@@ -222,7 +223,7 @@ export class AccessControlService {
       }),
     ]);
 
-    if (!organization) {
+    if (!organization || organization.status !== OrganizationStatus.ACTIVE) {
       return null;
     }
 

@@ -2,6 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import {
   AccessScope,
   OrganizationMembershipStatus,
+  OrganizationStatus,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AccessControlService } from './access-control.service';
@@ -65,6 +66,11 @@ describe('CurrentUserAccessService', () => {
           userId,
           status: {
             not: OrganizationMembershipStatus.REMOVED,
+          },
+          organization: {
+            is: {
+              status: OrganizationStatus.ACTIVE,
+            },
           },
         },
       }),
@@ -257,6 +263,7 @@ describe('CurrentUserAccessService', () => {
         slug: true,
       },
       orderBy: [{ name: 'asc' }, { id: 'asc' }],
+      where: { status: OrganizationStatus.ACTIVE },
     });
   });
 
