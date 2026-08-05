@@ -5,12 +5,14 @@ import {
   OrganizationStatus,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlCacheService } from './access-control-cache.service';
 import {
   EffectiveRole,
   OrganizationAccess,
   PlatformAccess,
 } from './access-control.types';
+import { PLATFORM_ROLE_KEYS } from './rbac.constants';
 
 interface ResolvedRole {
   id: string;
@@ -58,9 +60,14 @@ export class AccessControlService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cache: AccessControlCacheService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async resolvePlatformAccess(userId: string): Promise<PlatformAccess> {
+    if (await this.envSuperAdminService.isConfiguredUserId(userId)) {
+      return this.resolveEnvSuperAdminPlatformAccess(userId);
+    }
+
     const cachedAccess = await this.cache.getPlatformAccess(userId);
 
     if (cachedAccess.value) {
@@ -75,6 +82,10 @@ export class AccessControlService {
             organizationId: null,
             scope: AccessScope.PLATFORM,
             isActive: true,
+            OR: [
+              { systemKey: null },
+              { systemKey: { not: PLATFORM_ROLE_KEYS.superAdmin } },
+            ],
           },
         },
       },
@@ -131,11 +142,32 @@ export class AccessControlService {
       return cachedAccess.value;
     }
 
-    const [organization, platformAssignments, membership] = await Promise.all([
-      this.prisma.organization.findUnique({
-        where: { id: organizationId },
-        select: { id: true, status: true },
-      }),
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { id: true, status: true },
+    });
+
+    if (!organization || organization.status !== OrganizationStatus.ACTIVE) {
+      return null;
+    }
+
+    if (await this.envSuperAdminService.isConfiguredUserId(userId)) {
+      const result = await this.buildEnvSuperAdminOrganizationAccess(
+        userId,
+        organizationId,
+      );
+
+      await this.cache.setOrganizationAccess(
+        userId,
+        organizationId,
+        cachedAccess.stamp,
+        result,
+      );
+
+      return result;
+    }
+
+    const [platformAssignments, membership] = await Promise.all([
       this.prisma.platformUserRole.findMany({
         where: {
           userId,
@@ -144,6 +176,10 @@ export class AccessControlService {
               organizationId: null,
               scope: AccessScope.PLATFORM,
               isActive: true,
+              OR: [
+                { systemKey: null },
+                { systemKey: { not: PLATFORM_ROLE_KEYS.superAdmin } },
+              ],
             },
           },
         },
@@ -223,10 +259,6 @@ export class AccessControlService {
       }),
     ]);
 
-    if (!organization || organization.status !== OrganizationStatus.ACTIVE) {
-      return null;
-    }
-
     const effectiveAccess = buildEffectiveAccess([
       ...platformAssignments.map(({ role }) => role),
       ...(membership?.roles.map(({ role }) => role) ?? []),
@@ -266,5 +298,45 @@ export class AccessControlService {
 
   invalidateAllAccess(): Promise<void> {
     return this.cache.invalidateAll();
+  }
+
+  private async resolveEnvSuperAdminPlatformAccess(
+    userId: string,
+  ): Promise<PlatformAccess> {
+    const cachedAccess = await this.cache.getPlatformAccess(userId);
+
+    if (cachedAccess.value) {
+      return cachedAccess.value;
+    }
+
+    const role = this.envSuperAdminService.getVirtualRole();
+    const result: PlatformAccess = {
+      userId,
+      roles: role ? [role] : [],
+      permissions: await this.envSuperAdminService.listActivePermissionCodes(
+        AccessScope.PLATFORM,
+      ),
+    };
+
+    await this.cache.setPlatformAccess(userId, cachedAccess.stamp, result);
+
+    return result;
+  }
+
+  private async buildEnvSuperAdminOrganizationAccess(
+    userId: string,
+    organizationId: string,
+  ): Promise<OrganizationAccess> {
+    const role = this.envSuperAdminService.getVirtualRole();
+
+    return {
+      userId,
+      organizationId,
+      membershipId: null,
+      roles: role ? [role] : [],
+      permissions: await this.envSuperAdminService.listActivePermissionCodes(
+        AccessScope.ORGANIZATION,
+      ),
+    };
   }
 }

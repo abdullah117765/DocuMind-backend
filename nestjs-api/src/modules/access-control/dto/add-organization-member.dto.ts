@@ -1,5 +1,6 @@
 import { Transform, type TransformFnParams } from 'class-transformer';
 import {
+  ArrayMinSize,
   ArrayMaxSize,
   ArrayUnique,
   IsArray,
@@ -28,16 +29,20 @@ export class AddOrganizationMemberDto {
 
   @ApiPropertyOptional({
     description:
-      'Initial organization role IDs; an empty or omitted array creates a member without a role',
+      'Initial organization role ID. Exactly one role is required.',
     type: [String],
     example: ['b429b596-1865-4ace-bd6d-9ca3b52da710'],
-    maxItems: 20,
+    minItems: 1,
+    maxItems: 1,
     default: [],
   })
   @IsOptional()
   @IsArray({ message: 'Role IDs must be an array' })
-  @ArrayMaxSize(20, {
-    message: 'A member cannot have more than 20 roles',
+  @ArrayMinSize(1, {
+    message: 'Select one role for this member',
+  })
+  @ArrayMaxSize(1, {
+    message: 'Only one role can be assigned to a user',
   })
   @ArrayUnique({ message: 'Role IDs must be unique' })
   @IsUUID('4', {

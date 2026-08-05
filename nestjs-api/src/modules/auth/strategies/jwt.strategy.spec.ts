@@ -4,6 +4,7 @@ import { AuthConfiguration } from '../../../config/auth.config';
 import { CookieConfiguration } from '../../../config/cookie.config';
 import { Session, User } from '../../../generated/prisma/client';
 import { UsersService } from '../../users/users.service';
+import { EnvSuperAdminService } from '../env-super-admin.service';
 import { SessionService } from '../session.service';
 import { AccessTokenPayload } from '../token.service';
 import { JwtStrategy } from './jwt.strategy';
@@ -66,6 +67,7 @@ describe('JwtStrategy', () => {
   );
   const findActiveSession = jest.fn();
   const findById = jest.fn();
+  const getSuperAdminSessionUserMetadata = jest.fn();
   const configService = {
     getOrThrow,
   } as unknown as ConfigService;
@@ -75,12 +77,21 @@ describe('JwtStrategy', () => {
   const usersService = {
     findById,
   } as unknown as UsersService;
-  const strategy = new JwtStrategy(configService, sessionService, usersService);
+  const envSuperAdminService = {
+    getSessionUserMetadata: getSuperAdminSessionUserMetadata,
+  } as unknown as EnvSuperAdminService;
+  const strategy = new JwtStrategy(
+    configService,
+    sessionService,
+    usersService,
+    envSuperAdminService,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
     findActiveSession.mockResolvedValue(session);
     findById.mockResolvedValue(user);
+    getSuperAdminSessionUserMetadata.mockReturnValue(null);
   });
 
   it('returns an authenticated principal for a valid active session', async () => {

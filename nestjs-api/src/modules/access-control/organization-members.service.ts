@@ -11,9 +11,9 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlService } from './access-control.service';
 import { AddOrganizationMemberDto } from './dto/add-organization-member.dto';
-import { DEFAULT_ORGANIZATION_LIMITS } from '../organizations/organization-defaults';
 import {
   ORGANIZATION_PERMISSIONS,
   ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
@@ -103,6 +103,7 @@ export class OrganizationMembersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async listMembers(organizationId: string): Promise<OrganizationMemberView[]> {
@@ -152,6 +153,7 @@ export class OrganizationMembersService {
       },
       select: {
         id: true,
+        email: true,
         platformRoleAssignments: {
           where: {
             role: {
@@ -172,7 +174,10 @@ export class OrganizationMembersService {
       throw new NotFoundException('Active verified user not found');
     }
 
-    if (user.platformRoleAssignments.length > 0) {
+    if (
+      this.envSuperAdminService.isConfiguredUser(user) ||
+      user.platformRoleAssignments.length > 0
+    ) {
       throw new ConflictException({
         message:
           'Super Admin accounts operate from the platform level and cannot become organization members.',
@@ -216,7 +221,7 @@ export class OrganizationMembersService {
       );
     }
 
-    await this.assertMemberLimitAllowsAdd(organizationId);
+    await this.assertUserCanReceiveOrganizationRole(user.id);
 
     let membershipId: string;
 
@@ -293,6 +298,10 @@ export class OrganizationMembersService {
       organizationId,
       actorUserId,
       roleIdsInput,
+    );
+    await this.assertUserCanReceiveOrganizationRole(
+      membership.userId,
+      membershipId,
     );
     const currentlyManagesUsers =
       membership.status === OrganizationMembershipStatus.ACTIVE &&
@@ -423,8 +432,10 @@ export class OrganizationMembersService {
   ): Promise<MemberRoleRecord[]> {
     const roleIds = normalizeRoleIds(roleIdsInput);
 
-    if (roleIds.length === 0) {
-      return [];
+    if (roleIds.length !== 1) {
+      throw new BadRequestException(
+        'Select exactly one role. A user can have only one role globally.',
+      );
     }
 
     const roles = await this.prisma.role.findMany({
@@ -585,34 +596,40 @@ export class OrganizationMembersService {
   }
 
   private async userHasSuperAdminRole(userId: string): Promise<boolean> {
-    const assignment = await this.prisma.platformUserRole.findFirst({
-      where: {
-        userId,
-        role: {
-          is: {
-            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
-            scope: AccessScope.PLATFORM,
-            isActive: true,
-          },
-        },
-      },
-      select: { roleId: true },
-    });
-
-    return Boolean(assignment);
+    return this.envSuperAdminService.isConfiguredUserId(userId);
   }
 
-  private async assertMemberLimitAllowsAdd(
-    organizationId: string,
+  private async assertUserCanReceiveOrganizationRole(
+    userId: string,
+    currentMembershipId?: string,
   ): Promise<void> {
-    const [limits, memberCount] = await Promise.all([
-      this.prisma.organizationLimit.findUnique({
-        where: { organizationId },
-        select: { maxMembers: true },
-      }),
-      this.prisma.organizationMembership.count({
+    if (await this.envSuperAdminService.isConfiguredUserId(userId)) {
+      throw new ConflictException({
+        message:
+          'Super Admin accounts operate from the platform level and cannot become organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
+        },
+      });
+    }
+
+    const [platformRole, existingMembership] = await Promise.all([
+      this.prisma.platformUserRole.findFirst({
         where: {
-          organizationId,
+          userId,
+          role: {
+            is: {
+              scope: AccessScope.PLATFORM,
+              isActive: true,
+            },
+          },
+        },
+        select: { roleId: true },
+      }),
+      this.prisma.organizationMembership.findFirst({
+        where: {
+          userId,
+          ...(currentMembershipId ? { id: { not: currentMembershipId } } : {}),
           status: {
             in: [
               OrganizationMembershipStatus.ACTIVE,
@@ -620,14 +637,26 @@ export class OrganizationMembersService {
             ],
           },
         },
+        select: {
+          id: true,
+          organization: {
+            select: {
+              name: true,
+            },
+          },
+        },
       }),
     ]);
-    const maxMembers =
-      limits?.maxMembers ?? DEFAULT_ORGANIZATION_LIMITS.maxMembers;
 
-    if (memberCount + 1 > maxMembers) {
+    if (platformRole) {
       throw new ConflictException(
-        'Organization member limit reached. Increase the limit before adding more members.',
+        'This user already has a platform role and cannot receive an organization role.',
+      );
+    }
+
+    if (existingMembership) {
+      throw new ConflictException(
+        `This user already has a role in ${existingMembership.organization.name}. A user can have only one role globally.`,
       );
     }
   }

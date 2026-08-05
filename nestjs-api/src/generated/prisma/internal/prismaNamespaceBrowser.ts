@@ -262,6 +262,9 @@ export const OrganizationInviteScalarFieldEnum = {
   lastSentAt: 'lastSentAt',
   lastSendFailureAt: 'lastSendFailureAt',
   lastSendFailureReason: 'lastSendFailureReason',
+  temporaryPasswordHash: 'temporaryPasswordHash',
+  temporaryPasswordExpiresAt: 'temporaryPasswordExpiresAt',
+  temporaryPasswordUsedAt: 'temporaryPasswordUsedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -4,11 +4,10 @@ import {
   OrganizationMembershipStatus,
   OrganizationStatus,
   Prisma,
-  SubscriptionStatus,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { DEFAULT_ORGANIZATION_LIMITS } from './organization-defaults';
 import { OrganizationsService } from './organizations.service';
 
 describe('OrganizationsService', () => {
@@ -34,8 +33,6 @@ describe('OrganizationsService', () => {
   const organizationUpdate = jest.fn();
   const organizationDelete = jest.fn();
   const organizationFindUniqueOrThrow = jest.fn();
-  const organizationSubscriptionCreate = jest.fn();
-  const organizationLimitCreate = jest.fn();
   const organizationMembershipCreate = jest.fn();
   const membershipRoleCreate = jest.fn();
   const userFindUnique = jest.fn();
@@ -44,12 +41,6 @@ describe('OrganizationsService', () => {
     organization: {
       create: organizationCreate,
       findUniqueOrThrow: organizationFindUniqueOrThrow,
-    },
-    organizationSubscription: {
-      create: organizationSubscriptionCreate,
-    },
-    organizationLimit: {
-      create: organizationLimitCreate,
     },
     organizationMembership: {
       create: organizationMembershipCreate,
@@ -79,11 +70,19 @@ describe('OrganizationsService', () => {
   } as unknown as PrismaService;
   const invalidateOrganizationAccess = jest.fn();
   const invalidateUserAccess = jest.fn();
+  const isConfiguredSuperAdminEmail = jest.fn();
   const accessControlService = {
     invalidateOrganizationAccess,
     invalidateUserAccess,
   } as unknown as AccessControlService;
-  const service = new OrganizationsService(prisma, accessControlService);
+  const envSuperAdminService = {
+    isConfiguredEmail: isConfiguredSuperAdminEmail,
+  } as unknown as EnvSuperAdminService;
+  const service = new OrganizationsService(
+    prisma,
+    accessControlService,
+    envSuperAdminService,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -93,14 +92,13 @@ describe('OrganizationsService', () => {
     organizationUpdate.mockResolvedValue(organizationRecord);
     organizationDelete.mockResolvedValue(organizationRecord);
     organizationFindUniqueOrThrow.mockResolvedValue(organizationRecord);
-    organizationSubscriptionCreate.mockResolvedValue({});
-    organizationLimitCreate.mockResolvedValue({});
     organizationMembershipCreate.mockResolvedValue({ id: 'membership-1' });
     membershipRoleCreate.mockResolvedValue({});
     userFindUnique.mockResolvedValue(null);
     roleFindFirst.mockResolvedValue(null);
     invalidateOrganizationAccess.mockResolvedValue(undefined);
     invalidateUserAccess.mockResolvedValue(undefined);
+    isConfiguredSuperAdminEmail.mockReturnValue(false);
   });
 
   it('lists platform organization views', async () => {
@@ -161,20 +159,6 @@ describe('OrganizationsService', () => {
       },
       select: { id: true },
     });
-    expect(organizationSubscriptionCreate).toHaveBeenCalledWith({
-      data: {
-        organizationId,
-        plan: 'FREE',
-        status: SubscriptionStatus.ACTIVE,
-        currentPeriodEndsAt: null,
-      },
-    });
-    expect(organizationLimitCreate).toHaveBeenCalledWith({
-      data: {
-        organizationId,
-        ...DEFAULT_ORGANIZATION_LIMITS,
-      },
-    });
     expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
   });
 
@@ -210,6 +194,7 @@ describe('OrganizationsService', () => {
       isActive: true,
       isVerified: true,
       platformRoleAssignments: [],
+      organizationMemberships: [],
     });
     roleFindFirst.mockResolvedValue({
       id: 'organization-admin-role',
@@ -224,14 +209,6 @@ describe('OrganizationsService', () => {
         name: 'Acme Finance',
         firstAdminEmail: 'admin@example.com',
         allowJoinRequests: false,
-        subscription: {
-          plan: 'PROFESSIONAL',
-          status: SubscriptionStatus.TRIALING,
-          currentPeriodEndsAt: '2026-09-01T00:00:00.000Z',
-        },
-        limits: {
-          maxMembers: 25,
-        },
       }),
     ).resolves.toMatchObject({
       memberCount: 1,
@@ -262,21 +239,6 @@ describe('OrganizationsService', () => {
         allowJoinRequests: false,
       },
       select: { id: true },
-    });
-    expect(organizationSubscriptionCreate).toHaveBeenCalledWith({
-      data: {
-        organizationId,
-        plan: 'PROFESSIONAL',
-        status: SubscriptionStatus.TRIALING,
-        currentPeriodEndsAt: new Date('2026-09-01T00:00:00.000Z'),
-      },
-    });
-    expect(organizationLimitCreate).toHaveBeenCalledWith({
-      data: {
-        organizationId,
-        ...DEFAULT_ORGANIZATION_LIMITS,
-        maxMembers: 25,
-      },
     });
     expect(organizationMembershipCreate).toHaveBeenCalledWith({
       data: {

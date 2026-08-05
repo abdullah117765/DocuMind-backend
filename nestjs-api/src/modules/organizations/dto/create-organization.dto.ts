@@ -25,6 +25,8 @@ function normalizeSlug(value: unknown): unknown {
   return typeof value === 'string' ? value.trim().toLowerCase() : value;
 }
 
+const ORGANIZATION_NAME_PATTERN = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
+
 export class CreateOrganizationDto {
   @ApiProperty({
     description: 'Display name for the tenant organization',
@@ -38,9 +40,9 @@ export class CreateOrganizationDto {
   @MaxLength(150, {
     message: 'Organization name must not exceed 150 characters',
   })
-  @Matches(/^[A-Za-z0-9][A-Za-z0-9 .&'_-]*$/, {
+  @Matches(ORGANIZATION_NAME_PATTERN, {
     message:
-      'Organization name may contain letters, numbers, spaces, dots, ampersands, apostrophes, underscores, and hyphens',
+      'Organization name can contain only letters, numbers, and single spaces',
   })
   name!: string;
 
@@ -85,7 +87,8 @@ export class CreateOrganizationDto {
   allowJoinRequests?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Initial subscription override. Defaults are used if omitted.',
+    description:
+      'Deprecated compatibility field. Subscription/payment setup is disabled and this value is ignored.',
     type: UpdateOrganizationSubscriptionDto,
   })
   @IsOptional()
@@ -94,7 +97,8 @@ export class CreateOrganizationDto {
   subscription?: UpdateOrganizationSubscriptionDto;
 
   @ApiPropertyOptional({
-    description: 'Initial tenant limits override. Defaults are used if omitted.',
+    description:
+      'Deprecated compatibility field. Organization limits are disabled and this value is ignored.',
     type: UpdateOrganizationLimitsDto,
   })
   @IsOptional()

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   GoneException,
@@ -7,7 +8,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash, randomInt, randomUUID } from 'node:crypto';
+import { compare, hash } from 'bcrypt';
 import {
   AccessScope,
   OrganizationInviteStatus,
@@ -20,16 +22,22 @@ import {
   ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
   ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
   ORGANIZATION_ROLE_KEYS,
-  PLATFORM_ROLE_KEYS,
 } from '../access-control/rbac.constants';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { AcceptInviteWithTemporaryPasswordDto } from './dto/accept-invite-with-temporary-password.dto';
 import { InviteOrganizationMemberDto } from './dto/invite-organization-member.dto';
 import {
-  DEFAULT_ORGANIZATION_LIMITS,
+  ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS,
   ORGANIZATION_INVITE_TTL_DAYS,
 } from './organization-defaults';
+
+const TEMPORARY_PASSWORD_HASH_ROUNDS = 12;
+const TEMPORARY_PASSWORD_LENGTH = 12;
+const TEMPORARY_PASSWORD_CHARSET =
+  'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
 
 interface InviteRoleRecord {
   id: string;
@@ -58,6 +66,9 @@ interface InviteRecord {
   lastSentAt: Date | null;
   lastSendFailureAt: Date | null;
   lastSendFailureReason: string | null;
+  temporaryPasswordHash: string | null;
+  temporaryPasswordExpiresAt: Date | null;
+  temporaryPasswordUsedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
   organization: {
@@ -119,12 +130,28 @@ function normalizeRoleIds(roleIds: string[] = []): string[] {
   return [...new Set(roleIds)].sort((left, right) => left.localeCompare(right));
 }
 
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2002'
+  );
+}
+
+function generateTemporaryPassword(): string {
+  return Array.from({ length: TEMPORARY_PASSWORD_LENGTH }, () => {
+    const index = randomInt(0, TEMPORARY_PASSWORD_CHARSET.length);
+
+    return TEMPORARY_PASSWORD_CHARSET[index];
+  }).join('');
+}
+
 @Injectable()
 export class OrganizationInvitesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
     private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async listInvites(organizationId: string): Promise<OrganizationInviteView[]> {
@@ -151,7 +178,22 @@ export class OrganizationInvitesService {
       dto.roleIds ?? [],
     );
 
-    await this.assertCanInviteEmail(organizationId, email, now);
+    const invitee = await this.assertCanInviteEmail(email);
+    const temporaryPassword = invitee.hasExistingAccount
+      ? null
+      : generateTemporaryPassword();
+    const temporaryPasswordHash = temporaryPassword
+      ? await hash(temporaryPassword, TEMPORARY_PASSWORD_HASH_ROUNDS)
+      : null;
+    const temporaryPasswordExpiresAt = temporaryPassword
+      ? new Date(
+          now.getTime() +
+            ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS *
+              60 *
+              60 *
+              1000,
+        )
+      : null;
 
     const token = randomUUID();
     const tokenHash = this.hashToken(token);
@@ -176,6 +218,8 @@ export class OrganizationInvitesService {
             tokenHash,
             invitedByUserId: actor.userId,
             expiresAt,
+            temporaryPasswordHash,
+            temporaryPasswordExpiresAt,
           },
           include: this.inviteInclude(organizationId),
         });
@@ -204,6 +248,12 @@ export class OrganizationInvitesService {
         createdInvite.organization.name,
         token,
         ORGANIZATION_INVITE_TTL_DAYS,
+        {
+          temporaryPassword,
+          temporaryPasswordExpiresInHours: temporaryPassword
+            ? ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS
+            : null,
+        },
       );
       sentInvite = await this.prisma.organizationInvite.update({
         where: { id: createdInvite.id },
@@ -284,6 +334,21 @@ export class OrganizationInvitesService {
     }
 
     const token = randomUUID();
+    const temporaryPassword = existingInvite.temporaryPasswordHash
+      ? generateTemporaryPassword()
+      : null;
+    const temporaryPasswordHash = temporaryPassword
+      ? await hash(temporaryPassword, TEMPORARY_PASSWORD_HASH_ROUNDS)
+      : null;
+    const temporaryPasswordExpiresAt = temporaryPassword
+      ? new Date(
+          now.getTime() +
+            ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS *
+              60 *
+              60 *
+              1000,
+        )
+      : null;
     const expiresAt = new Date(
       now.getTime() + ORGANIZATION_INVITE_TTL_DAYS * 24 * 60 * 60 * 1000,
     );
@@ -294,6 +359,13 @@ export class OrganizationInvitesService {
         status: OrganizationInviteStatus.PENDING,
         expiresAt,
         revokedAt: null,
+        ...(temporaryPasswordHash
+          ? {
+              temporaryPasswordHash,
+              temporaryPasswordExpiresAt,
+              temporaryPasswordUsedAt: null,
+            }
+          : {}),
         lastSendFailureAt: null,
         lastSendFailureReason: null,
       },
@@ -306,6 +378,12 @@ export class OrganizationInvitesService {
         preparedInvite.organization.name,
         token,
         ORGANIZATION_INVITE_TTL_DAYS,
+        {
+          temporaryPassword,
+          temporaryPasswordExpiresInHours: temporaryPassword
+            ? ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS
+            : null,
+        },
       );
 
       const sentInvite = await this.prisma.organizationInvite.update({
@@ -406,6 +484,8 @@ export class OrganizationInvitesService {
       });
     }
 
+    await this.assertUserCanReceiveOrganizationRole(principal.userId);
+
     const membershipId = await this.prisma.$transaction(
       async (transaction) => {
         const existingMembership =
@@ -421,37 +501,6 @@ export class OrganizationInvitesService {
               status: true,
             },
           });
-
-        if (
-          !existingMembership ||
-          existingMembership.status === OrganizationMembershipStatus.REMOVED
-        ) {
-          const [limits, memberCount] = await Promise.all([
-            transaction.organizationLimit.findUnique({
-              where: { organizationId: invite.organizationId },
-              select: { maxMembers: true },
-            }),
-            transaction.organizationMembership.count({
-              where: {
-                organizationId: invite.organizationId,
-                status: {
-                  in: [
-                    OrganizationMembershipStatus.ACTIVE,
-                    OrganizationMembershipStatus.SUSPENDED,
-                  ],
-                },
-              },
-            }),
-          ]);
-          const maxMembers =
-            limits?.maxMembers ?? DEFAULT_ORGANIZATION_LIMITS.maxMembers;
-
-          if (memberCount + 1 > maxMembers) {
-            throw new ConflictException(
-              'Organization member limit reached. Ask an administrator to increase the limit before accepting this invitation.',
-            );
-          }
-        }
 
         const claimedInvite = await transaction.organizationInvite.updateMany({
           where: {
@@ -489,16 +538,16 @@ export class OrganizationInvitesService {
               select: { id: true },
             });
 
-        if (inviteRoles.length > 0) {
-          await transaction.membershipRole.createMany({
-            data: inviteRoles.map((role) => ({
-              membershipId: membership.id,
-              roleId: role.id,
-              assignedByUserId: invite.invitedByUserId,
-            })),
-            skipDuplicates: true,
-          });
-        }
+        await transaction.membershipRole.deleteMany({
+          where: { membershipId: membership.id },
+        });
+        await transaction.membershipRole.create({
+          data: {
+            membershipId: membership.id,
+            roleId: inviteRoles[0].id,
+            assignedByUserId: invite.invitedByUserId,
+          },
+        });
 
         return membership.id;
       },
@@ -518,11 +567,184 @@ export class OrganizationInvitesService {
     };
   }
 
+  async acceptInviteWithTemporaryPassword(
+    dto: AcceptInviteWithTemporaryPasswordDto,
+    now = new Date(),
+  ): Promise<OrganizationInviteAcceptResult> {
+    const email = normalizeEmail(dto.email);
+
+    if (this.envSuperAdminService.isConfiguredEmail(email)) {
+      throw new ForbiddenException({
+        message:
+          'Super Admin accounts manage organizations from the platform level and cannot become organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
+        },
+      });
+    }
+
+    const invite = await this.findInviteByToken(dto.token);
+    this.assertInviteCanBeAccepted(invite, now);
+    this.assertInviteOrganizationActive(invite);
+    const inviteRoles = await this.resolveInviteRolesForAcceptance(invite);
+
+    if (invite.email !== email) {
+      throw new ForbiddenException({
+        message: 'This invitation was sent to a different email address.',
+        details: {
+          reason: 'INVITE_EMAIL_MISMATCH',
+          invitedEmail: invite.email,
+          submittedEmail: email,
+        },
+      });
+    }
+
+    if (!invite.temporaryPasswordHash || !invite.temporaryPasswordExpiresAt) {
+      throw new ForbiddenException(
+        'This invitation belongs to an existing account. Sign in to accept it.',
+      );
+    }
+
+    if (invite.temporaryPasswordUsedAt) {
+      throw new ConflictException(
+        'This invitation password has already been used.',
+      );
+    }
+
+    if (invite.temporaryPasswordExpiresAt.getTime() <= now.getTime()) {
+      throw new GoneException(
+        'This invitation password has expired. Ask an administrator to resend the invitation.',
+      );
+    }
+
+    const temporaryPasswordMatches = await compare(
+      dto.temporaryPassword,
+      invite.temporaryPasswordHash,
+    );
+
+    if (!temporaryPasswordMatches) {
+      throw new ForbiddenException('Temporary password is incorrect.');
+    }
+
+    const passwordHash = await hash(
+      dto.newPassword,
+      TEMPORARY_PASSWORD_HASH_ROUNDS,
+    );
+
+    let accepted: {
+      membershipId: string;
+      userId: string;
+    };
+
+    try {
+      accepted = await this.prisma.$transaction(
+        async (transaction) => {
+          const existingUser = await transaction.user.findUnique({
+            where: { email },
+            select: { id: true },
+          });
+
+          if (existingUser) {
+            throw new ConflictException(
+              'An account already exists for this email. Sign in to accept the invitation.',
+            );
+          }
+
+          const user = await transaction.user.create({
+            data: {
+              email,
+              passwordHash,
+              isVerified: true,
+              isActive: true,
+            },
+            select: { id: true },
+          });
+
+          const claimedInvite = await transaction.organizationInvite.updateMany({
+            where: {
+              id: invite.id,
+              status: OrganizationInviteStatus.PENDING,
+              acceptedAt: null,
+              revokedAt: null,
+              temporaryPasswordUsedAt: null,
+              temporaryPasswordExpiresAt: { gt: now },
+              expiresAt: { gt: now },
+            },
+            data: {
+              status: OrganizationInviteStatus.ACCEPTED,
+              acceptedAt: now,
+              acceptedByUserId: user.id,
+              temporaryPasswordUsedAt: now,
+            },
+          });
+
+          if (claimedInvite.count !== 1) {
+            throw new ConflictException(
+              'This invitation is no longer available.',
+            );
+          }
+
+          const membership = await transaction.organizationMembership.create({
+            data: {
+              organizationId: invite.organizationId,
+              userId: user.id,
+              status: OrganizationMembershipStatus.ACTIVE,
+            },
+            select: { id: true },
+          });
+
+          await transaction.membershipRole.create({
+            data: {
+              membershipId: membership.id,
+              roleId: inviteRoles[0].id,
+              assignedByUserId: invite.invitedByUserId,
+            },
+          });
+
+          return {
+            membershipId: membership.id,
+            userId: user.id,
+          };
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        },
+      );
+    } catch (error: unknown) {
+      if (isUniqueConstraintError(error)) {
+        throw new ConflictException(
+          'An account already exists for this email. Sign in to accept the invitation.',
+        );
+      }
+
+      throw error;
+    }
+
+    await this.accessControlService.invalidateUserAccess(accepted.userId);
+
+    return {
+      message:
+        'Invitation accepted. Your account is ready; sign in with your new password.',
+      data: {
+        organization: invite.organization,
+        membershipId: accepted.membershipId,
+      },
+    };
+  }
+
   private async assertCanInviteEmail(
-    organizationId: string,
     email: string,
-    now: Date,
-  ): Promise<void> {
+  ): Promise<{ hasExistingAccount: boolean }> {
+    if (this.envSuperAdminService.isConfiguredEmail(email)) {
+      throw new ConflictException({
+        message:
+          'Super Admin accounts operate from the platform level and cannot become organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
+        },
+      });
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { email },
       select: {
@@ -532,7 +754,6 @@ export class OrganizationInvitesService {
           where: {
             role: {
               is: {
-                systemKey: PLATFORM_ROLE_KEYS.superAdmin,
                 scope: AccessScope.PLATFORM,
                 isActive: true,
               },
@@ -543,7 +764,6 @@ export class OrganizationInvitesService {
         },
         organizationMemberships: {
           where: {
-            organizationId,
             status: {
               in: [
                 OrganizationMembershipStatus.ACTIVE,
@@ -551,19 +771,23 @@ export class OrganizationInvitesService {
               ],
             },
           },
-          select: { id: true },
+          select: {
+            id: true,
+            organization: {
+              select: {
+                name: true,
+              },
+            },
+          },
+          take: 1,
         },
       },
     });
 
     if (user && user.platformRoleAssignments.length > 0) {
-      throw new ConflictException({
-        message:
-          'Super Admin accounts manage organizations from the platform level and cannot be invited as organization members.',
-        details: {
-          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
-        },
-      });
+      throw new ConflictException(
+        'This user already has a platform role and cannot receive an organization role.',
+      );
     }
 
     if (user && !user.isActive) {
@@ -574,52 +798,11 @@ export class OrganizationInvitesService {
 
     if (user && user.organizationMemberships.length > 0) {
       throw new ConflictException(
-        'User is already a current organization member',
+        `This user already has a role in ${user.organizationMemberships[0].organization.name}. A user can have only one role globally.`,
       );
     }
 
-    const [limits, memberCount, pendingInviteCount, pendingEmailInviteCount] =
-      await Promise.all([
-        this.prisma.organizationLimit.findUnique({
-          where: { organizationId },
-          select: { maxMembers: true },
-        }),
-        this.prisma.organizationMembership.count({
-          where: {
-            organizationId,
-            status: {
-              in: [
-                OrganizationMembershipStatus.ACTIVE,
-                OrganizationMembershipStatus.SUSPENDED,
-              ],
-            },
-          },
-        }),
-        this.prisma.organizationInvite.count({
-          where: {
-            organizationId,
-            status: OrganizationInviteStatus.PENDING,
-            expiresAt: { gt: now },
-          },
-        }),
-        this.prisma.organizationInvite.count({
-          where: {
-            organizationId,
-            email,
-            status: OrganizationInviteStatus.PENDING,
-            expiresAt: { gt: now },
-          },
-        }),
-      ]);
-    const maxMembers =
-      limits?.maxMembers ?? DEFAULT_ORGANIZATION_LIMITS.maxMembers;
-    const additionalInvite = pendingEmailInviteCount > 0 ? 0 : 1;
-
-    if (memberCount + pendingInviteCount + additionalInvite > maxMembers) {
-      throw new ConflictException(
-        'Organization member limit reached. Increase the limit before inviting more members.',
-      );
-    }
+    return { hasExistingAccount: Boolean(user) };
   }
 
   private async resolveApplicableRoles(
@@ -629,8 +812,10 @@ export class OrganizationInvitesService {
   ): Promise<AssignableInviteRoleRecord[]> {
     const roleIds = normalizeRoleIds(roleIdsInput);
 
-    if (roleIds.length === 0) {
-      return [];
+    if (roleIds.length !== 1) {
+      throw new BadRequestException(
+        'Select exactly one role. A user can have only one role globally.',
+      );
     }
 
     const roles = await this.prisma.role.findMany({
@@ -739,8 +924,10 @@ export class OrganizationInvitesService {
       invite.roles.map(({ role }) => role.id),
     );
 
-    if (roleIds.length === 0) {
-      return [];
+    if (roleIds.length !== 1) {
+      throw new ConflictException(
+        'This invitation must contain exactly one active role. Ask an administrator to resend it.',
+      );
     }
 
     const roles = await this.prisma.role.findMany({
@@ -934,21 +1121,67 @@ export class OrganizationInvitesService {
     return createHash('sha256').update(token).digest('hex');
   }
 
-  private async userHasSuperAdminRole(userId: string): Promise<boolean> {
-    const assignment = await this.prisma.platformUserRole.findFirst({
-      where: {
-        userId,
-        role: {
-          is: {
-            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
-            scope: AccessScope.PLATFORM,
-            isActive: true,
+  private async assertUserCanReceiveOrganizationRole(
+    userId: string,
+  ): Promise<void> {
+    if (await this.envSuperAdminService.isConfiguredUserId(userId)) {
+      throw new ConflictException({
+        message:
+          'Super Admin accounts operate from the platform level and cannot become organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
+        },
+      });
+    }
+
+    const [platformRole, existingMembership] = await Promise.all([
+      this.prisma.platformUserRole.findFirst({
+        where: {
+          userId,
+          role: {
+            is: {
+              scope: AccessScope.PLATFORM,
+              isActive: true,
+            },
           },
         },
-      },
-      select: { roleId: true },
-    });
+        select: { roleId: true },
+      }),
+      this.prisma.organizationMembership.findFirst({
+        where: {
+          userId,
+          status: {
+            in: [
+              OrganizationMembershipStatus.ACTIVE,
+              OrganizationMembershipStatus.SUSPENDED,
+            ],
+          },
+        },
+        select: {
+          id: true,
+          organization: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }),
+    ]);
 
-    return Boolean(assignment);
+    if (platformRole) {
+      throw new ConflictException(
+        'This user already has a platform role and cannot receive an organization role.',
+      );
+    }
+
+    if (existingMembership) {
+      throw new ConflictException(
+        `This user already has a role in ${existingMembership.organization.name}. A user can have only one role globally.`,
+      );
+    }
+  }
+
+  private async userHasSuperAdminRole(userId: string): Promise<boolean> {
+    return this.envSuperAdminService.isConfiguredUserId(userId);
   }
 }

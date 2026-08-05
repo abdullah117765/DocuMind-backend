@@ -3,8 +3,6 @@ import { AccessControlModule } from '../access-control/access-control.module';
 import { InviteAcceptanceController } from './invite-acceptance.controller';
 import { JoinRequestsController } from './join-requests.controller';
 import { JoinRequestsService } from './join-requests.service';
-import { OrganizationBillingController } from './organization-billing.controller';
-import { OrganizationBillingService } from './organization-billing.service';
 import { OrganizationInvitesController } from './organization-invites.controller';
 import { OrganizationInvitesService } from './organization-invites.service';
 import {
@@ -18,14 +16,12 @@ import { OrganizationsService } from './organizations.service';
   controllers: [
     InviteAcceptanceController,
     JoinRequestsController,
-    OrganizationBillingController,
     OrganizationInvitesController,
     OrganizationSettingsController,
     OrganizationsController,
   ],
   providers: [
     JoinRequestsService,
-    OrganizationBillingService,
     OrganizationInvitesService,
     OrganizationsService,
   ],

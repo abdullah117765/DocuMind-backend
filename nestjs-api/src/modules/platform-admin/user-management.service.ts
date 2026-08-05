@@ -7,11 +7,13 @@ import {
 import { hash } from 'bcrypt';
 import {
   AccessScope,
+  OrganizationMembershipStatus,
   Prisma,
   RoleAssignmentSource,
 } from '../../generated/prisma/client';
 import { normalizeEmail } from '../../common/validation/email.validation';
 import { AccessControlService } from '../access-control/access-control.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import {
   SESSION_REVOCATION_REASONS,
   SessionService,
@@ -40,6 +42,15 @@ const managedUserSelect = {
     },
   },
   platformRoleAssignments: {
+    where: {
+      role: {
+        is: {
+          NOT: {
+            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+          },
+        },
+      },
+    },
     select: {
       role: {
         select: {
@@ -48,15 +59,6 @@ const managedUserSelect = {
           systemKey: true,
           scope: true,
           isSystem: true,
-          permissions: {
-            select: {
-              permission: {
-                select: {
-                  code: true,
-                },
-              },
-            },
-          },
         },
       },
       source: true,
@@ -124,7 +126,6 @@ export interface ManagedUserView {
     name: string;
     systemKey: string | null;
     isSystem: boolean;
-    permissionCodes: string[];
   }>;
   memberships: Array<{
     id: string;
@@ -178,6 +179,7 @@ export class UserManagementService {
     private readonly prisma: PrismaService,
     private readonly sessionService: SessionService,
     private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async listUsers(query: ListUsersQueryDto): Promise<ManagedUserListResult> {
@@ -268,6 +270,13 @@ export class UserManagementService {
 
   async createUser(dto: CreateManagedUserDto): Promise<ManagedUserView> {
     const email = toNormalizedEmail(dto.email);
+
+    if (this.envSuperAdminService.isConfiguredEmail(email)) {
+      throw new ConflictException(
+        'Super Admin account is managed through environment variables.',
+      );
+    }
+
     const passwordHash = await hash(dto.password, PASSWORD_HASH_ROUNDS);
 
     try {
@@ -306,6 +315,7 @@ export class UserManagementService {
       where: { id: userId },
       select: {
         id: true,
+        email: true,
         isActive: true,
         platformRoleAssignments: {
           where: {
@@ -330,7 +340,8 @@ export class UserManagementService {
     const nextIsActive = dto.isActive ?? existingUser.isActive;
 
     if (
-      existingUser.platformRoleAssignments.length > 0 &&
+      (this.envSuperAdminService.isConfiguredUser(existingUser) ||
+        existingUser.platformRoleAssignments.length > 0) &&
       (dto.isActive !== undefined || dto.isVerified !== undefined)
     ) {
       throw new ForbiddenException(
@@ -375,11 +386,19 @@ export class UserManagementService {
     const roleIds = [...new Set(dto.roleIds)].sort((left, right) =>
       left.localeCompare(right),
     );
-    const [user, roles] = await Promise.all([
+
+    if (roleIds.length !== 1) {
+      throw new ConflictException(
+        'Select exactly one role. A user can have only one role globally.',
+      );
+    }
+
+    const [user, organizationMembership, roles] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
         select: {
           id: true,
+          email: true,
           platformRoleAssignments: {
             where: {
               role: {
@@ -392,6 +411,25 @@ export class UserManagementService {
             },
             select: { roleId: true },
             take: 1,
+          },
+        },
+      }),
+      this.prisma.organizationMembership.findFirst({
+        where: {
+          userId,
+          status: {
+            in: [
+              OrganizationMembershipStatus.ACTIVE,
+              OrganizationMembershipStatus.SUSPENDED,
+            ],
+          },
+        },
+        select: {
+          id: true,
+          organization: {
+            select: {
+              name: true,
+            },
           },
         },
       }),
@@ -408,6 +446,18 @@ export class UserManagementService {
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    if (this.envSuperAdminService.isConfiguredUser(user)) {
+      throw new ForbiddenException(
+        'Super Admin account is managed through environment variables and cannot receive application roles.',
+      );
+    }
+
+    if (organizationMembership) {
+      throw new ConflictException(
+        `This user already has a role in ${organizationMembership.organization.name}. A user can have only one role globally.`,
+      );
     }
 
     if (user.platformRoleAssignments.length > 0) {
@@ -441,16 +491,14 @@ export class UserManagementService {
         where: { userId },
       });
 
-      if (roleIds.length > 0) {
-        await transaction.platformUserRole.createMany({
-          data: roleIds.map((roleId) => ({
-            userId,
-            roleId,
-            assignedByUserId: actorUserId,
-            source: RoleAssignmentSource.ADMIN,
-          })),
-        });
-      }
+      await transaction.platformUserRole.create({
+        data: {
+          userId,
+          roleId: roleIds[0],
+          assignedByUserId: actorUserId,
+          source: RoleAssignmentSource.ADMIN,
+        },
+      });
     });
 
     await this.accessControlService.invalidateUserAccess(userId);
@@ -496,6 +544,10 @@ export class UserManagementService {
   }
 
   private toUserView(user: ManagedUserRecord): ManagedUserView {
+    const superAdminRole = this.envSuperAdminService.isConfiguredUser(user)
+      ? this.envSuperAdminService.getVirtualRole()
+      : null;
+
     return {
       id: user.id,
       email: user.email,
@@ -506,15 +558,21 @@ export class UserManagementService {
       updatedAt: user.updatedAt,
       sessionCount: user._count.sessions,
       organizationMembershipCount: user._count.organizationMemberships,
-      platformRoles: user.platformRoleAssignments.map(({ role }) => ({
-        id: role.id,
-        name: role.name,
-        systemKey: role.systemKey,
-        isSystem: role.isSystem,
-        permissionCodes: role.permissions
-          .map(({ permission }) => permission.code)
-          .sort((left, right) => left.localeCompare(right)),
-      })),
+      platformRoles: superAdminRole
+        ? [
+            {
+              id: superAdminRole.id,
+              name: superAdminRole.name,
+              systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+              isSystem: true,
+            },
+          ]
+        : user.platformRoleAssignments.map(({ role }) => ({
+            id: role.id,
+            name: role.name,
+            systemKey: role.systemKey,
+            isSystem: role.isSystem,
+          })),
       memberships: user.organizationMemberships.map((membership) => ({
         id: membership.id,
         status: membership.status,

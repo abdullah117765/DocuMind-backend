@@ -11,6 +11,7 @@ import cookieConfig from './config/cookie.config';
 import emailVerificationConfig from './config/email-verification.config';
 import mailConfig from './config/mail.config';
 import passwordResetConfig from './config/password-reset.config';
+import superAdminConfig from './config/super-admin.config';
 import { AccessControlModule } from './modules/access-control/access-control.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './modules/mail/mail.module';
@@ -33,6 +34,7 @@ import { RedisModule } from './modules/redis/redis.module';
         emailVerificationConfig,
         mailConfig,
         passwordResetConfig,
+        superAdminConfig,
       ],
     }),
     PrismaModule,

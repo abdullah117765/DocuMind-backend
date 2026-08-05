@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
 import {
   ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsNotEmpty,
   IsOptional,
@@ -28,12 +29,15 @@ export class InviteOrganizationMemberDto {
   email!: string;
 
   @ApiPropertyOptional({
-    description: 'Organization role IDs assigned when the invite is accepted',
+    description: 'Organization role ID assigned when the invite is accepted',
     type: [String],
+    minItems: 1,
+    maxItems: 1,
   })
   @IsOptional()
   @IsArray({ message: 'Role IDs must be an array' })
-  @ArrayMaxSize(25, { message: 'No more than 25 roles can be assigned' })
+  @ArrayMinSize(1, { message: 'Select one role for this invitation' })
+  @ArrayMaxSize(1, { message: 'Only one role can be assigned to a user' })
   @IsUUID('4', { each: true, message: 'Each role ID must be a valid UUID' })
   roleIds?: string[];
 }

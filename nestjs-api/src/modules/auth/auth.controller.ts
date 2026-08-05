@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  GoneException,
   HttpCode,
   HttpException,
   HttpStatus,
@@ -18,7 +19,6 @@ import {
   ApiBody,
   ApiConflictResponse,
   ApiCookieAuth,
-  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiHeader,
   ApiNotFoundResponse,
@@ -41,17 +41,16 @@ import {
   InvalidPasswordResetAuthorizationException,
   InvalidRefreshTokenException,
 } from './auth.exceptions';
-import {
+import { AuthService } from './auth.service';
+import type {
   ActiveSessionsResult,
   AuthActionResult,
-  AuthService,
   PasswordResetRequestResult,
   PasswordResetSessionResult,
 } from './auth.service';
 import { CsrfService } from './csrf.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 import { ResendVerificationEmailDto } from './dto/resend-verification-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SessionIdDto } from './dto/session-id.dto';
@@ -95,49 +94,25 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new user' })
-  @ApiBody({ type: RegisterDto })
-  @ApiCreatedResponse({
+  @HttpCode(HttpStatus.GONE)
+  @ApiOperation({ summary: 'Public sign-up is disabled' })
+  @ApiResponse({
+    status: HttpStatus.GONE,
     description:
-      'User created and a verification link sent to their email address',
+      'Public account creation is disabled; users must be invited by an administrator',
     schema: {
       example: {
-        status: 'success',
-        code: 201,
+        status: 'error',
+        code: 410,
         message:
-          'Registration successful. Please check your email to verify your account.',
+          'Public sign-up is disabled. Ask an administrator for an invitation.',
       },
     },
   })
-  @ApiBadRequestResponse({
-    description: 'Email or password validation failed',
-    schema: {
-      example: {
-        status: 'error',
-        code: 400,
-        message: 'Validation failed',
-        details: [
-          {
-            field: 'password',
-            issue: 'Password must be at least 8 characters long',
-          },
-        ],
-      },
-    },
-  })
-  @ApiConflictResponse({
-    description: 'The email address is already registered',
-    schema: {
-      example: {
-        status: 'error',
-        code: 409,
-        message: 'Email is already registered',
-      },
-    },
-  })
-  register(@Body() dto: RegisterDto): Promise<AuthActionResult> {
-    return this.authService.register(dto);
+  register(): AuthActionResult {
+    throw new GoneException(
+      'Public sign-up is disabled. Ask an administrator for an invitation.',
+    );
   }
 
   @Get('csrf')

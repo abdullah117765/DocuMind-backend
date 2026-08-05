@@ -9,6 +9,7 @@ import {
   OrganizationMembershipStatus,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlService } from './access-control.service';
 import { OrganizationMembersService } from './organization-members.service';
 
@@ -102,10 +103,20 @@ describe('OrganizationMembersService', () => {
     $transaction: runTransaction,
   } as unknown as PrismaService;
   const invalidateUserAccess = jest.fn();
+  const isConfiguredSuperAdminUser = jest.fn();
+  const isConfiguredSuperAdminUserId = jest.fn();
   const accessControlService = {
     invalidateUserAccess,
   } as unknown as AccessControlService;
-  const service = new OrganizationMembersService(prisma, accessControlService);
+  const envSuperAdminService = {
+    isConfiguredUser: isConfiguredSuperAdminUser,
+    isConfiguredUserId: isConfiguredSuperAdminUserId,
+  } as unknown as EnvSuperAdminService;
+  const service = new OrganizationMembersService(
+    prisma,
+    accessControlService,
+    envSuperAdminService,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -129,6 +140,8 @@ describe('OrganizationMembersService', () => {
     membershipRoleDeleteMany.mockResolvedValue({ count: 1 });
     transactionMembershipFindFirst.mockResolvedValue(null);
     invalidateUserAccess.mockResolvedValue();
+    isConfiguredSuperAdminUser.mockReturnValue(false);
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
   });
 
   it('lists active and suspended members as API views', async () => {
@@ -194,7 +207,19 @@ describe('OrganizationMembersService', () => {
     expect(membershipCreate).not.toHaveBeenCalled();
   });
 
+  it('rejects assigning more than one role to a member', async () => {
+    await expect(
+      service.addMember(organizationId, actorUserId, {
+        email: 'member@example.com',
+        roleIds: [viewerRole.id, adminRole.id],
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(roleFindMany).not.toHaveBeenCalled();
+    expect(membershipCreate).not.toHaveBeenCalled();
+  });
+
   it('rejects a user who is already active or suspended', async () => {
+    roleFindMany.mockResolvedValue([viewerRole]);
     membershipFindUnique.mockResolvedValue({
       id: membershipId,
       status: OrganizationMembershipStatus.ACTIVE,
@@ -203,6 +228,7 @@ describe('OrganizationMembersService', () => {
     await expect(
       service.addMember(organizationId, actorUserId, {
         email: 'member@example.com',
+        roleIds: [viewerRole.id],
       }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
@@ -223,10 +249,12 @@ describe('OrganizationMembersService', () => {
 
   it('creates a membership with initial roles and invalidates user access', async () => {
     roleFindMany.mockResolvedValue([viewerRole]);
-    membershipFindFirst.mockResolvedValue({
-      ...membership,
-      roles: [{ role: viewerRole }],
-    });
+    membershipFindFirst
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        ...membership,
+        roles: [{ role: viewerRole }],
+      });
 
     await expect(
       service.addMember(organizationId, actorUserId, {
@@ -251,6 +279,7 @@ describe('OrganizationMembersService', () => {
       },
       select: {
         id: true,
+        email: true,
         platformRoleAssignments: {
           where: {
             role: {
@@ -266,21 +295,8 @@ describe('OrganizationMembersService', () => {
         },
       },
     });
-    expect(organizationLimitFindUnique).toHaveBeenCalledWith({
-      where: { organizationId },
-      select: { maxMembers: true },
-    });
-    expect(membershipCount).toHaveBeenCalledWith({
-      where: {
-        organizationId,
-        status: {
-          in: [
-            OrganizationMembershipStatus.ACTIVE,
-            OrganizationMembershipStatus.SUSPENDED,
-          ],
-        },
-      },
-    });
+    expect(organizationLimitFindUnique).not.toHaveBeenCalled();
+    expect(membershipCount).not.toHaveBeenCalled();
     expect(membershipCreate).toHaveBeenCalledWith({
       data: {
         organizationId,
@@ -301,13 +317,19 @@ describe('OrganizationMembersService', () => {
     expect(invalidateUserAccess).toHaveBeenCalledWith(memberUserId);
   });
 
-  it('blocks adding a member when the organization member limit is reached', async () => {
-    organizationLimitFindUnique.mockResolvedValue({ maxMembers: 1 });
-    membershipCount.mockResolvedValue(1);
+  it('blocks adding a member who already has a role in another organization', async () => {
+    roleFindMany.mockResolvedValue([viewerRole]);
+    membershipFindFirst.mockResolvedValue({
+      id: 'existing-membership',
+      organization: {
+        name: 'Other Org',
+      },
+    });
 
     await expect(
       service.addMember(organizationId, actorUserId, {
         email: 'member@example.com',
+        roleIds: [viewerRole.id],
       }),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(membershipCreate).not.toHaveBeenCalled();
@@ -318,13 +340,17 @@ describe('OrganizationMembersService', () => {
       id: membershipId,
       status: OrganizationMembershipStatus.REMOVED,
     });
-    membershipFindFirst.mockResolvedValue({
-      ...membership,
-      roles: [],
-    });
+    roleFindMany.mockResolvedValue([viewerRole]);
+    membershipFindFirst
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        ...membership,
+        roles: [{ role: viewerRole }],
+      });
 
     await service.addMember(organizationId, actorUserId, {
       email: 'member@example.com',
+      roleIds: [viewerRole.id],
     });
 
     expect(membershipUpdate).toHaveBeenCalledWith({
@@ -336,6 +362,15 @@ describe('OrganizationMembersService', () => {
     });
     expect(membershipRoleDeleteMany).toHaveBeenCalledWith({
       where: { membershipId },
+    });
+    expect(membershipRoleCreateMany).toHaveBeenCalledWith({
+      data: [
+        {
+          membershipId,
+          roleId: viewerRole.id,
+          assignedByUserId: actorUserId,
+        },
+      ],
     });
   });
 
@@ -377,6 +412,7 @@ describe('OrganizationMembersService', () => {
     };
     membershipFindFirst
       .mockResolvedValueOnce(membership)
+      .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(updatedMembership);
     transactionMembershipFindFirst.mockResolvedValue({
       id: 'another-manager',
@@ -509,6 +545,7 @@ describe('OrganizationMembersService', () => {
         ...membership,
         roles: [{ role: viewerRole }],
       })
+      .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({
         ...membership,
         roles: [{ role: viewerRole }],

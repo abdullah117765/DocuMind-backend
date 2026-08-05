@@ -5,6 +5,7 @@ import {
   OrganizationStatus,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlService } from './access-control.service';
 import { CurrentUserAccessService } from './current-user-access.service';
 
@@ -29,11 +30,19 @@ describe('CurrentUserAccessService', () => {
   } as unknown as PrismaService;
   const resolvePlatformAccess = jest.fn();
   const resolveOrganizationAccess = jest.fn();
+  const isConfiguredSuperAdminUserId = jest.fn();
   const accessControlService = {
     resolvePlatformAccess,
     resolveOrganizationAccess,
   } as unknown as AccessControlService;
-  const service = new CurrentUserAccessService(prisma, accessControlService);
+  const envSuperAdminService = {
+    isConfiguredUserId: isConfiguredSuperAdminUserId,
+  } as unknown as EnvSuperAdminService;
+  const service = new CurrentUserAccessService(
+    prisma,
+    accessControlService,
+    envSuperAdminService,
+  );
   const platformAccess = {
     userId,
     roles: [],
@@ -52,6 +61,7 @@ describe('CurrentUserAccessService', () => {
     });
     resolvePlatformAccess.mockResolvedValue(platformAccess);
     resolveOrganizationAccess.mockResolvedValue(null);
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
   });
 
   it('returns empty organization access for a user with no memberships', async () => {

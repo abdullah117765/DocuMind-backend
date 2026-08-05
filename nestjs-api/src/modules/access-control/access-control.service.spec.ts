@@ -1,5 +1,6 @@
 import { AccessScope, OrganizationStatus } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlCacheService } from './access-control-cache.service';
 import { AccessControlService } from './access-control.service';
 import { OrganizationAccess, PlatformAccess } from './access-control.types';
@@ -15,6 +16,9 @@ describe('AccessControlService', () => {
   const invalidateUser = jest.fn();
   const setOrganizationAccess = jest.fn();
   const setPlatformAccess = jest.fn();
+  const isConfiguredSuperAdminUserId = jest.fn();
+  const getSuperAdminVirtualRole = jest.fn();
+  const listSuperAdminPermissionCodes = jest.fn();
   const prisma = {
     platformUserRole: {
       findMany: platformRoleFindMany,
@@ -35,7 +39,16 @@ describe('AccessControlService', () => {
     setOrganizationAccess,
     setPlatformAccess,
   } as unknown as AccessControlCacheService;
-  const service = new AccessControlService(prisma, cache);
+  const envSuperAdminService = {
+    isConfiguredUserId: isConfiguredSuperAdminUserId,
+    getVirtualRole: getSuperAdminVirtualRole,
+    listActivePermissionCodes: listSuperAdminPermissionCodes,
+  } as unknown as EnvSuperAdminService;
+  const service = new AccessControlService(
+    prisma,
+    cache,
+    envSuperAdminService,
+  );
   const stamp = {
     globalVersion: '0',
     userVersion: '0',
@@ -62,6 +75,9 @@ describe('AccessControlService', () => {
       status: OrganizationStatus.ACTIVE,
     });
     membershipFindFirst.mockResolvedValue(null);
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
+    getSuperAdminVirtualRole.mockReturnValue(null);
+    listSuperAdminPermissionCodes.mockResolvedValue([]);
   });
 
   it('returns cached platform access without querying PostgreSQL', async () => {

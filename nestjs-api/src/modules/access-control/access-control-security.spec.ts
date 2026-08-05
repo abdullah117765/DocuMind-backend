@@ -19,7 +19,6 @@ import {
 import { RoleManagementController } from './role-management.controller';
 import { UpdateMemberStatusDto } from './dto/update-member-status.dto';
 import { InviteAcceptanceController } from '../organizations/invite-acceptance.controller';
-import { OrganizationBillingController } from '../organizations/organization-billing.controller';
 import { OrganizationInvitesController } from '../organizations/organization-invites.controller';
 
 type ControllerClass = {
@@ -99,8 +98,6 @@ describe('Epic 2 security metadata', () => {
 
   it.each([
     [InviteAcceptanceController, 'acceptInvite'],
-    [OrganizationBillingController, 'updateSubscription'],
-    [OrganizationBillingController, 'updateLimits'],
   ])('requires CSRF protection on %p.%s', (controller, methodName) => {
     expect(getGuards(getHandler(controller, methodName))).toContain(CsrfGuard);
   });
@@ -122,46 +119,6 @@ describe('Epic 2 security metadata', () => {
   });
 
   it.each([
-    [
-      OrganizationBillingController,
-      'getSubscription',
-      {
-        scope: AccessScope.ORGANIZATION,
-        permissionCodes: ['billing.manage'],
-        match: PermissionMatch.ANY,
-        organizationIdParam: 'organizationId',
-      },
-    ],
-    [
-      OrganizationBillingController,
-      'getLimits',
-      {
-        scope: AccessScope.ORGANIZATION,
-        permissionCodes: ['billing.manage'],
-        match: PermissionMatch.ANY,
-        organizationIdParam: 'organizationId',
-      },
-    ],
-  ])(
-    'requires expected billing permissions on %p.%s',
-    (controller, methodName, requirement) => {
-      const handler = getHandler(controller, methodName);
-
-      expect(getGuards(handler)).toEqual(
-        expect.arrayContaining([JwtAuthGuard, PermissionsGuard]),
-      );
-      expect(
-        Reflect.getMetadata(
-          PERMISSION_REQUIREMENT_METADATA,
-          handler,
-        ) as PermissionRequirement,
-      ).toEqual(requirement);
-    },
-  );
-
-  it.each([
-    [OrganizationBillingController, 'updateSubscription'],
-    [OrganizationBillingController, 'updateLimits'],
     [OrganizationsController, 'updatePlatformOrganization'],
     [OrganizationsController, 'deleteOrganization'],
   ])('requires Super Admin role for platform mutation %p.%s', (controller, methodName) => {

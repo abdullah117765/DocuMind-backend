@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   ForbiddenException,
   NotFoundException,
   UnauthorizedException,
@@ -18,6 +17,7 @@ import {
 } from './auth.exceptions';
 import { AuthService } from './auth.service';
 import { EmailVerificationService } from './email-verification.service';
+import { EnvSuperAdminService } from './env-super-admin.service';
 import { PasswordResetService } from './password-reset.service';
 import { SESSION_REVOCATION_REASONS, SessionService } from './session.service';
 import { TokenService } from './token.service';
@@ -102,6 +102,11 @@ describe('AuthService', () => {
   const getPasswordResetOtpTtlSeconds = jest.fn();
   const releasePasswordResetRequestCooldown = jest.fn();
   const sendPasswordResetOtp = jest.fn();
+  const isConfiguredSuperAdminEmail = jest.fn();
+  const authenticateSuperAdmin = jest.fn();
+  const ensureSuperAdminUserRecord = jest.fn();
+  const isConfiguredSuperAdminUser = jest.fn();
+  const getSuperAdminSessionUserMetadata = jest.fn();
   const getOrThrow = jest.fn().mockReturnValue(authConfiguration);
   const usersService = {
     findByEmail,
@@ -148,6 +153,13 @@ describe('AuthService', () => {
     verify: verifyEmailToken,
     resend: resendVerificationEmail,
   } as unknown as EmailVerificationService;
+  const envSuperAdminService = {
+    isConfiguredEmail: isConfiguredSuperAdminEmail,
+    authenticate: authenticateSuperAdmin,
+    ensureUserRecord: ensureSuperAdminUserRecord,
+    isConfiguredUser: isConfiguredSuperAdminUser,
+    getSessionUserMetadata: getSuperAdminSessionUserMetadata,
+  } as unknown as EnvSuperAdminService;
   const service = new AuthService(
     usersService,
     redisService,
@@ -156,6 +168,7 @@ describe('AuthService', () => {
     tokenService,
     passwordResetService,
     emailVerificationService,
+    envSuperAdminService,
     configService,
   );
   const hashPassword = jest.mocked(hash);
@@ -211,87 +224,32 @@ describe('AuthService', () => {
     getPasswordResetOtpTtlSeconds.mockReturnValue(120);
     releasePasswordResetRequestCooldown.mockResolvedValue(undefined);
     sendPasswordResetOtp.mockResolvedValue(undefined);
+    isConfiguredSuperAdminEmail.mockReturnValue(false);
+    authenticateSuperAdmin.mockResolvedValue(null);
+    ensureSuperAdminUserRecord.mockResolvedValue(verifiedUser);
+    isConfiguredSuperAdminUser.mockReturnValue(false);
+    getSuperAdminSessionUserMetadata.mockReturnValue(null);
   });
 
   describe('register', () => {
-    it('creates an unverified user and sends a verification email', async () => {
-      await expect(
-        service.register({
-          email: user.email,
-          password: 'SecureP@ss1',
-        }),
-      ).resolves.toEqual({
-        message:
-          'Registration successful. Please check your email to verify your account.',
-      });
-
-      expect(findByEmail).toHaveBeenCalledWith(user.email);
-      expect(hashPassword).toHaveBeenCalledWith('SecureP@ss1', 12);
-      expect(createUser).toHaveBeenCalledWith({
-        email: user.email,
-        passwordHash: user.passwordHash,
-      });
-      expect(sendVerificationForUser).toHaveBeenCalledWith(user);
-    });
-
-    it('rejects an already-registered email before hashing', async () => {
-      findByEmail.mockResolvedValue(verifiedUser);
-
-      await expect(
-        service.register({
-          email: user.email,
-          password: 'SecureP@ss1',
-        }),
-      ).rejects.toThrow(ConflictException);
-
-      expect(hashPassword).not.toHaveBeenCalled();
-      expect(createUser).not.toHaveBeenCalled();
-      expect(sendVerificationForUser).not.toHaveBeenCalled();
-    });
-
-    it('keeps an unverified duplicate recoverable through resend', async () => {
-      findByEmail.mockResolvedValue(user);
-
+    it('rejects public registration because onboarding is invite-only', async () => {
       await expect(
         service.register({
           email: user.email,
           password: 'SecureP@ss1',
         }),
       ).rejects.toMatchObject({
+        status: 410,
         response: {
-          details: { reason: 'EMAIL_NOT_VERIFIED' },
+          message:
+            'Public sign-up is disabled. Ask an administrator for an invitation.',
         },
       });
 
+      expect(findByEmail).not.toHaveBeenCalled();
+      expect(hashPassword).not.toHaveBeenCalled();
+      expect(createUser).not.toHaveBeenCalled();
       expect(sendVerificationForUser).not.toHaveBeenCalled();
-    });
-
-    it('propagates verification delivery failures after account creation', async () => {
-      sendVerificationForUser.mockRejectedValue(
-        new Error('Verification delivery failed'),
-      );
-
-      await expect(
-        service.register({
-          email: user.email,
-          password: 'SecureP@ss1',
-        }),
-      ).rejects.toThrow('Verification delivery failed');
-    });
-
-    it('maps concurrent duplicate registration to a recoverable conflict', async () => {
-      findByEmail.mockResolvedValueOnce(null).mockResolvedValueOnce(user);
-      createUser.mockRejectedValue({ code: 'P2002' });
-
-      await expect(
-        service.register({
-          email: user.email,
-          password: 'SecureP@ss1',
-        }),
-      ).rejects.toMatchObject({
-        status: 409,
-        response: { details: { reason: 'EMAIL_NOT_VERIFIED' } },
-      });
     });
   });
 

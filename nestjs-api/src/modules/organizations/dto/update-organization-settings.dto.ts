@@ -16,6 +16,8 @@ function normalizeSlug(value: unknown): unknown {
   return typeof value === 'string' ? value.trim().toLowerCase() : value;
 }
 
+const ORGANIZATION_NAME_PATTERN = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
+
 export class UpdateOrganizationSettingsDto {
   @ApiPropertyOptional({
     description: 'Display name for the tenant organization',
@@ -29,9 +31,9 @@ export class UpdateOrganizationSettingsDto {
   @MaxLength(150, {
     message: 'Organization name must not exceed 150 characters',
   })
-  @Matches(/^[A-Za-z0-9][A-Za-z0-9 .&'_-]*$/, {
+  @Matches(ORGANIZATION_NAME_PATTERN, {
     message:
-      'Organization name may contain letters, numbers, spaces, dots, ampersands, apostrophes, underscores, and hyphens',
+      'Organization name can contain only letters, numbers, and single spaces',
   })
   name?: string;
 

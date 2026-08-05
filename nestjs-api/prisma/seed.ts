@@ -65,10 +65,11 @@ const permissions: readonly SeedPermission[] = [
   },
   {
     code: ORGANIZATION_PERMISSIONS.billingManage,
-    name: 'Billing',
-    description: 'View and manage organization billing.',
+    name: 'Billing (disabled)',
+    description: 'Disabled placeholder. Billing and payment flows are not enabled.',
     category: 'Administration',
     scope: AccessScope.ORGANIZATION,
+    isActive: false,
   },
   {
     code: ORGANIZATION_PERMISSIONS.membersManage,
@@ -93,10 +94,12 @@ const permissions: readonly SeedPermission[] = [
   },
   {
     code: ORGANIZATION_PERMISSIONS.settingsManage,
-    name: 'Organization Settings',
-    description: 'Update organization profile and tenant settings.',
+    name: 'Organization Settings (disabled)',
+    description:
+      'Disabled placeholder. Organization settings are hidden until real settings are defined.',
     category: 'Administration',
     scope: AccessScope.ORGANIZATION,
+    isActive: false,
   },
   {
     code: LEGACY_PERMISSIONS.usersManage,
@@ -160,10 +163,11 @@ const permissions: readonly SeedPermission[] = [
   },
   {
     code: PLATFORM_PERMISSIONS.subscriptionsManage,
-    name: 'Platform Subscriptions',
-    description: 'Manage platform subscription plans and tenant plan state.',
+    name: 'Platform Subscriptions (disabled)',
+    description: 'Disabled placeholder. Payment/subscription management is not enabled.',
     category: 'Platform',
     scope: AccessScope.PLATFORM,
+    isActive: false,
   },
   {
     code: PLATFORM_PERMISSIONS.aiConfigurationManage,
@@ -174,10 +178,12 @@ const permissions: readonly SeedPermission[] = [
   },
   {
     code: PLATFORM_PERMISSIONS.settingsManage,
-    name: 'System Settings',
-    description: 'Manage platform-wide system settings.',
+    name: 'System Settings (disabled)',
+    description:
+      'Disabled placeholder. Platform settings are hidden until real settings are defined.',
     category: 'Platform',
     scope: AccessScope.PLATFORM,
+    isActive: false,
   },
   {
     code: PLATFORM_PERMISSIONS.analyticsView,
@@ -198,14 +204,14 @@ const permissions: readonly SeedPermission[] = [
 const roleDefinitions = [
   {
     systemKey: 'super_admin',
-    name: 'Super Admin',
+    name: 'Super Admin (env only)',
     normalizedName: 'super admin',
-    description: 'Full access across the platform and every organization.',
+    description:
+      'Legacy placeholder only. The real Super Admin is configured from environment variables and is not assigned as a database role.',
     scope: AccessScope.PLATFORM,
-    autoGrantNewPermissions: true,
-    permissionCodes: permissions
-      .filter(({ isActive }) => isActive !== false)
-      .map(({ code }) => code),
+    isActive: false,
+    autoGrantNewPermissions: false,
+    permissionCodes: [],
   },
   {
     systemKey: 'organization_admin',
@@ -316,7 +322,7 @@ async function seed(): Promise<void> {
             description: roleDefinition.description,
             scope: roleDefinition.scope,
             isSystem: true,
-            isActive: true,
+            isActive: roleDefinition.isActive ?? true,
             autoGrantNewPermissions: roleDefinition.autoGrantNewPermissions,
           },
           update: {
@@ -325,7 +331,7 @@ async function seed(): Promise<void> {
             description: roleDefinition.description,
             scope: roleDefinition.scope,
             isSystem: true,
-            isActive: true,
+            isActive: roleDefinition.isActive ?? true,
             autoGrantNewPermissions: roleDefinition.autoGrantNewPermissions,
           },
           select: { id: true },

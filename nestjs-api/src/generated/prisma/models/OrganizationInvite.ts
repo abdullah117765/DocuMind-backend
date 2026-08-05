@@ -38,6 +38,9 @@ export type OrganizationInviteMinAggregateOutputType = {
   lastSentAt: Date | null
   lastSendFailureAt: Date | null
   lastSendFailureReason: string | null
+  temporaryPasswordHash: string | null
+  temporaryPasswordExpiresAt: Date | null
+  temporaryPasswordUsedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -56,6 +59,9 @@ export type OrganizationInviteMaxAggregateOutputType = {
   lastSentAt: Date | null
   lastSendFailureAt: Date | null
   lastSendFailureReason: string | null
+  temporaryPasswordHash: string | null
+  temporaryPasswordExpiresAt: Date | null
+  temporaryPasswordUsedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -74,6 +80,9 @@ export type OrganizationInviteCountAggregateOutputType = {
   lastSentAt: number
   lastSendFailureAt: number
   lastSendFailureReason: number
+  temporaryPasswordHash: number
+  temporaryPasswordExpiresAt: number
+  temporaryPasswordUsedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -94,6 +103,9 @@ export type OrganizationInviteMinAggregateInputType = {
   lastSentAt?: true
   lastSendFailureAt?: true
   lastSendFailureReason?: true
+  temporaryPasswordHash?: true
+  temporaryPasswordExpiresAt?: true
+  temporaryPasswordUsedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +124,9 @@ export type OrganizationInviteMaxAggregateInputType = {
   lastSentAt?: true
   lastSendFailureAt?: true
   lastSendFailureReason?: true
+  temporaryPasswordHash?: true
+  temporaryPasswordExpiresAt?: true
+  temporaryPasswordUsedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -130,6 +145,9 @@ export type OrganizationInviteCountAggregateInputType = {
   lastSentAt?: true
   lastSendFailureAt?: true
   lastSendFailureReason?: true
+  temporaryPasswordHash?: true
+  temporaryPasswordExpiresAt?: true
+  temporaryPasswordUsedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -221,6 +239,9 @@ export type OrganizationInviteGroupByOutputType = {
   lastSentAt: Date | null
   lastSendFailureAt: Date | null
   lastSendFailureReason: string | null
+  temporaryPasswordHash: string | null
+  temporaryPasswordExpiresAt: Date | null
+  temporaryPasswordUsedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: OrganizationInviteCountAggregateOutputType | null
@@ -260,6 +281,9 @@ export type OrganizationInviteWhereInput = {
   lastSentAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureReason?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
+  temporaryPasswordHash?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
+  temporaryPasswordExpiresAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OrganizationInvite"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"OrganizationInvite"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -282,6 +306,9 @@ export type OrganizationInviteOrderByWithRelationInput = {
   lastSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  temporaryPasswordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  temporaryPasswordExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  temporaryPasswordUsedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -307,6 +334,9 @@ export type OrganizationInviteWhereUniqueInput = Prisma.AtLeast<{
   lastSentAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureReason?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
+  temporaryPasswordHash?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
+  temporaryPasswordExpiresAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OrganizationInvite"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"OrganizationInvite"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -329,6 +359,9 @@ export type OrganizationInviteOrderByWithAggregationInput = {
   lastSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  temporaryPasswordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  temporaryPasswordExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  temporaryPasswordUsedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.OrganizationInviteCountOrderByAggregateInput
@@ -353,6 +386,9 @@ export type OrganizationInviteScalarWhereWithAggregatesInput = {
   lastSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureReason?: Prisma.StringNullableWithAggregatesFilter<"OrganizationInvite"> | string | null
+  temporaryPasswordHash?: Prisma.StringNullableWithAggregatesFilter<"OrganizationInvite"> | string | null
+  temporaryPasswordExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OrganizationInvite"> | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OrganizationInvite"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"OrganizationInvite"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"OrganizationInvite"> | Date | string
 }
@@ -368,6 +404,9 @@ export type OrganizationInviteCreateInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvitesInput
@@ -390,6 +429,9 @@ export type OrganizationInviteUncheckedCreateInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.OrganizationInviteRoleUncheckedCreateNestedManyWithoutInviteInput
@@ -406,6 +448,9 @@ export type OrganizationInviteUpdateInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvitesNestedInput
@@ -428,6 +473,9 @@ export type OrganizationInviteUncheckedUpdateInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.OrganizationInviteRoleUncheckedUpdateManyWithoutInviteNestedInput
@@ -447,6 +495,9 @@ export type OrganizationInviteCreateManyInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -462,6 +513,9 @@ export type OrganizationInviteUpdateManyMutationInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -480,6 +534,9 @@ export type OrganizationInviteUncheckedUpdateManyInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -508,6 +565,9 @@ export type OrganizationInviteCountOrderByAggregateInput = {
   lastSentAt?: Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrder
+  temporaryPasswordHash?: Prisma.SortOrder
+  temporaryPasswordExpiresAt?: Prisma.SortOrder
+  temporaryPasswordUsedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -526,6 +586,9 @@ export type OrganizationInviteMaxOrderByAggregateInput = {
   lastSentAt?: Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrder
+  temporaryPasswordHash?: Prisma.SortOrder
+  temporaryPasswordExpiresAt?: Prisma.SortOrder
+  temporaryPasswordUsedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -544,6 +607,9 @@ export type OrganizationInviteMinOrderByAggregateInput = {
   lastSentAt?: Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrder
+  temporaryPasswordHash?: Prisma.SortOrder
+  temporaryPasswordExpiresAt?: Prisma.SortOrder
+  temporaryPasswordUsedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -708,6 +774,9 @@ export type OrganizationInviteCreateWithoutInvitedByInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvitesInput
@@ -728,6 +797,9 @@ export type OrganizationInviteUncheckedCreateWithoutInvitedByInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.OrganizationInviteRoleUncheckedCreateNestedManyWithoutInviteInput
@@ -754,6 +826,9 @@ export type OrganizationInviteCreateWithoutAcceptedByInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvitesInput
@@ -774,6 +849,9 @@ export type OrganizationInviteUncheckedCreateWithoutAcceptedByInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.OrganizationInviteRoleUncheckedCreateNestedManyWithoutInviteInput
@@ -822,6 +900,9 @@ export type OrganizationInviteScalarWhereInput = {
   lastSentAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureReason?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
+  temporaryPasswordHash?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
+  temporaryPasswordExpiresAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OrganizationInvite"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"OrganizationInvite"> | Date | string
 }
@@ -853,6 +934,9 @@ export type OrganizationInviteCreateWithoutOrganizationInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   invitedBy?: Prisma.UserCreateNestedOneWithoutOrganizationInvitesSentInput
@@ -873,6 +957,9 @@ export type OrganizationInviteUncheckedCreateWithoutOrganizationInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.OrganizationInviteRoleUncheckedCreateNestedManyWithoutInviteInput
@@ -915,6 +1002,9 @@ export type OrganizationInviteCreateWithoutRolesInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutInvitesInput
@@ -936,6 +1026,9 @@ export type OrganizationInviteUncheckedCreateWithoutRolesInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -967,6 +1060,9 @@ export type OrganizationInviteUpdateWithoutRolesInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvitesNestedInput
@@ -988,6 +1084,9 @@ export type OrganizationInviteUncheckedUpdateWithoutRolesInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1005,6 +1104,9 @@ export type OrganizationInviteCreateManyInvitedByInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1022,6 +1124,9 @@ export type OrganizationInviteCreateManyAcceptedByInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1037,6 +1142,9 @@ export type OrganizationInviteUpdateWithoutInvitedByInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvitesNestedInput
@@ -1057,6 +1165,9 @@ export type OrganizationInviteUncheckedUpdateWithoutInvitedByInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.OrganizationInviteRoleUncheckedUpdateManyWithoutInviteNestedInput
@@ -1075,6 +1186,9 @@ export type OrganizationInviteUncheckedUpdateManyWithoutInvitedByInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1090,6 +1204,9 @@ export type OrganizationInviteUpdateWithoutAcceptedByInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutInvitesNestedInput
@@ -1110,6 +1227,9 @@ export type OrganizationInviteUncheckedUpdateWithoutAcceptedByInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.OrganizationInviteRoleUncheckedUpdateManyWithoutInviteNestedInput
@@ -1128,6 +1248,9 @@ export type OrganizationInviteUncheckedUpdateManyWithoutAcceptedByInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1145,6 +1268,9 @@ export type OrganizationInviteCreateManyOrganizationInput = {
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
+  temporaryPasswordHash?: string | null
+  temporaryPasswordExpiresAt?: Date | string | null
+  temporaryPasswordUsedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1160,6 +1286,9 @@ export type OrganizationInviteUpdateWithoutOrganizationInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invitedBy?: Prisma.UserUpdateOneWithoutOrganizationInvitesSentNestedInput
@@ -1180,6 +1309,9 @@ export type OrganizationInviteUncheckedUpdateWithoutOrganizationInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.OrganizationInviteRoleUncheckedUpdateManyWithoutInviteNestedInput
@@ -1198,6 +1330,9 @@ export type OrganizationInviteUncheckedUpdateManyWithoutOrganizationInput = {
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  temporaryPasswordExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  temporaryPasswordUsedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1247,6 +1382,9 @@ export type OrganizationInviteSelect<ExtArgs extends runtime.Types.Extensions.In
   lastSentAt?: boolean
   lastSendFailureAt?: boolean
   lastSendFailureReason?: boolean
+  temporaryPasswordHash?: boolean
+  temporaryPasswordExpiresAt?: boolean
+  temporaryPasswordUsedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1270,6 +1408,9 @@ export type OrganizationInviteSelectCreateManyAndReturn<ExtArgs extends runtime.
   lastSentAt?: boolean
   lastSendFailureAt?: boolean
   lastSendFailureReason?: boolean
+  temporaryPasswordHash?: boolean
+  temporaryPasswordExpiresAt?: boolean
+  temporaryPasswordUsedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1291,6 +1432,9 @@ export type OrganizationInviteSelectUpdateManyAndReturn<ExtArgs extends runtime.
   lastSentAt?: boolean
   lastSendFailureAt?: boolean
   lastSendFailureReason?: boolean
+  temporaryPasswordHash?: boolean
+  temporaryPasswordExpiresAt?: boolean
+  temporaryPasswordUsedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1312,11 +1456,14 @@ export type OrganizationInviteSelectScalar = {
   lastSentAt?: boolean
   lastSendFailureAt?: boolean
   lastSendFailureReason?: boolean
+  temporaryPasswordHash?: boolean
+  temporaryPasswordExpiresAt?: boolean
+  temporaryPasswordUsedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type OrganizationInviteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "email" | "tokenHash" | "status" | "invitedByUserId" | "acceptedByUserId" | "expiresAt" | "acceptedAt" | "revokedAt" | "lastSentAt" | "lastSendFailureAt" | "lastSendFailureReason" | "createdAt" | "updatedAt", ExtArgs["result"]["organizationInvite"]>
+export type OrganizationInviteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "email" | "tokenHash" | "status" | "invitedByUserId" | "acceptedByUserId" | "expiresAt" | "acceptedAt" | "revokedAt" | "lastSentAt" | "lastSendFailureAt" | "lastSendFailureReason" | "temporaryPasswordHash" | "temporaryPasswordExpiresAt" | "temporaryPasswordUsedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["organizationInvite"]>
 export type OrganizationInviteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   invitedBy?: boolean | Prisma.OrganizationInvite$invitedByArgs<ExtArgs>
@@ -1357,6 +1504,9 @@ export type $OrganizationInvitePayload<ExtArgs extends runtime.Types.Extensions.
     lastSentAt: Date | null
     lastSendFailureAt: Date | null
     lastSendFailureReason: string | null
+    temporaryPasswordHash: string | null
+    temporaryPasswordExpiresAt: Date | null
+    temporaryPasswordUsedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["organizationInvite"]>
@@ -1799,6 +1949,9 @@ export interface OrganizationInviteFieldRefs {
   readonly lastSentAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
   readonly lastSendFailureAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
   readonly lastSendFailureReason: Prisma.FieldRef<"OrganizationInvite", 'String'>
+  readonly temporaryPasswordHash: Prisma.FieldRef<"OrganizationInvite", 'String'>
+  readonly temporaryPasswordExpiresAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
+  readonly temporaryPasswordUsedAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
 }

@@ -11,20 +11,15 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
-import {
-  ORGANIZATION_ROLE_KEYS,
-  PLATFORM_ROLE_KEYS,
-} from '../access-control/rbac.constants';
+import { ORGANIZATION_ROLE_KEYS } from '../access-control/rbac.constants';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationSettingsDto } from './dto/update-organization-settings.dto';
 import { UpdatePlatformOrganizationDto } from './dto/update-platform-organization.dto';
-import {
-  DEFAULT_ORGANIZATION_LIMITS,
-  DEFAULT_ORGANIZATION_SUBSCRIPTION,
-} from './organization-defaults';
 
 const MAX_SLUG_ATTEMPTS = 50;
+const ORGANIZATION_NAME_PATTERN = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
 
 const organizationSelect = {
   id: true,
@@ -68,6 +63,14 @@ function normalizeOrganizationName(name: string): string {
   return name.trim().replace(/\s+/g, ' ');
 }
 
+function assertCleanOrganizationName(name: string): void {
+  if (!ORGANIZATION_NAME_PATTERN.test(name)) {
+    throw new BadRequestException(
+      'Organization name can contain only letters, numbers, and single spaces',
+    );
+  }
+}
+
 function buildSlugSeed(value: string): string {
   const slug = value
     .trim()
@@ -93,6 +96,7 @@ export class OrganizationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async listOrganizations(): Promise<PlatformOrganizationView[]> {
@@ -124,6 +128,7 @@ export class OrganizationsService {
     dto: CreateOrganizationDto,
   ): Promise<PlatformOrganizationView> {
     const name = normalizeOrganizationName(dto.name);
+    assertCleanOrganizationName(name);
     const slugSeed = buildSlugSeed(dto.slug ?? name);
     const slug = dto.slug
       ? slugSeed
@@ -133,22 +138,6 @@ export class OrganizationsService {
     const firstAdmin = firstAdminEmail
       ? await this.resolveFirstOrganizationAdmin(firstAdminEmail)
       : null;
-    const subscriptionData = {
-      organizationId: '',
-      plan: dto.subscription?.plan ?? DEFAULT_ORGANIZATION_SUBSCRIPTION.plan,
-      status:
-        dto.subscription?.status ?? DEFAULT_ORGANIZATION_SUBSCRIPTION.status,
-      currentPeriodEndsAt:
-        dto.subscription?.currentPeriodEndsAt === undefined
-          ? null
-          : dto.subscription.currentPeriodEndsAt
-            ? new Date(dto.subscription.currentPeriodEndsAt)
-            : null,
-    };
-    const limitsData = {
-      ...DEFAULT_ORGANIZATION_LIMITS,
-      ...dto.limits,
-    };
 
     try {
       const organization = await this.prisma.$transaction(
@@ -161,19 +150,6 @@ export class OrganizationsService {
               allowJoinRequests: dto.allowJoinRequests ?? true,
             },
             select: { id: true },
-          });
-
-          await transaction.organizationSubscription.create({
-            data: {
-              ...subscriptionData,
-              organizationId: createdOrganization.id,
-            },
-          });
-          await transaction.organizationLimit.create({
-            data: {
-              organizationId: createdOrganization.id,
-              ...limitsData,
-            },
           });
 
           if (firstAdmin) {
@@ -256,7 +232,13 @@ export class OrganizationsService {
     dto: UpdateOrganizationSettingsDto & { status?: OrganizationStatus },
   ): Promise<PlatformOrganizationView> {
     const data: Prisma.OrganizationUpdateInput = {
-      ...(dto.name ? { name: normalizeOrganizationName(dto.name) } : {}),
+      ...(dto.name
+        ? (() => {
+            const name = normalizeOrganizationName(dto.name);
+            assertCleanOrganizationName(name);
+            return { name };
+          })()
+        : {}),
       ...(dto.slug ? { slug: buildSlugSeed(dto.slug) } : {}),
       ...(dto.allowJoinRequests !== undefined
         ? { allowJoinRequests: dto.allowJoinRequests }
@@ -297,6 +279,16 @@ export class OrganizationsService {
     userId: string;
     roleId: string;
   }> {
+    if (this.envSuperAdminService.isConfiguredEmail(email)) {
+      throw new ConflictException({
+        message:
+          'Super Admin accounts operate from the platform level and cannot become organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
+        },
+      });
+    }
+
     const [user, role] = await Promise.all([
       this.prisma.user.findUnique({
         where: { email },
@@ -308,13 +300,31 @@ export class OrganizationsService {
             where: {
               role: {
                 is: {
-                  systemKey: PLATFORM_ROLE_KEYS.superAdmin,
                   scope: AccessScope.PLATFORM,
                   isActive: true,
                 },
               },
             },
             select: { roleId: true },
+            take: 1,
+          },
+          organizationMemberships: {
+            where: {
+              status: {
+                in: [
+                  OrganizationMembershipStatus.ACTIVE,
+                  OrganizationMembershipStatus.SUSPENDED,
+                ],
+              },
+            },
+            select: {
+              id: true,
+              organization: {
+                select: {
+                  name: true,
+                },
+              },
+            },
             take: 1,
           },
         },
@@ -339,11 +349,17 @@ export class OrganizationsService {
     if (user.platformRoleAssignments.length > 0) {
       throw new ConflictException({
         message:
-          'Super Admin accounts operate from the platform level and cannot become organization members.',
+          'Platform accounts operate from the platform level and cannot become organization members.',
         details: {
           reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
         },
       });
+    }
+
+    if (user.organizationMemberships.length > 0) {
+      throw new ConflictException(
+        `First Organization Admin already has a role in ${user.organizationMemberships[0].organization.name}. A user can have only one role globally.`,
+      );
     }
 
     if (!role) {
