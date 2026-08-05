@@ -1807,6 +1807,7 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const UserScalarFieldEnum = {
   id: 'id',
+  name: 'name',
   email: 'email',
   passwordHash: 'passwordHash',
   isVerified: 'isVerified',
@@ -1969,6 +1970,7 @@ export type PlatformUserRoleScalarFieldEnum = (typeof PlatformUserRoleScalarFiel
 export const OrganizationInviteScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
+  invitedName: 'invitedName',
   email: 'email',
   tokenHash: 'tokenHash',
   status: 'status',

@@ -1,12 +1,10 @@
 import { ConflictException } from '@nestjs/common';
 import {
-  AccessScope,
   OrganizationMembershipStatus,
   OrganizationStatus,
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
-import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganizationsService } from './organizations.service';
 
@@ -33,20 +31,10 @@ describe('OrganizationsService', () => {
   const organizationUpdate = jest.fn();
   const organizationDelete = jest.fn();
   const organizationFindUniqueOrThrow = jest.fn();
-  const organizationMembershipCreate = jest.fn();
-  const membershipRoleCreate = jest.fn();
-  const userFindUnique = jest.fn();
-  const roleFindFirst = jest.fn();
   const transaction = {
     organization: {
       create: organizationCreate,
       findUniqueOrThrow: organizationFindUniqueOrThrow,
-    },
-    organizationMembership: {
-      create: organizationMembershipCreate,
-    },
-    membershipRole: {
-      create: membershipRoleCreate,
     },
   };
   const runTransaction = jest.fn(
@@ -60,29 +48,13 @@ describe('OrganizationsService', () => {
       update: organizationUpdate,
       delete: organizationDelete,
     },
-    user: {
-      findUnique: userFindUnique,
-    },
-    role: {
-      findFirst: roleFindFirst,
-    },
     $transaction: runTransaction,
   } as unknown as PrismaService;
   const invalidateOrganizationAccess = jest.fn();
-  const invalidateUserAccess = jest.fn();
-  const isConfiguredSuperAdminEmail = jest.fn();
   const accessControlService = {
     invalidateOrganizationAccess,
-    invalidateUserAccess,
   } as unknown as AccessControlService;
-  const envSuperAdminService = {
-    isConfiguredEmail: isConfiguredSuperAdminEmail,
-  } as unknown as EnvSuperAdminService;
-  const service = new OrganizationsService(
-    prisma,
-    accessControlService,
-    envSuperAdminService,
-  );
+  const service = new OrganizationsService(prisma, accessControlService);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -92,13 +64,7 @@ describe('OrganizationsService', () => {
     organizationUpdate.mockResolvedValue(organizationRecord);
     organizationDelete.mockResolvedValue(organizationRecord);
     organizationFindUniqueOrThrow.mockResolvedValue(organizationRecord);
-    organizationMembershipCreate.mockResolvedValue({ id: 'membership-1' });
-    membershipRoleCreate.mockResolvedValue({});
-    userFindUnique.mockResolvedValue(null);
-    roleFindFirst.mockResolvedValue(null);
     invalidateOrganizationAccess.mockResolvedValue(undefined);
-    invalidateUserAccess.mockResolvedValue(undefined);
-    isConfiguredSuperAdminEmail.mockReturnValue(false);
   });
 
   it('lists platform organization views', async () => {
@@ -186,76 +152,6 @@ describe('OrganizationsService', () => {
       },
       select: { id: true },
     });
-  });
-
-  it('can assign the first Organization Admin while keeping Super Admin platform-only', async () => {
-    userFindUnique.mockResolvedValue({
-      id: 'first-admin-user',
-      isActive: true,
-      isVerified: true,
-      platformRoleAssignments: [],
-      organizationMemberships: [],
-    });
-    roleFindFirst.mockResolvedValue({
-      id: 'organization-admin-role',
-    });
-    organizationFindUniqueOrThrow.mockResolvedValue({
-      ...organizationRecord,
-      _count: { memberships: 1 },
-    });
-
-    await expect(
-      service.createOrganization(actorUserId, {
-        name: 'Acme Finance',
-        firstAdminEmail: 'admin@example.com',
-        allowJoinRequests: false,
-      }),
-    ).resolves.toMatchObject({
-      memberCount: 1,
-    });
-
-    expect(userFindUnique).toHaveBeenCalledWith({
-      where: { email: 'admin@example.com' },
-      select: expect.objectContaining({
-        id: true,
-        isActive: true,
-        isVerified: true,
-      }),
-    });
-    expect(roleFindFirst).toHaveBeenCalledWith({
-      where: {
-        systemKey: 'organization_admin',
-        scope: AccessScope.ORGANIZATION,
-        organizationId: null,
-        isActive: true,
-      },
-      select: { id: true },
-    });
-    expect(organizationCreate).toHaveBeenCalledWith({
-      data: {
-        name: 'Acme Finance',
-        slug: 'acme-finance',
-        createdByUserId: actorUserId,
-        allowJoinRequests: false,
-      },
-      select: { id: true },
-    });
-    expect(organizationMembershipCreate).toHaveBeenCalledWith({
-      data: {
-        organizationId,
-        userId: 'first-admin-user',
-        status: OrganizationMembershipStatus.ACTIVE,
-      },
-      select: { id: true },
-    });
-    expect(membershipRoleCreate).toHaveBeenCalledWith({
-      data: {
-        membershipId: 'membership-1',
-        roleId: 'organization-admin-role',
-        assignedByUserId: actorUserId,
-      },
-    });
-    expect(invalidateUserAccess).toHaveBeenCalledWith('first-admin-user');
   });
 
   it('rejects an explicit slug that races with another organization', async () => {

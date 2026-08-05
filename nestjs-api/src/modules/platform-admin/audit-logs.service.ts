@@ -1,5 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
+import { AccessControlService } from '../access-control/access-control.service';
+import { ORGANIZATION_PERMISSIONS } from '../access-control/rbac.constants';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
+import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListAuditLogsQueryDto } from './dto/list-audit-logs-query.dto';
 
@@ -19,6 +23,7 @@ const auditLogSelect = {
   actor: {
     select: {
       id: true,
+      name: true,
       email: true,
     },
   },
@@ -51,6 +56,7 @@ export interface AuditLogView {
   actor: {
     id: string;
     email: string;
+    name: string;
   } | null;
   organization: {
     id: string;
@@ -71,14 +77,27 @@ export interface AuditLogListResult {
 
 @Injectable()
 export class AuditLogsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
+  ) {}
 
   async listAuditLogs(
     query: ListAuditLogsQueryDto,
+    principal: AuthenticatedPrincipal,
   ): Promise<AuditLogListResult> {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 50;
-    const where = this.buildWhere(query);
+    const forcedOrganizationId = await this.resolveOrganizationScope(
+      principal,
+      query.organizationId,
+    );
+    const where = this.buildWhere(
+      query,
+      forcedOrganizationId,
+      forcedOrganizationId ? this.envSuperAdminService.getConfiguredEmail() : null,
+    );
     const [total, logs] = await Promise.all([
       this.prisma.auditLog.count({ where }),
       this.prisma.auditLog.findMany({
@@ -101,7 +120,41 @@ export class AuditLogsService {
     };
   }
 
-  private buildWhere(query: ListAuditLogsQueryDto): Prisma.AuditLogWhereInput {
+  private async resolveOrganizationScope(
+    principal: AuthenticatedPrincipal,
+    requestedOrganizationId?: string,
+  ): Promise<string | null> {
+    if (await this.envSuperAdminService.isConfiguredUserId(principal.userId)) {
+      return null;
+    }
+
+    if (!requestedOrganizationId) {
+      throw new ForbiddenException(
+        'Select an organization to view its audit logs.',
+      );
+    }
+
+    const access = await this.accessControlService.resolveOrganizationAccess(
+      principal.userId,
+      requestedOrganizationId,
+    );
+
+    if (
+      !access?.permissions.includes(ORGANIZATION_PERMISSIONS.membersManage)
+    ) {
+      throw new ForbiddenException(
+        'Only organization administrators can view organization audit logs.',
+      );
+    }
+
+    return requestedOrganizationId;
+  }
+
+  private buildWhere(
+    query: ListAuditLogsQueryDto,
+    forcedOrganizationId: string | null,
+    hiddenActorEmail: string | null,
+  ): Prisma.AuditLogWhereInput {
     const search = query.search?.trim();
     const createdAt: Prisma.DateTimeFilter = {
       ...(query.from ? { gte: new Date(query.from) } : {}),
@@ -111,7 +164,32 @@ export class AuditLogsService {
     return {
       ...(query.action ? { action: { contains: query.action } } : {}),
       ...(query.actorUserId ? { actorUserId: query.actorUserId } : {}),
-      ...(query.organizationId ? { organizationId: query.organizationId } : {}),
+      ...(forcedOrganizationId
+        ? { organizationId: forcedOrganizationId }
+        : query.organizationId
+          ? { organizationId: query.organizationId }
+          : {}),
+      ...(hiddenActorEmail
+        ? {
+            NOT: {
+              OR: [
+                {
+                  actor: {
+                    is: {
+                      email: hiddenActorEmail,
+                    },
+                  },
+                },
+                {
+                  metadata: {
+                    path: ['actor', 'email'],
+                    equals: hiddenActorEmail,
+                  },
+                },
+              ],
+            },
+          }
+        : {}),
       ...(Object.keys(createdAt).length > 0 ? { createdAt } : {}),
       ...(search
         ? {
@@ -164,8 +242,53 @@ export class AuditLogsService {
       userAgent: log.userAgent,
       metadata: log.metadata,
       createdAt: log.createdAt,
-      actor: log.actor,
+      actor: log.actor
+        ? {
+            ...log.actor,
+            name: log.actor.name ?? this.getActorDisplayName(log.actor.email),
+          }
+        : this.getMetadataActor(log.metadata),
       organization: log.organization,
+    };
+  }
+
+  private getActorDisplayName(email: string): string {
+    if (this.envSuperAdminService.isConfiguredEmail(email)) {
+      return this.envSuperAdminService.getDisplayName() ?? 'Super Admin';
+    }
+
+    return email.split('@')[0] || email;
+  }
+
+  private getMetadataActor(metadata: Prisma.JsonValue | null): {
+    id: string;
+    email: string;
+    name: string;
+  } | null {
+    if (
+      typeof metadata !== 'object' ||
+      metadata === null ||
+      Array.isArray(metadata) ||
+      typeof metadata.actor !== 'object' ||
+      metadata.actor === null ||
+      Array.isArray(metadata.actor)
+    ) {
+      return null;
+    }
+
+    const actor = metadata.actor as Record<string, unknown>;
+
+    if (typeof actor.userId !== 'string' || typeof actor.email !== 'string') {
+      return null;
+    }
+
+    return {
+      id: actor.userId,
+      email: actor.email,
+      name:
+        typeof actor.name === 'string' && actor.name.trim()
+          ? actor.name.trim()
+          : this.getActorDisplayName(actor.email),
     };
   }
 }

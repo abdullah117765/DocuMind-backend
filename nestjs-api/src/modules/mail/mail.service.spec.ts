@@ -89,16 +89,41 @@ describe('MailService', () => {
         to: 'member@example.com',
         subject: "You're invited to Acme Finance",
         template: 'organization-invite',
-        context: {
+        context: expect.objectContaining({
           expiresInDays: 7,
           hasTemporaryPassword: false,
           invitedEmail: 'member@example.com',
+          invitedName: null,
           inviteUrl: 'http://localhost:5173/accept-invite#token=invite-token',
           organizationName: 'Acme Finance',
           productName: 'WhimsyWorld',
+          roleSummary: null,
           temporaryPassword: undefined,
           temporaryPasswordExpiresInHours: undefined,
-        },
+        }),
+      }),
+    );
+  });
+
+  it('includes invited name and assigned role summary in organization invites', async () => {
+    await service.sendOrganizationInvite(
+      'member@example.com',
+      'Acme Finance',
+      'invite-token',
+      7,
+      {
+        invitedName: 'Member User',
+        roleNames: ['Manager'],
+      },
+    );
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          invitedName: 'Member User',
+          roleSummary: 'Manager',
+        }),
+        text: expect.stringContaining('Hello Member User,'),
       }),
     );
   });

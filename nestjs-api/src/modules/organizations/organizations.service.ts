@@ -5,14 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
-  AccessScope,
   OrganizationMembershipStatus,
   OrganizationStatus,
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
-import { ORGANIZATION_ROLE_KEYS } from '../access-control/rbac.constants';
-import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationSettingsDto } from './dto/update-organization-settings.dto';
@@ -96,7 +93,6 @@ export class OrganizationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessControlService: AccessControlService,
-    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async listOrganizations(): Promise<PlatformOrganizationView[]> {
@@ -134,11 +130,6 @@ export class OrganizationsService {
       ? slugSeed
       : await this.resolveAvailableGeneratedSlug(slugSeed);
 
-    const firstAdminEmail = dto.firstAdminEmail?.trim().toLowerCase();
-    const firstAdmin = firstAdminEmail
-      ? await this.resolveFirstOrganizationAdmin(firstAdminEmail)
-      : null;
-
     try {
       const organization = await this.prisma.$transaction(
         async (transaction) => {
@@ -152,25 +143,6 @@ export class OrganizationsService {
             select: { id: true },
           });
 
-          if (firstAdmin) {
-            const membership = await transaction.organizationMembership.create({
-              data: {
-                organizationId: createdOrganization.id,
-                userId: firstAdmin.userId,
-                status: OrganizationMembershipStatus.ACTIVE,
-              },
-              select: { id: true },
-            });
-
-            await transaction.membershipRole.create({
-              data: {
-                membershipId: membership.id,
-                roleId: firstAdmin.roleId,
-                assignedByUserId: actorUserId,
-              },
-            });
-          }
-
           return transaction.organization.findUniqueOrThrow({
             where: { id: createdOrganization.id },
             select: organizationSelect,
@@ -180,9 +152,6 @@ export class OrganizationsService {
 
       await Promise.all([
         this.accessControlService.invalidateOrganizationAccess(organization.id),
-        firstAdmin
-          ? this.accessControlService.invalidateUserAccess(firstAdmin.userId)
-          : Promise.resolve(),
       ]);
 
       return this.toView(organization);
@@ -273,103 +242,6 @@ export class OrganizationsService {
 
       throw error;
     }
-  }
-
-  private async resolveFirstOrganizationAdmin(email: string): Promise<{
-    userId: string;
-    roleId: string;
-  }> {
-    if (this.envSuperAdminService.isConfiguredEmail(email)) {
-      throw new ConflictException({
-        message:
-          'Super Admin accounts operate from the platform level and cannot become organization members.',
-        details: {
-          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
-        },
-      });
-    }
-
-    const [user, role] = await Promise.all([
-      this.prisma.user.findUnique({
-        where: { email },
-        select: {
-          id: true,
-          isActive: true,
-          isVerified: true,
-          platformRoleAssignments: {
-            where: {
-              role: {
-                is: {
-                  scope: AccessScope.PLATFORM,
-                  isActive: true,
-                },
-              },
-            },
-            select: { roleId: true },
-            take: 1,
-          },
-          organizationMemberships: {
-            where: {
-              status: {
-                in: [
-                  OrganizationMembershipStatus.ACTIVE,
-                  OrganizationMembershipStatus.SUSPENDED,
-                ],
-              },
-            },
-            select: {
-              id: true,
-              organization: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-            take: 1,
-          },
-        },
-      }),
-      this.prisma.role.findFirst({
-        where: {
-          systemKey: ORGANIZATION_ROLE_KEYS.organizationAdmin,
-          scope: AccessScope.ORGANIZATION,
-          organizationId: null,
-          isActive: true,
-        },
-        select: { id: true },
-      }),
-    ]);
-
-    if (!user || !user.isActive || !user.isVerified) {
-      throw new NotFoundException(
-        'First Organization Admin must be an active verified user',
-      );
-    }
-
-    if (user.platformRoleAssignments.length > 0) {
-      throw new ConflictException({
-        message:
-          'Platform accounts operate from the platform level and cannot become organization members.',
-        details: {
-          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
-        },
-      });
-    }
-
-    if (user.organizationMemberships.length > 0) {
-      throw new ConflictException(
-        `First Organization Admin already has a role in ${user.organizationMemberships[0].organization.name}. A user can have only one role globally.`,
-      );
-    }
-
-    if (!role) {
-      throw new ConflictException('Organization Admin role is not configured');
-    }
-
-    return {
-      userId: user.id,
-      roleId: role.id,
-    };
   }
 
   private async resolveAvailableGeneratedSlug(seed: string): Promise<string> {

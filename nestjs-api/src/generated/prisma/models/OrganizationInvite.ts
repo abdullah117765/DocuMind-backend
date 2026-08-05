@@ -27,6 +27,7 @@ export type AggregateOrganizationInvite = {
 export type OrganizationInviteMinAggregateOutputType = {
   id: string | null
   organizationId: string | null
+  invitedName: string | null
   email: string | null
   tokenHash: string | null
   status: $Enums.OrganizationInviteStatus | null
@@ -48,6 +49,7 @@ export type OrganizationInviteMinAggregateOutputType = {
 export type OrganizationInviteMaxAggregateOutputType = {
   id: string | null
   organizationId: string | null
+  invitedName: string | null
   email: string | null
   tokenHash: string | null
   status: $Enums.OrganizationInviteStatus | null
@@ -69,6 +71,7 @@ export type OrganizationInviteMaxAggregateOutputType = {
 export type OrganizationInviteCountAggregateOutputType = {
   id: number
   organizationId: number
+  invitedName: number
   email: number
   tokenHash: number
   status: number
@@ -92,6 +95,7 @@ export type OrganizationInviteCountAggregateOutputType = {
 export type OrganizationInviteMinAggregateInputType = {
   id?: true
   organizationId?: true
+  invitedName?: true
   email?: true
   tokenHash?: true
   status?: true
@@ -113,6 +117,7 @@ export type OrganizationInviteMinAggregateInputType = {
 export type OrganizationInviteMaxAggregateInputType = {
   id?: true
   organizationId?: true
+  invitedName?: true
   email?: true
   tokenHash?: true
   status?: true
@@ -134,6 +139,7 @@ export type OrganizationInviteMaxAggregateInputType = {
 export type OrganizationInviteCountAggregateInputType = {
   id?: true
   organizationId?: true
+  invitedName?: true
   email?: true
   tokenHash?: true
   status?: true
@@ -228,6 +234,7 @@ export type OrganizationInviteGroupByArgs<ExtArgs extends runtime.Types.Extensio
 export type OrganizationInviteGroupByOutputType = {
   id: string
   organizationId: string
+  invitedName: string | null
   email: string
   tokenHash: string
   status: $Enums.OrganizationInviteStatus
@@ -270,6 +277,7 @@ export type OrganizationInviteWhereInput = {
   NOT?: Prisma.OrganizationInviteWhereInput | Prisma.OrganizationInviteWhereInput[]
   id?: Prisma.UuidFilter<"OrganizationInvite"> | string
   organizationId?: Prisma.UuidFilter<"OrganizationInvite"> | string
+  invitedName?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
   email?: Prisma.StringFilter<"OrganizationInvite"> | string
   tokenHash?: Prisma.StringFilter<"OrganizationInvite"> | string
   status?: Prisma.EnumOrganizationInviteStatusFilter<"OrganizationInvite"> | $Enums.OrganizationInviteStatus
@@ -295,6 +303,7 @@ export type OrganizationInviteWhereInput = {
 export type OrganizationInviteOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  invitedName?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -324,6 +333,7 @@ export type OrganizationInviteWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.OrganizationInviteWhereInput[]
   NOT?: Prisma.OrganizationInviteWhereInput | Prisma.OrganizationInviteWhereInput[]
   organizationId?: Prisma.UuidFilter<"OrganizationInvite"> | string
+  invitedName?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
   email?: Prisma.StringFilter<"OrganizationInvite"> | string
   status?: Prisma.EnumOrganizationInviteStatusFilter<"OrganizationInvite"> | $Enums.OrganizationInviteStatus
   invitedByUserId?: Prisma.UuidNullableFilter<"OrganizationInvite"> | string | null
@@ -348,6 +358,7 @@ export type OrganizationInviteWhereUniqueInput = Prisma.AtLeast<{
 export type OrganizationInviteOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  invitedName?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -375,6 +386,7 @@ export type OrganizationInviteScalarWhereWithAggregatesInput = {
   NOT?: Prisma.OrganizationInviteScalarWhereWithAggregatesInput | Prisma.OrganizationInviteScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"OrganizationInvite"> | string
   organizationId?: Prisma.UuidWithAggregatesFilter<"OrganizationInvite"> | string
+  invitedName?: Prisma.StringNullableWithAggregatesFilter<"OrganizationInvite"> | string | null
   email?: Prisma.StringWithAggregatesFilter<"OrganizationInvite"> | string
   tokenHash?: Prisma.StringWithAggregatesFilter<"OrganizationInvite"> | string
   status?: Prisma.EnumOrganizationInviteStatusWithAggregatesFilter<"OrganizationInvite"> | $Enums.OrganizationInviteStatus
@@ -395,6 +407,7 @@ export type OrganizationInviteScalarWhereWithAggregatesInput = {
 
 export type OrganizationInviteCreateInput = {
   id?: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -418,6 +431,7 @@ export type OrganizationInviteCreateInput = {
 export type OrganizationInviteUncheckedCreateInput = {
   id?: string
   organizationId: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -439,6 +453,7 @@ export type OrganizationInviteUncheckedCreateInput = {
 
 export type OrganizationInviteUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -462,6 +477,7 @@ export type OrganizationInviteUpdateInput = {
 export type OrganizationInviteUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -484,6 +500,7 @@ export type OrganizationInviteUncheckedUpdateInput = {
 export type OrganizationInviteCreateManyInput = {
   id?: string
   organizationId: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -504,6 +521,7 @@ export type OrganizationInviteCreateManyInput = {
 
 export type OrganizationInviteUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -523,6 +541,7 @@ export type OrganizationInviteUpdateManyMutationInput = {
 export type OrganizationInviteUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -554,6 +573,7 @@ export type OrganizationInviteOrderByRelationAggregateInput = {
 export type OrganizationInviteCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  invitedName?: Prisma.SortOrder
   email?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -575,6 +595,7 @@ export type OrganizationInviteCountOrderByAggregateInput = {
 export type OrganizationInviteMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  invitedName?: Prisma.SortOrder
   email?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -596,6 +617,7 @@ export type OrganizationInviteMaxOrderByAggregateInput = {
 export type OrganizationInviteMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  invitedName?: Prisma.SortOrder
   email?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -765,6 +787,7 @@ export type OrganizationInviteUpdateOneRequiredWithoutRolesNestedInput = {
 
 export type OrganizationInviteCreateWithoutInvitedByInput = {
   id?: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -787,6 +810,7 @@ export type OrganizationInviteCreateWithoutInvitedByInput = {
 export type OrganizationInviteUncheckedCreateWithoutInvitedByInput = {
   id?: string
   organizationId: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -817,6 +841,7 @@ export type OrganizationInviteCreateManyInvitedByInputEnvelope = {
 
 export type OrganizationInviteCreateWithoutAcceptedByInput = {
   id?: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -839,6 +864,7 @@ export type OrganizationInviteCreateWithoutAcceptedByInput = {
 export type OrganizationInviteUncheckedCreateWithoutAcceptedByInput = {
   id?: string
   organizationId: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -889,6 +915,7 @@ export type OrganizationInviteScalarWhereInput = {
   NOT?: Prisma.OrganizationInviteScalarWhereInput | Prisma.OrganizationInviteScalarWhereInput[]
   id?: Prisma.UuidFilter<"OrganizationInvite"> | string
   organizationId?: Prisma.UuidFilter<"OrganizationInvite"> | string
+  invitedName?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
   email?: Prisma.StringFilter<"OrganizationInvite"> | string
   tokenHash?: Prisma.StringFilter<"OrganizationInvite"> | string
   status?: Prisma.EnumOrganizationInviteStatusFilter<"OrganizationInvite"> | $Enums.OrganizationInviteStatus
@@ -925,6 +952,7 @@ export type OrganizationInviteUpdateManyWithWhereWithoutAcceptedByInput = {
 
 export type OrganizationInviteCreateWithoutOrganizationInput = {
   id?: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -946,6 +974,7 @@ export type OrganizationInviteCreateWithoutOrganizationInput = {
 
 export type OrganizationInviteUncheckedCreateWithoutOrganizationInput = {
   id?: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -993,6 +1022,7 @@ export type OrganizationInviteUpdateManyWithWhereWithoutOrganizationInput = {
 
 export type OrganizationInviteCreateWithoutRolesInput = {
   id?: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -1015,6 +1045,7 @@ export type OrganizationInviteCreateWithoutRolesInput = {
 export type OrganizationInviteUncheckedCreateWithoutRolesInput = {
   id?: string
   organizationId: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -1051,6 +1082,7 @@ export type OrganizationInviteUpdateToOneWithWhereWithoutRolesInput = {
 
 export type OrganizationInviteUpdateWithoutRolesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1073,6 +1105,7 @@ export type OrganizationInviteUpdateWithoutRolesInput = {
 export type OrganizationInviteUncheckedUpdateWithoutRolesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1094,6 +1127,7 @@ export type OrganizationInviteUncheckedUpdateWithoutRolesInput = {
 export type OrganizationInviteCreateManyInvitedByInput = {
   id?: string
   organizationId: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -1114,6 +1148,7 @@ export type OrganizationInviteCreateManyInvitedByInput = {
 export type OrganizationInviteCreateManyAcceptedByInput = {
   id?: string
   organizationId: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -1133,6 +1168,7 @@ export type OrganizationInviteCreateManyAcceptedByInput = {
 
 export type OrganizationInviteUpdateWithoutInvitedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1155,6 +1191,7 @@ export type OrganizationInviteUpdateWithoutInvitedByInput = {
 export type OrganizationInviteUncheckedUpdateWithoutInvitedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1176,6 +1213,7 @@ export type OrganizationInviteUncheckedUpdateWithoutInvitedByInput = {
 export type OrganizationInviteUncheckedUpdateManyWithoutInvitedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1195,6 +1233,7 @@ export type OrganizationInviteUncheckedUpdateManyWithoutInvitedByInput = {
 
 export type OrganizationInviteUpdateWithoutAcceptedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1217,6 +1256,7 @@ export type OrganizationInviteUpdateWithoutAcceptedByInput = {
 export type OrganizationInviteUncheckedUpdateWithoutAcceptedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1238,6 +1278,7 @@ export type OrganizationInviteUncheckedUpdateWithoutAcceptedByInput = {
 export type OrganizationInviteUncheckedUpdateManyWithoutAcceptedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1257,6 +1298,7 @@ export type OrganizationInviteUncheckedUpdateManyWithoutAcceptedByInput = {
 
 export type OrganizationInviteCreateManyOrganizationInput = {
   id?: string
+  invitedName?: string | null
   email: string
   tokenHash: string
   status?: $Enums.OrganizationInviteStatus
@@ -1277,6 +1319,7 @@ export type OrganizationInviteCreateManyOrganizationInput = {
 
 export type OrganizationInviteUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1298,6 +1341,7 @@ export type OrganizationInviteUpdateWithoutOrganizationInput = {
 
 export type OrganizationInviteUncheckedUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1319,6 +1363,7 @@ export type OrganizationInviteUncheckedUpdateWithoutOrganizationInput = {
 
 export type OrganizationInviteUncheckedUpdateManyWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  invitedName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrganizationInviteStatusFieldUpdateOperationsInput | $Enums.OrganizationInviteStatus
@@ -1371,6 +1416,7 @@ export type OrganizationInviteCountOutputTypeCountRolesArgs<ExtArgs extends runt
 export type OrganizationInviteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   organizationId?: boolean
+  invitedName?: boolean
   email?: boolean
   tokenHash?: boolean
   status?: boolean
@@ -1397,6 +1443,7 @@ export type OrganizationInviteSelect<ExtArgs extends runtime.Types.Extensions.In
 export type OrganizationInviteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   organizationId?: boolean
+  invitedName?: boolean
   email?: boolean
   tokenHash?: boolean
   status?: boolean
@@ -1421,6 +1468,7 @@ export type OrganizationInviteSelectCreateManyAndReturn<ExtArgs extends runtime.
 export type OrganizationInviteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   organizationId?: boolean
+  invitedName?: boolean
   email?: boolean
   tokenHash?: boolean
   status?: boolean
@@ -1445,6 +1493,7 @@ export type OrganizationInviteSelectUpdateManyAndReturn<ExtArgs extends runtime.
 export type OrganizationInviteSelectScalar = {
   id?: boolean
   organizationId?: boolean
+  invitedName?: boolean
   email?: boolean
   tokenHash?: boolean
   status?: boolean
@@ -1463,7 +1512,7 @@ export type OrganizationInviteSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrganizationInviteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "email" | "tokenHash" | "status" | "invitedByUserId" | "acceptedByUserId" | "expiresAt" | "acceptedAt" | "revokedAt" | "lastSentAt" | "lastSendFailureAt" | "lastSendFailureReason" | "temporaryPasswordHash" | "temporaryPasswordExpiresAt" | "temporaryPasswordUsedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["organizationInvite"]>
+export type OrganizationInviteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "invitedName" | "email" | "tokenHash" | "status" | "invitedByUserId" | "acceptedByUserId" | "expiresAt" | "acceptedAt" | "revokedAt" | "lastSentAt" | "lastSendFailureAt" | "lastSendFailureReason" | "temporaryPasswordHash" | "temporaryPasswordExpiresAt" | "temporaryPasswordUsedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["organizationInvite"]>
 export type OrganizationInviteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   invitedBy?: boolean | Prisma.OrganizationInvite$invitedByArgs<ExtArgs>
@@ -1493,6 +1542,7 @@ export type $OrganizationInvitePayload<ExtArgs extends runtime.Types.Extensions.
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     organizationId: string
+    invitedName: string | null
     email: string
     tokenHash: string
     status: $Enums.OrganizationInviteStatus
@@ -1938,6 +1988,7 @@ export interface Prisma__OrganizationInviteClient<T, Null = never, ExtArgs exten
 export interface OrganizationInviteFieldRefs {
   readonly id: Prisma.FieldRef<"OrganizationInvite", 'String'>
   readonly organizationId: Prisma.FieldRef<"OrganizationInvite", 'String'>
+  readonly invitedName: Prisma.FieldRef<"OrganizationInvite", 'String'>
   readonly email: Prisma.FieldRef<"OrganizationInvite", 'String'>
   readonly tokenHash: Prisma.FieldRef<"OrganizationInvite", 'String'>
   readonly status: Prisma.FieldRef<"OrganizationInvite", 'OrganizationInviteStatus'>

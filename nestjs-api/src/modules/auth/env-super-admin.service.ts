@@ -108,6 +108,10 @@ export class EnvSuperAdminService {
     return this.config.name;
   }
 
+  getConfiguredEmail(): string | null {
+    return this.config.email;
+  }
+
   getVirtualRole(): EnvSuperAdminProfile | null {
     if (!this.config.configured || !this.config.name) {
       return null;
@@ -166,11 +170,13 @@ export class EnvSuperAdminService {
       const superAdminUser = await transaction.user.upsert({
         where: { email: this.config.email as string },
         update: {
+          name: this.config.name,
           isVerified: true,
           isActive: true,
           deactivatedAt: null,
         },
         create: {
+          name: this.config.name,
           email: this.config.email as string,
           passwordHash: ENV_ONLY_PASSWORD_HASH_PLACEHOLDER,
           isVerified: true,

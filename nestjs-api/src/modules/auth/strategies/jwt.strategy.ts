@@ -106,16 +106,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
+    const nameMetadata = superAdminMetadata
+      ? {
+          isEnvSuperAdmin: true,
+          name: superAdminMetadata.name,
+        }
+      : user.name
+        ? { name: user.name }
+        : {};
+
     return {
       userId: user.id,
       email: user.email,
       isVerified: superAdminMetadata ? true : user.isVerified,
-      ...(superAdminMetadata
-        ? {
-            isEnvSuperAdmin: true,
-            name: superAdminMetadata.name,
-          }
-        : {}),
+      ...nameMetadata,
       sessionId: session.id,
       tokenId: parsedPayload.jti,
     };

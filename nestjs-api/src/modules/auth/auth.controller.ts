@@ -63,8 +63,10 @@ interface CurrentAuthenticationResult {
   data: {
     user: {
       id: string;
+      name?: string;
       email: string;
       isVerified: boolean;
+      isSuperAdmin?: boolean;
     };
     session: {
       id: string;
@@ -469,8 +471,10 @@ export class AuthController {
       data: {
         user: {
           id: principal.userId,
+          ...(principal.name ? { name: principal.name } : {}),
           email: principal.email,
           isVerified: principal.isVerified,
+          ...(principal.isEnvSuperAdmin ? { isSuperAdmin: true } : {}),
         },
         session: {
           id: principal.sessionId,

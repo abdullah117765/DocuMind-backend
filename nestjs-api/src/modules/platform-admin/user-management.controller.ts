@@ -25,13 +25,11 @@ import { CsrfGuard } from '../../common/guards/csrf.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { CreateManagedUserDto } from './dto/create-managed-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
-import { ReplacePlatformRolesDto } from './dto/replace-platform-roles.dto';
 import { UpdateManagedUserDto } from './dto/update-managed-user.dto';
 import { UserIdDto } from './dto/user-id.dto';
 import {
   ManagedUserListResult,
   ManagedUserView,
-  PlatformRoleView,
   UserManagementService,
 } from './user-management.service';
 
@@ -42,12 +40,6 @@ interface UsersResult {
 interface UserResult {
   data: {
     user: ManagedUserView;
-  };
-}
-
-interface PlatformRolesResult {
-  data: {
-    roles: PlatformRoleView[];
   };
 }
 
@@ -72,17 +64,6 @@ export class UserManagementController {
   async listUsers(@Query() query: ListUsersQueryDto): Promise<UsersResult> {
     return {
       data: await this.usersService.listUsers(query),
-    };
-  }
-
-  @Get('platform-roles')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'List assignable platform roles' })
-  async listPlatformRoles(): Promise<PlatformRolesResult> {
-    return {
-      data: {
-        roles: await this.usersService.listPlatformRoles(),
-      },
     };
   }
 
@@ -116,7 +97,7 @@ export class UserManagementController {
   @UseGuards(CsrfGuard)
   @ApiHeader(CSRF_HEADER)
   @ApiBody({ type: UpdateManagedUserDto })
-  @ApiOperation({ summary: 'Update verification or active state for a user' })
+  @ApiOperation({ summary: 'Update active state for a user' })
   async updateUser(
     @CurrentUser() principal: AuthenticatedPrincipal,
     @Param() params: UserIdDto,
@@ -133,25 +114,4 @@ export class UserManagementController {
     };
   }
 
-  @Patch(':userId/platform-roles')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(CsrfGuard)
-  @ApiHeader(CSRF_HEADER)
-  @ApiBody({ type: ReplacePlatformRolesDto })
-  @ApiOperation({ summary: 'Replace platform roles for a user' })
-  async replacePlatformRoles(
-    @CurrentUser() principal: AuthenticatedPrincipal,
-    @Param() params: UserIdDto,
-    @Body() dto: ReplacePlatformRolesDto,
-  ): Promise<UserResult> {
-    return {
-      data: {
-        user: await this.usersService.replacePlatformRoles(
-          principal.userId,
-          params.userId,
-          dto,
-        ),
-      },
-    };
-  }
 }

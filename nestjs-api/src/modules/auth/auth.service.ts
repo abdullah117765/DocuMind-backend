@@ -73,13 +73,13 @@ export interface PasswordResetSessionResult {
 
 export interface AuthenticatedSessionResult {
   data: {
-        user: {
-          id: string;
-          email: string;
-          isVerified: boolean;
-          isSuperAdmin?: boolean;
-          name?: string;
-        };
+    user: {
+      id: string;
+      name?: string;
+      email: string;
+      isVerified: boolean;
+      isSuperAdmin?: boolean;
+    };
     session: {
       id: string;
       expiresAt: Date;
@@ -507,6 +507,7 @@ export class AuthService {
       data: {
         user: {
           id: user.id,
+          ...(user.name ? { name: user.name } : {}),
           email: user.email,
           isVerified: user.isVerified,
           ...(superAdminMetadata ?? {}),

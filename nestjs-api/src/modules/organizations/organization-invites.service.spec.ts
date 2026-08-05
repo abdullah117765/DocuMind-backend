@@ -39,6 +39,7 @@ describe('OrganizationInvitesService', () => {
   const inviteRecord = {
     id: inviteId,
     organizationId,
+    invitedName: 'Member User',
     email: 'member@example.com',
     status: OrganizationInviteStatus.PENDING,
     expiresAt: new Date('2026-08-11T09:00:00.000Z'),
@@ -167,6 +168,7 @@ describe('OrganizationInvitesService', () => {
         organizationId,
         actor,
         {
+          name: 'Member User',
           email: ' MEMBER@example.com ',
           roleIds: [roleId],
         },
@@ -209,6 +211,8 @@ describe('OrganizationInvitesService', () => {
       expect.any(String),
       7,
       {
+        invitedName: 'Member User',
+        roleNames: ['Viewer'],
         temporaryPassword: expect.any(String),
         temporaryPasswordExpiresInHours: 24,
       },
@@ -243,6 +247,7 @@ describe('OrganizationInvitesService', () => {
         organizationId,
         actor,
         {
+          name: 'Member User',
           email: 'member@example.com',
           roleIds: [roleId],
         },

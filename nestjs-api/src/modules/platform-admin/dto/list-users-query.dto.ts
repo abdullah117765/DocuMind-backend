@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 function optionalInteger({ value }: TransformFnParams): unknown {
   if (value === undefined || value === null || value === '') {
@@ -8,17 +8,6 @@ function optionalInteger({ value }: TransformFnParams): unknown {
   }
 
   return Number(value);
-}
-
-function optionalBoolean({ value }: TransformFnParams): unknown {
-  if (value === undefined || value === null || value === '') {
-    return undefined;
-  }
-
-  if (value === true || value === 'true') return true;
-  if (value === false || value === 'false') return false;
-
-  return value;
 }
 
 export class ListUsersQueryDto {
@@ -48,10 +37,4 @@ export class ListUsersQueryDto {
     message: 'Status must be active, inactive, or all',
   })
   status?: 'active' | 'inactive' | 'all';
-
-  @ApiPropertyOptional({ example: true })
-  @IsOptional()
-  @Transform(optionalBoolean)
-  @IsBoolean({ message: 'Verified must be true or false' })
-  verified?: boolean;
 }

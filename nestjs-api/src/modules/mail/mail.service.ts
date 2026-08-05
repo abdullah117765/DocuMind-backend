@@ -69,6 +69,8 @@ export class MailService {
     token: string,
     expiresInDays: number,
     options: {
+      invitedName?: string | null;
+      roleNames?: string[];
       temporaryPassword?: string | null;
       temporaryPasswordExpiresInHours?: number | null;
     } = {},
@@ -77,6 +79,9 @@ export class MailService {
     const invitedEmail = email.trim().toLowerCase();
     const productName = this.getProductName();
     const hasTemporaryPassword = Boolean(options.temporaryPassword);
+    const invitedName = options.invitedName?.trim() || null;
+    const roleNames = options.roleNames ?? [];
+    const roleSummary = roleNames.length ? roleNames.join(', ') : null;
 
     await this.mailerService.sendMail({
       to: invitedEmail,
@@ -86,17 +91,25 @@ export class MailService {
         expiresInDays,
         hasTemporaryPassword,
         invitedEmail,
+        invitedName,
         inviteUrl,
         organizationName,
         productName,
+        roleSummary,
         temporaryPassword: options.temporaryPassword,
         temporaryPasswordExpiresInHours:
           options.temporaryPasswordExpiresInHours,
       },
       text: [
-        `You have been invited to join ${organizationName} on ${productName}.`,
+        invitedName
+          ? `Hello ${invitedName},`
+          : `You have been invited to join ${organizationName} on ${productName}.`,
         '',
-        `This invitation is for ${invitedEmail}.`,
+        invitedName
+          ? `You have been invited to join ${organizationName} on ${productName}.`
+          : `This invitation is for ${invitedEmail}.`,
+        `Invited email: ${invitedEmail}.`,
+        ...(roleSummary ? [`Assigned role: ${roleSummary}.`] : []),
         '',
         ...(hasTemporaryPassword
           ? [

@@ -1,4 +1,11 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCookieAuth,
@@ -6,7 +13,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { RequirePlatformSuperAdmin } from '../../common/decorators/require-permissions.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import {
   AuditLogListResult,
   AuditLogsService,
@@ -20,7 +29,7 @@ interface AuditLogsResult {
 @ApiTags('Audit Logs')
 @ApiBearerAuth('access-token')
 @ApiCookieAuth('access-cookie')
-@RequirePlatformSuperAdmin()
+@UseGuards(JwtAuthGuard)
 @Controller('audit-logs')
 export class AuditLogsController {
   constructor(private readonly auditLogsService: AuditLogsService) {}
@@ -30,10 +39,11 @@ export class AuditLogsController {
   @ApiOperation({ summary: 'List platform audit logs' })
   @ApiOkResponse({ description: 'Audit logs' })
   async listAuditLogs(
+    @CurrentUser() principal: AuthenticatedPrincipal,
     @Query() query: ListAuditLogsQueryDto,
   ): Promise<AuditLogsResult> {
     return {
-      data: await this.auditLogsService.listAuditLogs(query),
+      data: await this.auditLogsService.listAuditLogs(query, principal),
     };
   }
 }

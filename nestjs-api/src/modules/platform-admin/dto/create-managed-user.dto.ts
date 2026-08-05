@@ -1,9 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
 import {
-  IsBoolean,
   IsNotEmpty,
-  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -17,8 +15,28 @@ import {
 
 const PASSWORD_COMPLEXITY_PATTERN =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!]).+$/;
+const PERSON_NAME_PATTERN = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
+
+function normalizePersonName(value: unknown): unknown {
+  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : value;
+}
 
 export class CreateManagedUserDto {
+  @ApiProperty({
+    example: 'Ahmed Khan',
+    minLength: 2,
+    maxLength: 150,
+  })
+  @Transform(({ value }: TransformFnParams): unknown => normalizePersonName(value))
+  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @MinLength(2, { message: 'Name must be at least 2 characters long' })
+  @MaxLength(150, { message: 'Name must not exceed 150 characters' })
+  @Matches(PERSON_NAME_PATTERN, {
+    message: 'Name can contain only letters, numbers, and single spaces',
+  })
+  name!: string;
+
   @ApiProperty({
     example: 'member@example.com',
     maxLength: 254,
@@ -44,12 +62,4 @@ export class CreateManagedUserDto {
       'Password must contain uppercase, lowercase, number, and one special character (@#$%^&*!)',
   })
   password!: string;
-
-  @ApiPropertyOptional({
-    description: 'Create as verified so the account can be used immediately',
-    default: true,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'Verified must be true or false' })
-  isVerified?: boolean;
 }

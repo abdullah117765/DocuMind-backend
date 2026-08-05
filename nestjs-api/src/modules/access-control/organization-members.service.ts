@@ -46,6 +46,7 @@ interface MembershipRecord {
   updatedAt: Date;
   user: {
     id: string;
+    name: string | null;
     email: string;
     isVerified: boolean;
     isActive: boolean;
@@ -68,6 +69,7 @@ export interface OrganizationMemberView {
   status: OrganizationMembershipStatus;
   user: {
     id: string;
+    name: string | null;
     email: string;
     isVerified: boolean;
   };
@@ -707,6 +709,7 @@ export class OrganizationMembersService {
       user: {
         select: {
           id: true,
+          name: true,
           email: true,
           isVerified: true,
           isActive: true,

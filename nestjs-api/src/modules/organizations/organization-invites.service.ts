@@ -58,6 +58,7 @@ interface AssignableInviteRoleRecord extends InviteRoleRecord {
 interface InviteRecord {
   id: string;
   organizationId: string;
+  invitedName: string | null;
   email: string;
   status: OrganizationInviteStatus;
   expiresAt: Date;
@@ -85,6 +86,7 @@ interface InviteRecord {
 export interface OrganizationInviteView {
   id: string;
   organizationId: string;
+  name: string | null;
   email: string;
   status: OrganizationInviteStatus;
   expiresAt: Date;
@@ -99,6 +101,7 @@ export interface OrganizationInviteView {
 }
 
 export interface OrganizationInvitePreview {
+  name: string | null;
   email: string;
   status: OrganizationInviteStatus;
   expiresAt: Date;
@@ -128,6 +131,10 @@ function normalizeEmail(email: string): string {
 
 function normalizeRoleIds(roleIds: string[] = []): string[] {
   return [...new Set(roleIds)].sort((left, right) => left.localeCompare(right));
+}
+
+function displayNameFromEmail(email: string): string {
+  return email.split('@')[0]?.replace(/[._-]+/g, ' ') || email;
 }
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -214,6 +221,7 @@ export class OrganizationInvitesService {
         const invite = await transaction.organizationInvite.create({
           data: {
             organizationId,
+            invitedName: dto.name,
             email,
             tokenHash,
             invitedByUserId: actor.userId,
@@ -249,6 +257,8 @@ export class OrganizationInvitesService {
         token,
         ORGANIZATION_INVITE_TTL_DAYS,
         {
+          invitedName: dto.name,
+          roleNames: roles.map((role) => role.name),
           temporaryPassword,
           temporaryPasswordExpiresInHours: temporaryPassword
             ? ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS
@@ -379,6 +389,8 @@ export class OrganizationInvitesService {
         token,
         ORGANIZATION_INVITE_TTL_DAYS,
         {
+          invitedName: preparedInvite.invitedName,
+          roleNames: preparedInvite.roles.map(({ role }) => role.name),
           temporaryPassword,
           temporaryPasswordExpiresInHours: temporaryPassword
             ? ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS
@@ -523,6 +535,16 @@ export class OrganizationInvitesService {
           );
         }
 
+        if (invite.invitedName) {
+          await transaction.user.updateMany({
+            where: {
+              id: principal.userId,
+              OR: [{ name: null }, { name: '' }],
+            },
+            data: { name: invite.invitedName },
+          });
+        }
+
         const membership = existingMembership
           ? await transaction.organizationMembership.update({
               where: { id: existingMembership.id },
@@ -652,6 +674,7 @@ export class OrganizationInvitesService {
 
           const user = await transaction.user.create({
             data: {
+              name: invite.invitedName ?? displayNameFromEmail(email),
               email,
               passwordHash,
               isVerified: true,
@@ -773,7 +796,7 @@ export class OrganizationInvitesService {
           },
           select: {
             id: true,
-            organization: {
+        organization: {
               select: {
                 name: true,
               },
@@ -1029,6 +1052,7 @@ export class OrganizationInvitesService {
           status: true,
         },
       },
+      invitedName: true,
       roles: {
         where: organizationId
           ? {
@@ -1063,6 +1087,7 @@ export class OrganizationInvitesService {
       id: invite.id,
       organizationId: invite.organizationId,
       email: invite.email,
+      name: invite.invitedName,
       status: this.resolveInviteStatus(invite, now),
       expiresAt: invite.expiresAt,
       acceptedAt: invite.acceptedAt,
@@ -1088,6 +1113,7 @@ export class OrganizationInvitesService {
   ): OrganizationInvitePreview {
     return {
       email: invite.email,
+      name: invite.invitedName,
       status: this.resolveInviteStatus(invite, now),
       expiresAt: invite.expiresAt,
       organization: invite.organization,

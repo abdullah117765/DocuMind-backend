@@ -14,14 +14,20 @@ import { PrismaService } from '../prisma/prisma.service';
 const AUDITED_METHODS = new Set(['POST', 'PATCH', 'PUT', 'DELETE']);
 const REDACTED_KEYS = new Set([
   'accessToken',
+  'authorization',
   'confirmPassword',
+  'cookie',
   'currentPassword',
+  'inviteToken',
   'newPassword',
   'otp',
   'password',
+  'passwordHash',
   'refreshToken',
   'resetToken',
   'token',
+  'tokenHash',
+  'token_hash',
 ]);
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -93,6 +99,13 @@ function buildMetadata(
 ): Prisma.InputJsonValue {
   const metadata = {
     durationMs,
+    actor: request.user
+      ? {
+          userId: request.user.userId,
+          email: request.user.email,
+          ...(request.user.name ? { name: request.user.name } : {}),
+        }
+      : null,
     params: sanitizeValue(request.params ?? {}),
     query: sanitizeValue(request.query ?? {}),
     body: sanitizeValue(request.body ?? {}),

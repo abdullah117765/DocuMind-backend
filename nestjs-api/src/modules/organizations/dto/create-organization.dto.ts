@@ -9,11 +9,6 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import {
-  APP_EMAIL_PATTERN,
-  INVALID_EMAIL_MESSAGE,
-  normalizeEmail,
-} from '../../../common/validation/email.validation';
 import { UpdateOrganizationLimitsDto } from './update-organization-limits.dto';
 import { UpdateOrganizationSubscriptionDto } from './update-organization-subscription.dto';
 
@@ -64,18 +59,6 @@ export class CreateOrganizationDto {
       'Organization slug may contain lowercase letters, numbers, and single hyphens',
   })
   slug?: string;
-
-  @ApiPropertyOptional({
-    description:
-      'Optional active verified user email to assign as the first Organization Admin. Super Admin remains outside tenant membership.',
-    example: 'admin@acme-finance.com',
-    maxLength: 254,
-  })
-  @Transform(({ value }: TransformFnParams): unknown => normalizeEmail(value))
-  @IsOptional()
-  @MaxLength(254, { message: 'First admin email must not exceed 254 characters' })
-  @Matches(APP_EMAIL_PATTERN, { message: INVALID_EMAIL_MESSAGE })
-  firstAdminEmail?: string;
 
   @ApiPropertyOptional({
     description:
