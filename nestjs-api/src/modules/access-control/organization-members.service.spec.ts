@@ -130,6 +130,7 @@ describe('OrganizationMembersService', () => {
     });
     platformUserRoleFindFirst.mockResolvedValue(null);
     membershipFindMany.mockResolvedValue([]);
+    membershipFindFirst.mockResolvedValue(null);
     membershipFindUnique.mockResolvedValue(null);
     membershipCount.mockResolvedValue(0);
     membershipCreate.mockResolvedValue({ id: membershipId });
@@ -165,6 +166,7 @@ describe('OrganizationMembersService', () => {
           {
             id: adminRole.id,
             organizationId: null,
+            systemKey: adminRole.systemKey,
             name: adminRole.name,
             isSystem: true,
           },
@@ -375,6 +377,9 @@ describe('OrganizationMembersService', () => {
   });
 
   it('prevents removing the final active user manager role', async () => {
+    isConfiguredSuperAdminUserId.mockImplementation(
+      async (userId: string) => userId === actorUserId,
+    );
     membershipFindFirst.mockResolvedValueOnce(membership);
     transactionMembershipFindFirst.mockResolvedValue(null);
     roleFindMany.mockResolvedValue([viewerRole]);
@@ -406,6 +411,9 @@ describe('OrganizationMembersService', () => {
   });
 
   it('atomically replaces roles when another user manager remains', async () => {
+    isConfiguredSuperAdminUserId.mockImplementation(
+      async (userId: string) => userId === actorUserId,
+    );
     const updatedMembership = {
       ...membership,
       roles: [{ role: viewerRole }],
@@ -442,6 +450,9 @@ describe('OrganizationMembersService', () => {
   });
 
   it('prevents suspending the final active user manager', async () => {
+    isConfiguredSuperAdminUserId.mockImplementation(
+      async (userId: string) => userId === actorUserId,
+    );
     membershipFindFirst.mockResolvedValueOnce(membership);
     transactionMembershipFindFirst.mockResolvedValue(null);
 
@@ -481,10 +492,14 @@ describe('OrganizationMembersService', () => {
     const suspendedMembership = {
       ...membership,
       status: OrganizationMembershipStatus.SUSPENDED,
+      roles: [{ role: viewerRole }],
     };
     membershipFindFirst
       .mockResolvedValueOnce(suspendedMembership)
-      .mockResolvedValueOnce(membership);
+      .mockResolvedValueOnce({
+        ...membership,
+        roles: [{ role: viewerRole }],
+      });
 
     await service.updateMemberStatus(
       organizationId,
@@ -500,6 +515,20 @@ describe('OrganizationMembersService', () => {
       },
     });
     expect(invalidateUserAccess).toHaveBeenCalledWith(memberUserId);
+  });
+
+  it('blocks organization admins from managing protected organization-admin members', async () => {
+    membershipFindFirst.mockResolvedValue(membership);
+
+    await expect(
+      service.updateMemberStatus(
+        organizationId,
+        membershipId,
+        actorUserId,
+        OrganizationMembershipStatus.SUSPENDED,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(membershipUpdate).not.toHaveBeenCalled();
   });
 
   it('removes a member and revokes every assigned role', async () => {

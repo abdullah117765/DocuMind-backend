@@ -10,6 +10,8 @@ import { ListAuditLogsQueryDto } from './dto/list-audit-logs-query.dto';
 const auditLogSelect = {
   id: true,
   actorUserId: true,
+  actorName: true,
+  actorEmail: true,
   organizationId: true,
   action: true,
   method: true,
@@ -54,7 +56,7 @@ export interface AuditLogView {
   metadata: Prisma.JsonValue | null;
   createdAt: Date;
   actor: {
-    id: string;
+    id: string | null;
     email: string;
     name: string;
   } | null;
@@ -181,6 +183,9 @@ export class AuditLogsService {
                   },
                 },
                 {
+                  actorEmail: hiddenActorEmail,
+                },
+                {
                   metadata: {
                     path: ['actor', 'email'],
                     equals: hiddenActorEmail,
@@ -196,6 +201,18 @@ export class AuditLogsService {
             OR: [
               { action: { contains: search, mode: Prisma.QueryMode.insensitive } },
               { path: { contains: search, mode: Prisma.QueryMode.insensitive } },
+              {
+                actorEmail: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              {
+                actorName: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
               {
                 resource: {
                   contains: search,
@@ -242,14 +259,44 @@ export class AuditLogsService {
       userAgent: log.userAgent,
       metadata: log.metadata,
       createdAt: log.createdAt,
-      actor: log.actor
-        ? {
-            ...log.actor,
-            name: log.actor.name ?? this.getActorDisplayName(log.actor.email),
-          }
-        : this.getMetadataActor(log.metadata),
+      actor: this.getActorView(log),
       organization: log.organization,
     };
+  }
+
+  private getActorView(log: AuditLogRecord): {
+    id: string | null;
+    email: string;
+    name: string;
+  } | null {
+    if (log.actor) {
+      return {
+        id: log.actor.id,
+        email: log.actor.email,
+        name:
+          log.actor.name ??
+          log.actorName ??
+          this.getActorDisplayName(log.actor.email),
+      };
+    }
+
+    const metadataActor = this.getMetadataActor(log.metadata);
+
+    if (metadataActor) {
+      return metadataActor;
+    }
+
+    if (log.actorEmail) {
+      return {
+        id: log.actorUserId,
+        email: log.actorEmail,
+        name:
+          log.actorName?.trim() ||
+          this.getActorDisplayName(log.actorEmail),
+      };
+    }
+
+    return null;
   }
 
   private getActorDisplayName(email: string): string {
@@ -261,7 +308,7 @@ export class AuditLogsService {
   }
 
   private getMetadataActor(metadata: Prisma.JsonValue | null): {
-    id: string;
+    id: string | null;
     email: string;
     name: string;
   } | null {
@@ -278,12 +325,12 @@ export class AuditLogsService {
 
     const actor = metadata.actor as Record<string, unknown>;
 
-    if (typeof actor.userId !== 'string' || typeof actor.email !== 'string') {
+    if (typeof actor.email !== 'string') {
       return null;
     }
 
     return {
-      id: actor.userId,
+      id: typeof actor.userId === 'string' ? actor.userId : null,
       email: actor.email,
       name:
         typeof actor.name === 'string' && actor.name.trim()

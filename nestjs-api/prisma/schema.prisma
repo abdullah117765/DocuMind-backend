@@ -372,6 +372,8 @@ model JoinRequest {
 model AuditLog {
   id             String       @id @default(uuid()) @db.Uuid
   actorUserId    String?      @map("actor_user_id") @db.Uuid
+  actorName      String?      @map("actor_name") @db.VarChar(150)
+  actorEmail     String?      @map("actor_email") @db.VarChar(254)
   organizationId String?      @map("organization_id") @db.Uuid
   action         String       @db.VarChar(160)
   method         String       @db.VarChar(12)

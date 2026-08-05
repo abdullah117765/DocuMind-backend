@@ -130,11 +130,15 @@ export class RoleManagementController {
     summary: 'List system and custom roles available in an organization',
   })
   @ApiOkResponse({ description: 'Available organization roles' })
-  async listRoles(@Param() params: OrganizationIdDto): Promise<RoleListResult> {
+  async listRoles(
+    @Param() params: OrganizationIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Promise<RoleListResult> {
     return {
       data: {
         roles: await this.roleManagementService.listRoles(
           params.organizationId,
+          principal.userId,
         ),
       },
     };

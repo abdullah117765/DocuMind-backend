@@ -25,6 +25,7 @@ describe('RoleManagementService', () => {
   const customRole = {
     id: roleId,
     organizationId,
+    systemKey: null,
     name: 'Reviewer',
     description: 'Reviews documents.',
     scope: AccessScope.ORGANIZATION,
@@ -53,6 +54,7 @@ describe('RoleManagementService', () => {
     ...customRole,
     id: 'e49feaf4-2d74-4d94-ae9b-1ac8a35be9ea',
     organizationId: null,
+    systemKey: 'organization_admin',
     name: 'Organization Admin',
     isSystem: true,
   };
@@ -153,18 +155,53 @@ describe('RoleManagementService', () => {
   it('lists applicable system and custom roles as API views', async () => {
     roleFindMany.mockResolvedValue([systemRole, customRole]);
 
-    const result = await service.listRoles(organizationId);
+    const result = await service.listRoles(organizationId, actorUserId);
 
     expect(result).toEqual([
       expect.objectContaining({
         id: systemRole.id,
         isSystem: true,
+        canAssign: true,
         assignedMembersCount: 2,
       }),
       expect.objectContaining({
         id: customRole.id,
         isSystem: false,
+        canAssign: true,
         permissions: [permission],
+      }),
+    ]);
+  });
+
+  it('marks protected roles as not assignable for organization admins', async () => {
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
+    roleFindMany.mockResolvedValue([
+      systemRole,
+      customUserManagerRole,
+      {
+        ...customRole,
+        id: '748cf2a2-f08b-46ee-8578-0d70407e6d35',
+        systemKey: 'manager',
+        name: 'Manager',
+        isSystem: true,
+      },
+    ]);
+
+    const result = await service.listRoles(organizationId, actorUserId);
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: systemRole.id,
+        systemKey: 'organization_admin',
+        canAssign: false,
+      }),
+      expect.objectContaining({
+        id: customUserManagerRole.id,
+        canAssign: false,
+      }),
+      expect.objectContaining({
+        systemKey: 'manager',
+        canAssign: true,
       }),
     ]);
   });

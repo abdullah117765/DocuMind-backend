@@ -59,6 +59,7 @@ interface MembershipRecord {
 export interface MemberRoleView {
   id: string;
   organizationId: string | null;
+  systemKey: string | null;
   name: string;
   isSystem: boolean;
 }
@@ -296,6 +297,11 @@ export class OrganizationMembersService {
       );
     }
 
+    await this.assertActorCanManageTargetMember(
+      actorUserId,
+      membership.roles.map(({ role }) => role),
+    );
+
     const roles = await this.resolveApplicableRoles(
       organizationId,
       actorUserId,
@@ -358,6 +364,11 @@ export class OrganizationMembersService {
       );
     }
 
+    await this.assertActorCanManageTargetMember(
+      actorUserId,
+      membership.roles.map(({ role }) => role),
+    );
+
     if (membership.status === status) {
       return this.toMemberView(membership);
     }
@@ -400,6 +411,11 @@ export class OrganizationMembersService {
         'You cannot remove your own organization membership',
       );
     }
+
+    await this.assertActorCanManageTargetMember(
+      actorUserId,
+      membership.roles.map(({ role }) => role),
+    );
 
     await this.runSerializableMembershipMutation(async (transaction) => {
       if (
@@ -501,6 +517,32 @@ export class OrganizationMembersService {
           'Organization Admins can assign only Manager, Employee, Viewer, or non-admin custom roles.',
         details: {
           blockedRoleIds: blockedRoles.map((role) => role.id),
+        },
+      });
+    }
+  }
+
+  private async assertActorCanManageTargetMember(
+    actorUserId: string,
+    currentRoles: MemberRoleRecord[],
+  ): Promise<void> {
+    if (
+      currentRoles.length === 0 ||
+      (await this.userHasSuperAdminRole(actorUserId))
+    ) {
+      return;
+    }
+
+    const protectedRoles = currentRoles.filter(
+      (role) => !this.isAssignableByOrganizationAdmin(role),
+    );
+
+    if (protectedRoles.length > 0) {
+      throw new ForbiddenException({
+        message:
+          'Only Super Admin can manage members with Organization Admin or protected custom roles.',
+        details: {
+          protectedRoleIds: protectedRoles.map((role) => role.id),
         },
       });
     }
@@ -737,7 +779,6 @@ export class OrganizationMembersService {
                 where: {
                   permission: {
                     is: {
-                      code: MEMBER_MANAGEMENT_PERMISSION,
                       scope: AccessScope.ORGANIZATION,
                       isActive: true,
                     },
@@ -768,6 +809,7 @@ export class OrganizationMembersService {
         .map(({ role }) => ({
           id: role.id,
           organizationId: role.organizationId,
+          systemKey: role.systemKey,
           name: role.name,
           isSystem: role.isSystem,
         }))

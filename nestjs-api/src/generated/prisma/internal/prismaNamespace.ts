@@ -2047,6 +2047,8 @@ export type JoinRequestScalarFieldEnum = (typeof JoinRequestScalarFieldEnum)[key
 export const AuditLogScalarFieldEnum = {
   id: 'id',
   actorUserId: 'actorUserId',
+  actorName: 'actorName',
+  actorEmail: 'actorEmail',
   organizationId: 'organizationId',
   action: 'action',
   method: 'method',

@@ -1052,7 +1052,6 @@ export class OrganizationInvitesService {
           status: true,
         },
       },
-      invitedName: true,
       roles: {
         where: organizationId
           ? {

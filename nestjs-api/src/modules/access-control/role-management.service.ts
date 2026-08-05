@@ -17,6 +17,9 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import {
   LEGACY_PERMISSIONS,
   ORGANIZATION_PERMISSIONS,
+  ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
+  ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
+  ORGANIZATION_ROLE_KEYS,
 } from './rbac.constants';
 import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 
@@ -32,6 +35,7 @@ interface PermissionRecord {
 interface RoleRecord {
   id: string;
   organizationId: string | null;
+  systemKey: string | null;
   name: string;
   description: string | null;
   scope: AccessScope;
@@ -62,11 +66,13 @@ export interface PermissionView {
 export interface RoleView {
   id: string;
   organizationId: string | null;
+  systemKey: string | null;
   name: string;
   description: string | null;
   scope: AccessScope;
   isSystem: boolean;
   isActive: boolean;
+  canAssign: boolean;
   assignedMembersCount: number;
   permissions: PermissionView[];
   createdAt: Date;
@@ -142,7 +148,10 @@ export class RoleManagementService {
     });
   }
 
-  async listRoles(organizationId: string): Promise<RoleView[]> {
+  async listRoles(
+    organizationId: string,
+    actorUserId?: string,
+  ): Promise<RoleView[]> {
     const roles = await this.prisma.role.findMany({
       where: {
         scope: AccessScope.ORGANIZATION,
@@ -152,8 +161,16 @@ export class RoleManagementService {
       select: this.roleSelect(organizationId),
       orderBy: [{ isSystem: 'desc' }, { name: 'asc' }, { id: 'asc' }],
     });
+    const actorIsSuperAdmin = actorUserId
+      ? await this.envSuperAdminService.isConfiguredUserId(actorUserId)
+      : false;
 
-    return roles.map((role) => this.toRoleView(role));
+    return roles.map((role) =>
+      this.toRoleView(
+        role,
+        actorIsSuperAdmin || this.isAssignableByOrganizationAdmin(role),
+      ),
+    );
   }
 
   async getRole(organizationId: string, roleId: string): Promise<RoleView> {
@@ -610,6 +627,7 @@ export class RoleManagementService {
     return {
       id: true,
       organizationId: true,
+      systemKey: true,
       name: true,
       description: true,
       scope: true,
@@ -653,15 +671,33 @@ export class RoleManagementService {
     } as const satisfies Prisma.RoleSelect;
   }
 
-  private toRoleView(role: RoleRecord): RoleView {
+  private isAssignableByOrganizationAdmin(role: RoleRecord): boolean {
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.organizationAdmin) {
+      return false;
+    }
+
+    if (role.systemKey) {
+      return ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS.has(
+        role.systemKey,
+      );
+    }
+
+    return !role.permissions.some(({ permission }) =>
+      ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
+    );
+  }
+
+  private toRoleView(role: RoleRecord, canAssign = true): RoleView {
     return {
       id: role.id,
       organizationId: role.organizationId,
+      systemKey: role.systemKey,
       name: role.name,
       description: role.description,
       scope: role.scope,
       isSystem: role.isSystem,
       isActive: role.isActive,
+      canAssign,
       assignedMembersCount: role._count.membershipAssignments,
       permissions: role.permissions
         .map(({ permission }) => permission)

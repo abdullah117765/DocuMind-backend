@@ -3,7 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { timingSafeEqual } from 'node:crypto';
 import { SuperAdminConfiguration } from '../../config/super-admin.config';
 import { AccessScope, User } from '../../generated/prisma/client';
-import { PLATFORM_ROLE_KEYS } from '../access-control/rbac.constants';
+import {
+  ORGANIZATION_PERMISSIONS,
+  PLATFORM_PERMISSIONS,
+  PLATFORM_ROLE_KEYS,
+} from '../access-control/rbac.constants';
 import { PrismaService } from '../prisma/prisma.service';
 
 export const ENV_SUPER_ADMIN_ROLE_ID =
@@ -11,6 +15,31 @@ export const ENV_SUPER_ADMIN_ROLE_ID =
 
 const ENV_ONLY_PASSWORD_HASH_PLACEHOLDER =
   '$2b$12$puR9afvrAILWKKnVKbDCX.0CXlT.969TXmlk0BC2aAbR/9yjc5..y';
+
+const BUILT_IN_PLATFORM_SUPER_ADMIN_PERMISSIONS = [
+  PLATFORM_PERMISSIONS.organizationsManage,
+  PLATFORM_PERMISSIONS.usersManage,
+  PLATFORM_PERMISSIONS.aiConfigurationManage,
+  PLATFORM_PERMISSIONS.analyticsView,
+  PLATFORM_PERMISSIONS.auditLogsView,
+];
+
+const BUILT_IN_ORGANIZATION_SUPER_ADMIN_PERMISSIONS = [
+  ORGANIZATION_PERMISSIONS.documentsRead,
+  ORGANIZATION_PERMISSIONS.documentsCreate,
+  ORGANIZATION_PERMISSIONS.documentsUpdate,
+  ORGANIZATION_PERMISSIONS.documentsDelete,
+  ORGANIZATION_PERMISSIONS.documentsExport,
+  ORGANIZATION_PERMISSIONS.documentsUpload,
+  ORGANIZATION_PERMISSIONS.aiAccess,
+  ORGANIZATION_PERMISSIONS.membersManage,
+  ORGANIZATION_PERMISSIONS.rolesManage,
+  ORGANIZATION_PERMISSIONS.permissionsAssign,
+  ORGANIZATION_PERMISSIONS.queuesManage,
+  ORGANIZATION_PERMISSIONS.analyticsView,
+  ORGANIZATION_PERMISSIONS.promptsManage,
+  ORGANIZATION_PERMISSIONS.apiAccess,
+];
 
 export interface EnvSuperAdminProfile {
   id: typeof ENV_SUPER_ADMIN_ROLE_ID;
@@ -156,7 +185,17 @@ export class EnvSuperAdminService {
       },
     });
 
-    return permissions.map((permission) => permission.code);
+    const builtInPermissionCodes =
+      scope === AccessScope.PLATFORM
+        ? BUILT_IN_PLATFORM_SUPER_ADMIN_PERMISSIONS
+        : BUILT_IN_ORGANIZATION_SUPER_ADMIN_PERMISSIONS;
+
+    return [
+      ...new Set([
+        ...builtInPermissionCodes,
+        ...permissions.map((permission) => permission.code),
+      ]),
+    ].sort((left, right) => left.localeCompare(right));
   }
 
   async ensureUserRecord(): Promise<User> {

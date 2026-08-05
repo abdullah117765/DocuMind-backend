@@ -12,6 +12,16 @@ import {
 } from '../src/modules/access-control/rbac.constants';
 
 type SeedPermission = Omit<Prisma.PermissionCreateInput, 'roles'>;
+interface SeedRoleDefinition {
+  systemKey: string;
+  name: string;
+  normalizedName: string;
+  description: string;
+  scope: AccessScope;
+  isActive?: boolean;
+  autoGrantNewPermissions: boolean;
+  permissionCodes: string[];
+}
 
 const permissions: readonly SeedPermission[] = [
   {
@@ -201,7 +211,7 @@ const permissions: readonly SeedPermission[] = [
   },
 ];
 
-const roleDefinitions = [
+const roleDefinitions: readonly SeedRoleDefinition[] = [
   {
     systemKey: 'super_admin',
     name: 'Super Admin (env only)',
@@ -268,7 +278,7 @@ const roleDefinitions = [
     autoGrantNewPermissions: false,
     permissionCodes: [ORGANIZATION_PERMISSIONS.documentsRead],
   },
-] as const;
+];
 
 function getConnectionString(): string {
   const connectionString = process.env.DATABASE_URL?.trim();

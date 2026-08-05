@@ -36,6 +36,12 @@ type AuditRequest = Request & {
   user?: AuthenticatedPrincipal;
 };
 
+interface AuditActorSnapshot {
+  userId: string | null;
+  email: string | null;
+  name: string | null;
+}
+
 function getClientIp(request: Request): string | null {
   const forwardedFor = request.headers['x-forwarded-for'];
   const rawIp =
@@ -92,18 +98,52 @@ function getStatusCode(error: unknown, response: Response): number {
   return response.statusCode >= 400 ? response.statusCode : 500;
 }
 
+function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase().slice(0, 254);
+}
+
+function getRequestEmail(request: AuditRequest): string | null {
+  const email =
+    typeof request.body?.email === 'string' ? request.body.email : null;
+
+  return email && email.includes('@') ? normalizeEmail(email) : null;
+}
+
+function getActorSnapshot(request: AuditRequest): AuditActorSnapshot | null {
+  if (request.user) {
+    return {
+      userId: request.user.userId,
+      email: normalizeEmail(request.user.email),
+      name: request.user.name?.trim().slice(0, 150) || null,
+    };
+  }
+
+  const email = getRequestEmail(request);
+
+  if (!email) {
+    return null;
+  }
+
+  return {
+    userId: null,
+    email,
+    name: null,
+  };
+}
+
 function buildMetadata(
   request: AuditRequest,
   durationMs: number,
+  actor: AuditActorSnapshot | null,
   error?: unknown,
 ): Prisma.InputJsonValue {
   const metadata = {
     durationMs,
-    actor: request.user
+    actor: actor
       ? {
-          userId: request.user.userId,
-          email: request.user.email,
-          ...(request.user.name ? { name: request.user.name } : {}),
+          ...(actor.userId ? { userId: actor.userId } : {}),
+          ...(actor.email ? { email: actor.email } : {}),
+          ...(actor.name ? { name: actor.name } : {}),
         }
       : null,
     params: sanitizeValue(request.params ?? {}),
@@ -166,11 +206,14 @@ export class AuditLogInterceptor implements NestInterceptor {
       UUID_PATTERN.test(request.params.organizationId)
         ? request.params.organizationId
         : null;
+    const actor = getActorSnapshot(request);
 
     void this.prisma.auditLog
       .create({
         data: {
-          actorUserId: request.user?.userId ?? null,
+          actorUserId: actor?.userId ?? null,
+          actorName: actor?.name ?? null,
+          actorEmail: actor?.email ?? null,
           organizationId,
           action: `${request.method} ${path}`.slice(0, 160),
           method: request.method.slice(0, 12),
@@ -182,7 +225,7 @@ export class AuditLogInterceptor implements NestInterceptor {
             typeof request.headers['user-agent'] === 'string'
               ? request.headers['user-agent']
               : null,
-          metadata: buildMetadata(request, durationMs, error),
+          metadata: buildMetadata(request, durationMs, actor, error),
         },
       })
       .catch(() => {
