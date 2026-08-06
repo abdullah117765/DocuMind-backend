@@ -76,7 +76,8 @@ const permissions: readonly SeedPermission[] = [
   {
     code: ORGANIZATION_PERMISSIONS.billingManage,
     name: 'Billing (disabled)',
-    description: 'Disabled placeholder. Billing and payment flows are not enabled.',
+    description:
+      'Disabled placeholder. Billing and payment flows are not enabled.',
     category: 'Administration',
     scope: AccessScope.ORGANIZATION,
     isActive: false,
@@ -84,7 +85,8 @@ const permissions: readonly SeedPermission[] = [
   {
     code: ORGANIZATION_PERMISSIONS.membersManage,
     name: 'Member Management',
-    description: 'Create, invite, update, deactivate, and remove organization members.',
+    description:
+      'Create, invite, update, deactivate, and remove organization members.',
     category: 'Administration',
     scope: AccessScope.ORGANIZATION,
   },
@@ -172,9 +174,18 @@ const permissions: readonly SeedPermission[] = [
     scope: AccessScope.PLATFORM,
   },
   {
+    code: PLATFORM_PERMISSIONS.documentsManage,
+    name: 'Platform Documents',
+    description:
+      'Review organization document uploads and permanently purge files after tenant deletion.',
+    category: 'Platform',
+    scope: AccessScope.PLATFORM,
+  },
+  {
     code: PLATFORM_PERMISSIONS.subscriptionsManage,
     name: 'Platform Subscriptions (disabled)',
-    description: 'Disabled placeholder. Payment/subscription management is not enabled.',
+    description:
+      'Disabled placeholder. Payment/subscription management is not enabled.',
     category: 'Platform',
     scope: AccessScope.PLATFORM,
     isActive: false,

@@ -68,7 +68,12 @@ export const ModelName = {
   OrganizationSubscription: 'OrganizationSubscription',
   OrganizationLimit: 'OrganizationLimit',
   JoinRequest: 'JoinRequest',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  Document: 'Document',
+  DocumentVersion: 'DocumentVersion',
+  DocumentAccess: 'DocumentAccess',
+  DocumentUploadSession: 'DocumentUploadSession',
+  DocumentUploadStagedFile: 'DocumentUploadStagedFile'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -344,6 +349,106 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const DocumentScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  originalFilename: 'originalFilename',
+  extension: 'extension',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  checksumSha256: 'checksumSha256',
+  storageBucket: 'storageBucket',
+  storageKey: 'storageKey',
+  status: 'status',
+  createdByUserId: 'createdByUserId',
+  userDeletedByUserId: 'userDeletedByUserId',
+  userDeletedAt: 'userDeletedAt',
+  orgDeletedByUserId: 'orgDeletedByUserId',
+  orgDeletedAt: 'orgDeletedAt',
+  restoredByUserId: 'restoredByUserId',
+  restoredAt: 'restoredAt',
+  purgedByUserId: 'purgedByUserId',
+  purgedAt: 'purgedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const DocumentVersionScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  organizationId: 'organizationId',
+  versionNumber: 'versionNumber',
+  name: 'name',
+  originalFilename: 'originalFilename',
+  extension: 'extension',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  checksumSha256: 'checksumSha256',
+  storageBucket: 'storageBucket',
+  storageKey: 'storageKey',
+  metadata: 'metadata',
+  preview: 'preview',
+  createdByUserId: 'createdByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentVersionScalarFieldEnum = (typeof DocumentVersionScalarFieldEnum)[keyof typeof DocumentVersionScalarFieldEnum]
+
+
+export const DocumentAccessScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  userId: 'userId',
+  accessLevel: 'accessLevel',
+  grantedByUserId: 'grantedByUserId',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentAccessScalarFieldEnum = (typeof DocumentAccessScalarFieldEnum)[keyof typeof DocumentAccessScalarFieldEnum]
+
+
+export const DocumentUploadSessionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  createdByUserId: 'createdByUserId',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  committedAt: 'committedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentUploadSessionScalarFieldEnum = (typeof DocumentUploadSessionScalarFieldEnum)[keyof typeof DocumentUploadSessionScalarFieldEnum]
+
+
+export const DocumentUploadStagedFileScalarFieldEnum = {
+  id: 'id',
+  uploadSessionId: 'uploadSessionId',
+  position: 'position',
+  originalFilename: 'originalFilename',
+  extension: 'extension',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  checksumSha256: 'checksumSha256',
+  storageBucket: 'storageBucket',
+  storageKey: 'storageKey',
+  metadata: 'metadata',
+  preview: 'preview',
+  status: 'status',
+  rejectionReason: 'rejectionReason',
+  sourceArchiveName: 'sourceArchiveName',
+  sourceArchivePath: 'sourceArchivePath',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentUploadStagedFileScalarFieldEnum = (typeof DocumentUploadStagedFileScalarFieldEnum)[keyof typeof DocumentUploadStagedFileScalarFieldEnum]
 
 
 export const SortOrder = {

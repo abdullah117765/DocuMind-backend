@@ -12,6 +12,7 @@ export const ORGANIZATION_ROLE_KEYS = {
 export const PLATFORM_PERMISSIONS = {
   organizationsManage: 'platform.organizations.manage',
   usersManage: 'platform.users.manage',
+  documentsManage: 'platform.documents.manage',
   subscriptionsManage: 'platform.subscriptions.manage',
   aiConfigurationManage: 'platform.ai_config.manage',
   settingsManage: 'platform.settings.manage',
@@ -45,18 +46,18 @@ export const LEGACY_PERMISSIONS = {
 
 export const ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS: ReadonlySet<string> =
   new Set([
-  ORGANIZATION_ROLE_KEYS.manager,
-  ORGANIZATION_ROLE_KEYS.employee,
-  ORGANIZATION_ROLE_KEYS.viewer,
-]);
+    ORGANIZATION_ROLE_KEYS.manager,
+    ORGANIZATION_ROLE_KEYS.employee,
+    ORGANIZATION_ROLE_KEYS.viewer,
+  ]);
 
 export const ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS: ReadonlySet<string> =
   new Set([
-  ORGANIZATION_PERMISSIONS.membersManage,
-  ORGANIZATION_PERMISSIONS.rolesManage,
-  ORGANIZATION_PERMISSIONS.permissionsAssign,
-  ORGANIZATION_PERMISSIONS.billingManage,
-  ORGANIZATION_PERMISSIONS.queuesManage,
-  ORGANIZATION_PERMISSIONS.promptsManage,
-  ORGANIZATION_PERMISSIONS.settingsManage,
-]);
+    ORGANIZATION_PERMISSIONS.membersManage,
+    ORGANIZATION_PERMISSIONS.rolesManage,
+    ORGANIZATION_PERMISSIONS.permissionsAssign,
+    ORGANIZATION_PERMISSIONS.billingManage,
+    ORGANIZATION_PERMISSIONS.queuesManage,
+    ORGANIZATION_PERMISSIONS.promptsManage,
+    ORGANIZATION_PERMISSIONS.settingsManage,
+  ]);

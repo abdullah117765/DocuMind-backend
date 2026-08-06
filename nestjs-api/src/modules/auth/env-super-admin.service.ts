@@ -10,8 +10,7 @@ import {
 } from '../access-control/rbac.constants';
 import { PrismaService } from '../prisma/prisma.service';
 
-export const ENV_SUPER_ADMIN_ROLE_ID =
-  '00000000-0000-4000-8000-000000000001';
+export const ENV_SUPER_ADMIN_ROLE_ID = '00000000-0000-4000-8000-000000000001';
 
 const ENV_ONLY_PASSWORD_HASH_PLACEHOLDER =
   '$2b$12$puR9afvrAILWKKnVKbDCX.0CXlT.969TXmlk0BC2aAbR/9yjc5..y';
@@ -19,6 +18,7 @@ const ENV_ONLY_PASSWORD_HASH_PLACEHOLDER =
 const BUILT_IN_PLATFORM_SUPER_ADMIN_PERMISSIONS = [
   PLATFORM_PERMISSIONS.organizationsManage,
   PLATFORM_PERMISSIONS.usersManage,
+  PLATFORM_PERMISSIONS.documentsManage,
   PLATFORM_PERMISSIONS.aiConfigurationManage,
   PLATFORM_PERMISSIONS.analyticsView,
   PLATFORM_PERMISSIONS.auditLogsView,
@@ -72,13 +72,12 @@ export class EnvSuperAdminService {
     private readonly prisma: PrismaService,
     configService: ConfigService,
   ) {
-    this.config =
-      configService.get<SuperAdminConfiguration>('superAdmin') ?? {
-        configured: false,
-        email: null,
-        password: null,
-        name: null,
-      };
+    this.config = configService.get<SuperAdminConfiguration>('superAdmin') ?? {
+      configured: false,
+      email: null,
+      password: null,
+      name: null,
+    };
   }
 
   isConfigured(): boolean {
@@ -87,8 +86,7 @@ export class EnvSuperAdminService {
 
   isConfiguredEmail(email: string): boolean {
     return (
-      this.config.configured &&
-      this.config.email === normalizeEmail(email)
+      this.config.configured && this.config.email === normalizeEmail(email)
     );
   }
 
@@ -157,7 +155,11 @@ export class EnvSuperAdminService {
     isSuperAdmin: true;
     name: string;
   } | null {
-    if (!this.config.configured || !this.config.name || !this.isConfiguredUser(user)) {
+    if (
+      !this.config.configured ||
+      !this.config.name ||
+      !this.isConfiguredUser(user)
+    ) {
       return null;
     }
 

@@ -71,3 +71,40 @@ export const OrganizationStatus = {
 } as const
 
 export type OrganizationStatus = (typeof OrganizationStatus)[keyof typeof OrganizationStatus]
+
+
+export const DocumentStatus = {
+  ACTIVE: 'ACTIVE',
+  SOFT_DELETED_BY_USER: 'SOFT_DELETED_BY_USER',
+  SOFT_DELETED_BY_ORG: 'SOFT_DELETED_BY_ORG',
+  PURGED: 'PURGED'
+} as const
+
+export type DocumentStatus = (typeof DocumentStatus)[keyof typeof DocumentStatus]
+
+
+export const DocumentAccessLevel = {
+  PREVIEW: 'PREVIEW'
+} as const
+
+export type DocumentAccessLevel = (typeof DocumentAccessLevel)[keyof typeof DocumentAccessLevel]
+
+
+export const DocumentUploadSessionStatus = {
+  PENDING: 'PENDING',
+  COMMITTED: 'COMMITTED',
+  CANCELED: 'CANCELED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type DocumentUploadSessionStatus = (typeof DocumentUploadSessionStatus)[keyof typeof DocumentUploadSessionStatus]
+
+
+export const DocumentStagedFileStatus = {
+  READY: 'READY',
+  REJECTED: 'REJECTED',
+  REMOVED: 'REMOVED',
+  COMMITTED: 'COMMITTED'
+} as const
+
+export type DocumentStagedFileStatus = (typeof DocumentStagedFileStatus)[keyof typeof DocumentStagedFileStatus]

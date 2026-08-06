@@ -426,6 +426,74 @@ export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
   _max?: Prisma.NestedJsonNullableFilter<$PrismaModel>
 }
 
+export type EnumDocumentStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentStatus | Prisma.EnumDocumentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentStatus[] | Prisma.ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentStatus[] | Prisma.ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel> | $Enums.DocumentStatus
+}
+
+export type EnumDocumentStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentStatus | Prisma.EnumDocumentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentStatus[] | Prisma.ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentStatus[] | Prisma.ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
+}
+
+export type EnumDocumentAccessLevelFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentAccessLevel | Prisma.EnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentAccessLevel[] | Prisma.ListEnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentAccessLevel[] | Prisma.ListEnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentAccessLevelFilter<$PrismaModel> | $Enums.DocumentAccessLevel
+}
+
+export type EnumDocumentAccessLevelWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentAccessLevel | Prisma.EnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentAccessLevel[] | Prisma.ListEnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentAccessLevel[] | Prisma.ListEnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentAccessLevelWithAggregatesFilter<$PrismaModel> | $Enums.DocumentAccessLevel
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentAccessLevelFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentAccessLevelFilter<$PrismaModel>
+}
+
+export type EnumDocumentUploadSessionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentUploadSessionStatus | Prisma.EnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentUploadSessionStatus[] | Prisma.ListEnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentUploadSessionStatus[] | Prisma.ListEnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentUploadSessionStatusFilter<$PrismaModel> | $Enums.DocumentUploadSessionStatus
+}
+
+export type EnumDocumentUploadSessionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentUploadSessionStatus | Prisma.EnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentUploadSessionStatus[] | Prisma.ListEnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentUploadSessionStatus[] | Prisma.ListEnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentUploadSessionStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentUploadSessionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentUploadSessionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentUploadSessionStatusFilter<$PrismaModel>
+}
+
+export type EnumDocumentStagedFileStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentStagedFileStatus | Prisma.EnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentStagedFileStatus[] | Prisma.ListEnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentStagedFileStatus[] | Prisma.ListEnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentStagedFileStatusFilter<$PrismaModel> | $Enums.DocumentStagedFileStatus
+}
+
+export type EnumDocumentStagedFileStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentStagedFileStatus | Prisma.EnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentStagedFileStatus[] | Prisma.ListEnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentStagedFileStatus[] | Prisma.ListEnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentStagedFileStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentStagedFileStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentStagedFileStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentStagedFileStatusFilter<$PrismaModel>
+}
+
 export type NestedUuidFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -818,6 +886,74 @@ export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumDocumentStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentStatus | Prisma.EnumDocumentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentStatus[] | Prisma.ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentStatus[] | Prisma.ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel> | $Enums.DocumentStatus
+}
+
+export type NestedEnumDocumentStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentStatus | Prisma.EnumDocumentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentStatus[] | Prisma.ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentStatus[] | Prisma.ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumDocumentAccessLevelFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentAccessLevel | Prisma.EnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentAccessLevel[] | Prisma.ListEnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentAccessLevel[] | Prisma.ListEnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentAccessLevelFilter<$PrismaModel> | $Enums.DocumentAccessLevel
+}
+
+export type NestedEnumDocumentAccessLevelWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentAccessLevel | Prisma.EnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentAccessLevel[] | Prisma.ListEnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentAccessLevel[] | Prisma.ListEnumDocumentAccessLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentAccessLevelWithAggregatesFilter<$PrismaModel> | $Enums.DocumentAccessLevel
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentAccessLevelFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentAccessLevelFilter<$PrismaModel>
+}
+
+export type NestedEnumDocumentUploadSessionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentUploadSessionStatus | Prisma.EnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentUploadSessionStatus[] | Prisma.ListEnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentUploadSessionStatus[] | Prisma.ListEnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentUploadSessionStatusFilter<$PrismaModel> | $Enums.DocumentUploadSessionStatus
+}
+
+export type NestedEnumDocumentUploadSessionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentUploadSessionStatus | Prisma.EnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentUploadSessionStatus[] | Prisma.ListEnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentUploadSessionStatus[] | Prisma.ListEnumDocumentUploadSessionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentUploadSessionStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentUploadSessionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentUploadSessionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentUploadSessionStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumDocumentStagedFileStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentStagedFileStatus | Prisma.EnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentStagedFileStatus[] | Prisma.ListEnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentStagedFileStatus[] | Prisma.ListEnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentStagedFileStatusFilter<$PrismaModel> | $Enums.DocumentStagedFileStatus
+}
+
+export type NestedEnumDocumentStagedFileStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentStagedFileStatus | Prisma.EnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentStagedFileStatus[] | Prisma.ListEnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentStagedFileStatus[] | Prisma.ListEnumDocumentStagedFileStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentStagedFileStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentStagedFileStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentStagedFileStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentStagedFileStatusFilter<$PrismaModel>
 }
 
 

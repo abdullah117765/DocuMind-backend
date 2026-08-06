@@ -52,6 +52,31 @@ enum OrganizationStatus {
   SUSPENDED
 }
 
+enum DocumentStatus {
+  ACTIVE
+  SOFT_DELETED_BY_USER
+  SOFT_DELETED_BY_ORG
+  PURGED
+}
+
+enum DocumentAccessLevel {
+  PREVIEW
+}
+
+enum DocumentUploadSessionStatus {
+  PENDING
+  COMMITTED
+  CANCELED
+  EXPIRED
+}
+
+enum DocumentStagedFileStatus {
+  READY
+  REJECTED
+  REMOVED
+  COMMITTED
+}
+
 model User {
   id                            String                   @id @default(uuid()) @db.Uuid
   name                          String?                  @db.VarChar(150)
@@ -72,6 +97,15 @@ model User {
   joinRequests                  JoinRequest[]            @relation("JoinRequestRequester")
   joinRequestsReviewed          JoinRequest[]            @relation("JoinRequestReviewer")
   auditLogs                     AuditLog[]               @relation("AuditLogActor")
+  documentsCreated              Document[]               @relation("DocumentCreator")
+  documentVersionsCreated       DocumentVersion[]        @relation("DocumentVersionCreator")
+  documentUserDeletions         Document[]               @relation("DocumentUserDeleter")
+  documentOrgDeletions          Document[]               @relation("DocumentOrgDeleter")
+  documentRestorations          Document[]               @relation("DocumentRestorer")
+  documentPurges                Document[]               @relation("DocumentPurger")
+  documentAccessGrants          DocumentAccess[]         @relation("DocumentAccessUser")
+  documentAccessGranted         DocumentAccess[]         @relation("DocumentAccessGranter")
+  documentUploadSessions        DocumentUploadSession[]  @relation("DocumentUploadSessionCreator")
   platformRoleAssignments       PlatformUserRole[]       @relation("PlatformRoleAssignee")
   platformRoleAssignmentsMade   PlatformUserRole[]       @relation("PlatformRoleAssigner")
   membershipRoleAssignmentsMade MembershipRole[]         @relation("MembershipRoleAssigner")
@@ -162,6 +196,8 @@ model Organization {
   invites         OrganizationInvite[]
   joinRequests    JoinRequest[]
   auditLogs       AuditLog[]
+  documents       Document[]
+  documentUploadSessions DocumentUploadSession[]
   subscription    OrganizationSubscription?
   limits          OrganizationLimit?
 
@@ -392,4 +428,132 @@ model AuditLog {
   @@index([action, createdAt])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model Document {
+  id              String         @id @default(uuid()) @db.Uuid
+  organizationId  String         @map("organization_id") @db.Uuid
+  name            String         @db.VarChar(255)
+  originalFilename String        @map("original_filename") @db.VarChar(255)
+  extension       String         @db.VarChar(16)
+  mimeType        String         @map("mime_type") @db.VarChar(120)
+  sizeBytes       Int            @map("size_bytes")
+  checksumSha256  String         @map("checksum_sha256") @db.VarChar(64)
+  storageBucket   String         @map("storage_bucket") @db.VarChar(80)
+  storageKey      String         @map("storage_key") @db.VarChar(500)
+  status          DocumentStatus @default(ACTIVE)
+  createdByUserId String         @map("created_by_user_id") @db.Uuid
+  userDeletedByUserId String?    @map("user_deleted_by_user_id") @db.Uuid
+  userDeletedAt   DateTime?      @map("user_deleted_at")
+  orgDeletedByUserId String?     @map("org_deleted_by_user_id") @db.Uuid
+  orgDeletedAt    DateTime?      @map("org_deleted_at")
+  restoredByUserId String?       @map("restored_by_user_id") @db.Uuid
+  restoredAt      DateTime?      @map("restored_at")
+  purgedByUserId  String?        @map("purged_by_user_id") @db.Uuid
+  purgedAt        DateTime?      @map("purged_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy       User           @relation("DocumentCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  userDeletedBy   User?          @relation("DocumentUserDeleter", fields: [userDeletedByUserId], references: [id], onDelete: SetNull)
+  orgDeletedBy    User?          @relation("DocumentOrgDeleter", fields: [orgDeletedByUserId], references: [id], onDelete: SetNull)
+  restoredBy      User?          @relation("DocumentRestorer", fields: [restoredByUserId], references: [id], onDelete: SetNull)
+  purgedBy        User?          @relation("DocumentPurger", fields: [purgedByUserId], references: [id], onDelete: SetNull)
+  versions        DocumentVersion[]
+  accessGrants    DocumentAccess[]
+
+  @@index([organizationId, status, updatedAt])
+  @@index([createdByUserId, status, updatedAt])
+  @@index([checksumSha256])
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id              String   @id @default(uuid()) @db.Uuid
+  documentId      String   @map("document_id") @db.Uuid
+  organizationId  String   @map("organization_id") @db.Uuid
+  versionNumber   Int      @map("version_number")
+  name            String   @db.VarChar(255)
+  originalFilename String  @map("original_filename") @db.VarChar(255)
+  extension       String   @db.VarChar(16)
+  mimeType        String   @map("mime_type") @db.VarChar(120)
+  sizeBytes       Int      @map("size_bytes")
+  checksumSha256  String   @map("checksum_sha256") @db.VarChar(64)
+  storageBucket   String   @map("storage_bucket") @db.VarChar(80)
+  storageKey      String   @map("storage_key") @db.VarChar(500)
+  metadata        Json?
+  preview         Json?
+  createdByUserId String   @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdBy       User     @relation("DocumentVersionCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([documentId, versionNumber])
+  @@index([organizationId, createdAt])
+  @@index([createdByUserId, createdAt])
+  @@map("document_versions")
+}
+
+model DocumentAccess {
+  id              String              @id @default(uuid()) @db.Uuid
+  documentId      String              @map("document_id") @db.Uuid
+  userId          String              @map("user_id") @db.Uuid
+  accessLevel     DocumentAccessLevel @default(PREVIEW) @map("access_level")
+  grantedByUserId String              @map("granted_by_user_id") @db.Uuid
+  revokedAt       DateTime?           @map("revoked_at")
+  createdAt       DateTime            @default(now()) @map("created_at")
+
+  document        Document            @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user            User                @relation("DocumentAccessUser", fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy       User                @relation("DocumentAccessGranter", fields: [grantedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([documentId, revokedAt])
+  @@index([userId, revokedAt])
+  @@map("document_access")
+}
+
+model DocumentUploadSession {
+  id              String                      @id @default(uuid()) @db.Uuid
+  organizationId  String                      @map("organization_id") @db.Uuid
+  createdByUserId String                      @map("created_by_user_id") @db.Uuid
+  status          DocumentUploadSessionStatus @default(PENDING)
+  expiresAt       DateTime                    @map("expires_at")
+  committedAt     DateTime?                   @map("committed_at")
+  createdAt       DateTime                    @default(now()) @map("created_at")
+  updatedAt       DateTime                    @updatedAt @map("updated_at")
+
+  organization    Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy       User                        @relation("DocumentUploadSessionCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  files           DocumentUploadStagedFile[]
+
+  @@index([organizationId, status, createdAt])
+  @@index([createdByUserId, status, createdAt])
+  @@map("document_upload_sessions")
+}
+
+model DocumentUploadStagedFile {
+  id              String                   @id @default(uuid()) @db.Uuid
+  uploadSessionId String                   @map("upload_session_id") @db.Uuid
+  position        Int
+  originalFilename String                  @map("original_filename") @db.VarChar(255)
+  extension       String                   @db.VarChar(16)
+  mimeType        String                   @map("mime_type") @db.VarChar(120)
+  sizeBytes       Int                      @map("size_bytes")
+  checksumSha256  String                   @map("checksum_sha256") @db.VarChar(64)
+  storageBucket   String                   @map("storage_bucket") @db.VarChar(80)
+  storageKey      String                   @map("storage_key") @db.VarChar(500)
+  metadata        Json?
+  preview         Json?
+  status          DocumentStagedFileStatus @default(READY)
+  rejectionReason String?                  @map("rejection_reason") @db.VarChar(500)
+  sourceArchiveName String?                @map("source_archive_name") @db.VarChar(255)
+  sourceArchivePath String?                @map("source_archive_path") @db.VarChar(500)
+  createdAt       DateTime                 @default(now()) @map("created_at")
+
+  uploadSession   DocumentUploadSession    @relation(fields: [uploadSessionId], references: [id], onDelete: Cascade)
+
+  @@index([uploadSessionId, status])
+  @@map("document_upload_staged_files")
 }

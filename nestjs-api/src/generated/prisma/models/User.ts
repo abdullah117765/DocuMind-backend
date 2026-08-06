@@ -224,6 +224,15 @@ export type UserWhereInput = {
   joinRequests?: Prisma.JoinRequestListRelationFilter
   joinRequestsReviewed?: Prisma.JoinRequestListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  documentsCreated?: Prisma.DocumentListRelationFilter
+  documentVersionsCreated?: Prisma.DocumentVersionListRelationFilter
+  documentUserDeletions?: Prisma.DocumentListRelationFilter
+  documentOrgDeletions?: Prisma.DocumentListRelationFilter
+  documentRestorations?: Prisma.DocumentListRelationFilter
+  documentPurges?: Prisma.DocumentListRelationFilter
+  documentAccessGrants?: Prisma.DocumentAccessListRelationFilter
+  documentAccessGranted?: Prisma.DocumentAccessListRelationFilter
+  documentUploadSessions?: Prisma.DocumentUploadSessionListRelationFilter
   platformRoleAssignments?: Prisma.PlatformUserRoleListRelationFilter
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleListRelationFilter
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleListRelationFilter
@@ -250,6 +259,15 @@ export type UserOrderByWithRelationInput = {
   joinRequests?: Prisma.JoinRequestOrderByRelationAggregateInput
   joinRequestsReviewed?: Prisma.JoinRequestOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  documentsCreated?: Prisma.DocumentOrderByRelationAggregateInput
+  documentVersionsCreated?: Prisma.DocumentVersionOrderByRelationAggregateInput
+  documentUserDeletions?: Prisma.DocumentOrderByRelationAggregateInput
+  documentOrgDeletions?: Prisma.DocumentOrderByRelationAggregateInput
+  documentRestorations?: Prisma.DocumentOrderByRelationAggregateInput
+  documentPurges?: Prisma.DocumentOrderByRelationAggregateInput
+  documentAccessGrants?: Prisma.DocumentAccessOrderByRelationAggregateInput
+  documentAccessGranted?: Prisma.DocumentAccessOrderByRelationAggregateInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionOrderByRelationAggregateInput
   platformRoleAssignments?: Prisma.PlatformUserRoleOrderByRelationAggregateInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleOrderByRelationAggregateInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleOrderByRelationAggregateInput
@@ -279,6 +297,15 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   joinRequests?: Prisma.JoinRequestListRelationFilter
   joinRequestsReviewed?: Prisma.JoinRequestListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  documentsCreated?: Prisma.DocumentListRelationFilter
+  documentVersionsCreated?: Prisma.DocumentVersionListRelationFilter
+  documentUserDeletions?: Prisma.DocumentListRelationFilter
+  documentOrgDeletions?: Prisma.DocumentListRelationFilter
+  documentRestorations?: Prisma.DocumentListRelationFilter
+  documentPurges?: Prisma.DocumentListRelationFilter
+  documentAccessGrants?: Prisma.DocumentAccessListRelationFilter
+  documentAccessGranted?: Prisma.DocumentAccessListRelationFilter
+  documentUploadSessions?: Prisma.DocumentUploadSessionListRelationFilter
   platformRoleAssignments?: Prisma.PlatformUserRoleListRelationFilter
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleListRelationFilter
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleListRelationFilter
@@ -335,6 +362,15 @@ export type UserCreateInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -361,6 +397,15 @@ export type UserUncheckedCreateInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -387,6 +432,15 @@ export type UserUpdateInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -413,6 +467,15 @@ export type UserUncheckedUpdateInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -733,6 +796,140 @@ export type UserUpdateOneWithoutAuditLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.UserUpdateWithoutAuditLogsInput>, Prisma.UserUncheckedUpdateWithoutAuditLogsInput>
 }
 
+export type UserCreateNestedOneWithoutDocumentsCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentsCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutDocumentUserDeletionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentUserDeletionsInput, Prisma.UserUncheckedCreateWithoutDocumentUserDeletionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentUserDeletionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutDocumentOrgDeletionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentOrgDeletionsInput, Prisma.UserUncheckedCreateWithoutDocumentOrgDeletionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentOrgDeletionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutDocumentRestorationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentRestorationsInput, Prisma.UserUncheckedCreateWithoutDocumentRestorationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentRestorationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutDocumentPurgesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentPurgesInput, Prisma.UserUncheckedCreateWithoutDocumentPurgesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentPurgesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDocumentsCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentsCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentsCreatedInput
+  upsert?: Prisma.UserUpsertWithoutDocumentsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentsCreatedInput, Prisma.UserUpdateWithoutDocumentsCreatedInput>, Prisma.UserUncheckedUpdateWithoutDocumentsCreatedInput>
+}
+
+export type UserUpdateOneWithoutDocumentUserDeletionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentUserDeletionsInput, Prisma.UserUncheckedCreateWithoutDocumentUserDeletionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentUserDeletionsInput
+  upsert?: Prisma.UserUpsertWithoutDocumentUserDeletionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentUserDeletionsInput, Prisma.UserUpdateWithoutDocumentUserDeletionsInput>, Prisma.UserUncheckedUpdateWithoutDocumentUserDeletionsInput>
+}
+
+export type UserUpdateOneWithoutDocumentOrgDeletionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentOrgDeletionsInput, Prisma.UserUncheckedCreateWithoutDocumentOrgDeletionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentOrgDeletionsInput
+  upsert?: Prisma.UserUpsertWithoutDocumentOrgDeletionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentOrgDeletionsInput, Prisma.UserUpdateWithoutDocumentOrgDeletionsInput>, Prisma.UserUncheckedUpdateWithoutDocumentOrgDeletionsInput>
+}
+
+export type UserUpdateOneWithoutDocumentRestorationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentRestorationsInput, Prisma.UserUncheckedCreateWithoutDocumentRestorationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentRestorationsInput
+  upsert?: Prisma.UserUpsertWithoutDocumentRestorationsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentRestorationsInput, Prisma.UserUpdateWithoutDocumentRestorationsInput>, Prisma.UserUncheckedUpdateWithoutDocumentRestorationsInput>
+}
+
+export type UserUpdateOneWithoutDocumentPurgesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentPurgesInput, Prisma.UserUncheckedCreateWithoutDocumentPurgesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentPurgesInput
+  upsert?: Prisma.UserUpsertWithoutDocumentPurgesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentPurgesInput, Prisma.UserUpdateWithoutDocumentPurgesInput>, Prisma.UserUncheckedUpdateWithoutDocumentPurgesInput>
+}
+
+export type UserCreateNestedOneWithoutDocumentVersionsCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentVersionsCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentVersionsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentVersionsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDocumentVersionsCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentVersionsCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentVersionsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentVersionsCreatedInput
+  upsert?: Prisma.UserUpsertWithoutDocumentVersionsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentVersionsCreatedInput, Prisma.UserUpdateWithoutDocumentVersionsCreatedInput>, Prisma.UserUncheckedUpdateWithoutDocumentVersionsCreatedInput>
+}
+
+export type UserCreateNestedOneWithoutDocumentAccessGrantsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentAccessGrantsInput, Prisma.UserUncheckedCreateWithoutDocumentAccessGrantsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentAccessGrantsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutDocumentAccessGrantedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentAccessGrantedInput, Prisma.UserUncheckedCreateWithoutDocumentAccessGrantedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentAccessGrantedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDocumentAccessGrantsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentAccessGrantsInput, Prisma.UserUncheckedCreateWithoutDocumentAccessGrantsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentAccessGrantsInput
+  upsert?: Prisma.UserUpsertWithoutDocumentAccessGrantsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentAccessGrantsInput, Prisma.UserUpdateWithoutDocumentAccessGrantsInput>, Prisma.UserUncheckedUpdateWithoutDocumentAccessGrantsInput>
+}
+
+export type UserUpdateOneRequiredWithoutDocumentAccessGrantedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentAccessGrantedInput, Prisma.UserUncheckedCreateWithoutDocumentAccessGrantedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentAccessGrantedInput
+  upsert?: Prisma.UserUpsertWithoutDocumentAccessGrantedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentAccessGrantedInput, Prisma.UserUpdateWithoutDocumentAccessGrantedInput>, Prisma.UserUncheckedUpdateWithoutDocumentAccessGrantedInput>
+}
+
+export type UserCreateNestedOneWithoutDocumentUploadSessionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentUploadSessionsInput, Prisma.UserUncheckedCreateWithoutDocumentUploadSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentUploadSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDocumentUploadSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentUploadSessionsInput, Prisma.UserUncheckedCreateWithoutDocumentUploadSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentUploadSessionsInput
+  upsert?: Prisma.UserUpsertWithoutDocumentUploadSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentUploadSessionsInput, Prisma.UserUpdateWithoutDocumentUploadSessionsInput>, Prisma.UserUncheckedUpdateWithoutDocumentUploadSessionsInput>
+}
+
 export type UserCreateWithoutEmailVerificationTokensInput = {
   id?: string
   name?: string | null
@@ -752,6 +949,15 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -777,6 +983,15 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -818,6 +1033,15 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -843,6 +1067,15 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -868,6 +1101,15 @@ export type UserCreateWithoutPasswordResetAuthorizationsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -893,6 +1135,15 @@ export type UserUncheckedCreateWithoutPasswordResetAuthorizationsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -934,6 +1185,15 @@ export type UserUpdateWithoutPasswordResetAuthorizationsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -959,6 +1219,15 @@ export type UserUncheckedUpdateWithoutPasswordResetAuthorizationsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -984,6 +1253,15 @@ export type UserCreateWithoutSessionsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -1009,6 +1287,15 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -1050,6 +1337,15 @@ export type UserUpdateWithoutSessionsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -1075,6 +1371,15 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -1100,6 +1405,15 @@ export type UserCreateWithoutCreatedOrganizationsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -1125,6 +1439,15 @@ export type UserUncheckedCreateWithoutCreatedOrganizationsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -1166,6 +1489,15 @@ export type UserUpdateWithoutCreatedOrganizationsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -1191,6 +1523,15 @@ export type UserUncheckedUpdateWithoutCreatedOrganizationsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -1216,6 +1557,15 @@ export type UserCreateWithoutOrganizationMembershipsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -1241,6 +1591,15 @@ export type UserUncheckedCreateWithoutOrganizationMembershipsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -1282,6 +1641,15 @@ export type UserUpdateWithoutOrganizationMembershipsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -1307,6 +1675,15 @@ export type UserUncheckedUpdateWithoutOrganizationMembershipsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -1333,6 +1710,15 @@ export type UserCreateWithoutRolePermissionGrantsMadeInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -1358,6 +1744,15 @@ export type UserUncheckedCreateWithoutRolePermissionGrantsMadeInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -1399,6 +1794,15 @@ export type UserUpdateWithoutRolePermissionGrantsMadeInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -1424,6 +1828,15 @@ export type UserUncheckedUpdateWithoutRolePermissionGrantsMadeInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -1449,6 +1862,15 @@ export type UserCreateWithoutMembershipRoleAssignmentsMadeInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
@@ -1474,6 +1896,15 @@ export type UserUncheckedCreateWithoutMembershipRoleAssignmentsMadeInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
@@ -1515,6 +1946,15 @@ export type UserUpdateWithoutMembershipRoleAssignmentsMadeInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
@@ -1540,6 +1980,15 @@ export type UserUncheckedUpdateWithoutMembershipRoleAssignmentsMadeInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
@@ -1565,6 +2014,15 @@ export type UserCreateWithoutPlatformRoleAssignmentsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
   rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
@@ -1590,6 +2048,15 @@ export type UserUncheckedCreateWithoutPlatformRoleAssignmentsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
   rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
@@ -1620,6 +2087,15 @@ export type UserCreateWithoutPlatformRoleAssignmentsMadeInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
   rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
@@ -1645,6 +2121,15 @@ export type UserUncheckedCreateWithoutPlatformRoleAssignmentsMadeInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
   rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
@@ -1686,6 +2171,15 @@ export type UserUpdateWithoutPlatformRoleAssignmentsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
   rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
@@ -1711,6 +2205,15 @@ export type UserUncheckedUpdateWithoutPlatformRoleAssignmentsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
@@ -1747,6 +2250,15 @@ export type UserUpdateWithoutPlatformRoleAssignmentsMadeInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
   rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
@@ -1772,6 +2284,15 @@ export type UserUncheckedUpdateWithoutPlatformRoleAssignmentsMadeInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
@@ -1796,6 +2317,15 @@ export type UserCreateWithoutOrganizationInvitesSentInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -1821,6 +2351,15 @@ export type UserUncheckedCreateWithoutOrganizationInvitesSentInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -1851,6 +2390,15 @@ export type UserCreateWithoutOrganizationInvitesAcceptedInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -1876,6 +2424,15 @@ export type UserUncheckedCreateWithoutOrganizationInvitesAcceptedInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -1917,6 +2474,15 @@ export type UserUpdateWithoutOrganizationInvitesSentInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -1942,6 +2508,15 @@ export type UserUncheckedUpdateWithoutOrganizationInvitesSentInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -1978,6 +2553,15 @@ export type UserUpdateWithoutOrganizationInvitesAcceptedInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -2003,6 +2587,15 @@ export type UserUncheckedUpdateWithoutOrganizationInvitesAcceptedInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -2028,6 +2621,15 @@ export type UserCreateWithoutJoinRequestsInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -2053,6 +2655,15 @@ export type UserUncheckedCreateWithoutJoinRequestsInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -2083,6 +2694,15 @@ export type UserCreateWithoutJoinRequestsReviewedInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -2108,6 +2728,15 @@ export type UserUncheckedCreateWithoutJoinRequestsReviewedInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -2149,6 +2778,15 @@ export type UserUpdateWithoutJoinRequestsInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -2174,6 +2812,15 @@ export type UserUncheckedUpdateWithoutJoinRequestsInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -2210,6 +2857,15 @@ export type UserUpdateWithoutJoinRequestsReviewedInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -2235,6 +2891,15 @@ export type UserUncheckedUpdateWithoutJoinRequestsReviewedInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -2260,6 +2925,15 @@ export type UserCreateWithoutAuditLogsInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
@@ -2285,6 +2959,15 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
@@ -2326,6 +3009,15 @@ export type UserUpdateWithoutAuditLogsInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
@@ -2351,6 +3043,1383 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserCreateWithoutDocumentsCreatedInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutDocumentsCreatedInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutDocumentsCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentsCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentsCreatedInput>
+}
+
+export type UserCreateWithoutDocumentUserDeletionsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutDocumentUserDeletionsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutDocumentUserDeletionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentUserDeletionsInput, Prisma.UserUncheckedCreateWithoutDocumentUserDeletionsInput>
+}
+
+export type UserCreateWithoutDocumentOrgDeletionsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutDocumentOrgDeletionsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutDocumentOrgDeletionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentOrgDeletionsInput, Prisma.UserUncheckedCreateWithoutDocumentOrgDeletionsInput>
+}
+
+export type UserCreateWithoutDocumentRestorationsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutDocumentRestorationsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutDocumentRestorationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentRestorationsInput, Prisma.UserUncheckedCreateWithoutDocumentRestorationsInput>
+}
+
+export type UserCreateWithoutDocumentPurgesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutDocumentPurgesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutDocumentPurgesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentPurgesInput, Prisma.UserUncheckedCreateWithoutDocumentPurgesInput>
+}
+
+export type UserUpsertWithoutDocumentsCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentsCreatedInput, Prisma.UserUncheckedUpdateWithoutDocumentsCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentsCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentsCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentsCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentsCreatedInput, Prisma.UserUncheckedUpdateWithoutDocumentsCreatedInput>
+}
+
+export type UserUpdateWithoutDocumentsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUpsertWithoutDocumentUserDeletionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentUserDeletionsInput, Prisma.UserUncheckedUpdateWithoutDocumentUserDeletionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentUserDeletionsInput, Prisma.UserUncheckedCreateWithoutDocumentUserDeletionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentUserDeletionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentUserDeletionsInput, Prisma.UserUncheckedUpdateWithoutDocumentUserDeletionsInput>
+}
+
+export type UserUpdateWithoutDocumentUserDeletionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentUserDeletionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUpsertWithoutDocumentOrgDeletionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentOrgDeletionsInput, Prisma.UserUncheckedUpdateWithoutDocumentOrgDeletionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentOrgDeletionsInput, Prisma.UserUncheckedCreateWithoutDocumentOrgDeletionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentOrgDeletionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentOrgDeletionsInput, Prisma.UserUncheckedUpdateWithoutDocumentOrgDeletionsInput>
+}
+
+export type UserUpdateWithoutDocumentOrgDeletionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentOrgDeletionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUpsertWithoutDocumentRestorationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentRestorationsInput, Prisma.UserUncheckedUpdateWithoutDocumentRestorationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentRestorationsInput, Prisma.UserUncheckedCreateWithoutDocumentRestorationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentRestorationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentRestorationsInput, Prisma.UserUncheckedUpdateWithoutDocumentRestorationsInput>
+}
+
+export type UserUpdateWithoutDocumentRestorationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentRestorationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUpsertWithoutDocumentPurgesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentPurgesInput, Prisma.UserUncheckedUpdateWithoutDocumentPurgesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentPurgesInput, Prisma.UserUncheckedCreateWithoutDocumentPurgesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentPurgesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentPurgesInput, Prisma.UserUncheckedUpdateWithoutDocumentPurgesInput>
+}
+
+export type UserUpdateWithoutDocumentPurgesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentPurgesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserCreateWithoutDocumentVersionsCreatedInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutDocumentVersionsCreatedInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutDocumentVersionsCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentVersionsCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentVersionsCreatedInput>
+}
+
+export type UserUpsertWithoutDocumentVersionsCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentVersionsCreatedInput, Prisma.UserUncheckedUpdateWithoutDocumentVersionsCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentVersionsCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentVersionsCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentVersionsCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentVersionsCreatedInput, Prisma.UserUncheckedUpdateWithoutDocumentVersionsCreatedInput>
+}
+
+export type UserUpdateWithoutDocumentVersionsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentVersionsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserCreateWithoutDocumentAccessGrantsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutDocumentAccessGrantsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutDocumentAccessGrantsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentAccessGrantsInput, Prisma.UserUncheckedCreateWithoutDocumentAccessGrantsInput>
+}
+
+export type UserCreateWithoutDocumentAccessGrantedInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutDocumentAccessGrantedInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutDocumentAccessGrantedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentAccessGrantedInput, Prisma.UserUncheckedCreateWithoutDocumentAccessGrantedInput>
+}
+
+export type UserUpsertWithoutDocumentAccessGrantsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentAccessGrantsInput, Prisma.UserUncheckedUpdateWithoutDocumentAccessGrantsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentAccessGrantsInput, Prisma.UserUncheckedCreateWithoutDocumentAccessGrantsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentAccessGrantsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentAccessGrantsInput, Prisma.UserUncheckedUpdateWithoutDocumentAccessGrantsInput>
+}
+
+export type UserUpdateWithoutDocumentAccessGrantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentAccessGrantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUpsertWithoutDocumentAccessGrantedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentAccessGrantedInput, Prisma.UserUncheckedUpdateWithoutDocumentAccessGrantedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentAccessGrantedInput, Prisma.UserUncheckedCreateWithoutDocumentAccessGrantedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentAccessGrantedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentAccessGrantedInput, Prisma.UserUncheckedUpdateWithoutDocumentAccessGrantedInput>
+}
+
+export type UserUpdateWithoutDocumentAccessGrantedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentAccessGrantedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserCreateWithoutDocumentUploadSessionsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutDocumentUploadSessionsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutDocumentUploadSessionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentUploadSessionsInput, Prisma.UserUncheckedCreateWithoutDocumentUploadSessionsInput>
+}
+
+export type UserUpsertWithoutDocumentUploadSessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentUploadSessionsInput, Prisma.UserUncheckedUpdateWithoutDocumentUploadSessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentUploadSessionsInput, Prisma.UserUncheckedCreateWithoutDocumentUploadSessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentUploadSessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentUploadSessionsInput, Prisma.UserUncheckedUpdateWithoutDocumentUploadSessionsInput>
+}
+
+export type UserUpdateWithoutDocumentUploadSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentUploadSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
   platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
   platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
   membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
@@ -2373,6 +4442,15 @@ export type UserCountOutputType = {
   joinRequests: number
   joinRequestsReviewed: number
   auditLogs: number
+  documentsCreated: number
+  documentVersionsCreated: number
+  documentUserDeletions: number
+  documentOrgDeletions: number
+  documentRestorations: number
+  documentPurges: number
+  documentAccessGrants: number
+  documentAccessGranted: number
+  documentUploadSessions: number
   platformRoleAssignments: number
   platformRoleAssignmentsMade: number
   membershipRoleAssignmentsMade: number
@@ -2390,6 +4468,15 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   joinRequests?: boolean | UserCountOutputTypeCountJoinRequestsArgs
   joinRequestsReviewed?: boolean | UserCountOutputTypeCountJoinRequestsReviewedArgs
   auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
+  documentsCreated?: boolean | UserCountOutputTypeCountDocumentsCreatedArgs
+  documentVersionsCreated?: boolean | UserCountOutputTypeCountDocumentVersionsCreatedArgs
+  documentUserDeletions?: boolean | UserCountOutputTypeCountDocumentUserDeletionsArgs
+  documentOrgDeletions?: boolean | UserCountOutputTypeCountDocumentOrgDeletionsArgs
+  documentRestorations?: boolean | UserCountOutputTypeCountDocumentRestorationsArgs
+  documentPurges?: boolean | UserCountOutputTypeCountDocumentPurgesArgs
+  documentAccessGrants?: boolean | UserCountOutputTypeCountDocumentAccessGrantsArgs
+  documentAccessGranted?: boolean | UserCountOutputTypeCountDocumentAccessGrantedArgs
+  documentUploadSessions?: boolean | UserCountOutputTypeCountDocumentUploadSessionsArgs
   platformRoleAssignments?: boolean | UserCountOutputTypeCountPlatformRoleAssignmentsArgs
   platformRoleAssignmentsMade?: boolean | UserCountOutputTypeCountPlatformRoleAssignmentsMadeArgs
   membershipRoleAssignmentsMade?: boolean | UserCountOutputTypeCountMembershipRoleAssignmentsMadeArgs
@@ -2479,6 +4566,69 @@ export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountDocumentsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentVersionsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentVersionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentUserDeletionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentOrgDeletionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentRestorationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentPurgesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentAccessGrantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentAccessWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentAccessGrantedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentAccessWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentUploadSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentUploadSessionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountPlatformRoleAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.PlatformUserRoleWhereInput
 }
@@ -2525,6 +4675,15 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   joinRequests?: boolean | Prisma.User$joinRequestsArgs<ExtArgs>
   joinRequestsReviewed?: boolean | Prisma.User$joinRequestsReviewedArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  documentsCreated?: boolean | Prisma.User$documentsCreatedArgs<ExtArgs>
+  documentVersionsCreated?: boolean | Prisma.User$documentVersionsCreatedArgs<ExtArgs>
+  documentUserDeletions?: boolean | Prisma.User$documentUserDeletionsArgs<ExtArgs>
+  documentOrgDeletions?: boolean | Prisma.User$documentOrgDeletionsArgs<ExtArgs>
+  documentRestorations?: boolean | Prisma.User$documentRestorationsArgs<ExtArgs>
+  documentPurges?: boolean | Prisma.User$documentPurgesArgs<ExtArgs>
+  documentAccessGrants?: boolean | Prisma.User$documentAccessGrantsArgs<ExtArgs>
+  documentAccessGranted?: boolean | Prisma.User$documentAccessGrantedArgs<ExtArgs>
+  documentUploadSessions?: boolean | Prisma.User$documentUploadSessionsArgs<ExtArgs>
   platformRoleAssignments?: boolean | Prisma.User$platformRoleAssignmentsArgs<ExtArgs>
   platformRoleAssignmentsMade?: boolean | Prisma.User$platformRoleAssignmentsMadeArgs<ExtArgs>
   membershipRoleAssignmentsMade?: boolean | Prisma.User$membershipRoleAssignmentsMadeArgs<ExtArgs>
@@ -2580,6 +4739,15 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   joinRequests?: boolean | Prisma.User$joinRequestsArgs<ExtArgs>
   joinRequestsReviewed?: boolean | Prisma.User$joinRequestsReviewedArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  documentsCreated?: boolean | Prisma.User$documentsCreatedArgs<ExtArgs>
+  documentVersionsCreated?: boolean | Prisma.User$documentVersionsCreatedArgs<ExtArgs>
+  documentUserDeletions?: boolean | Prisma.User$documentUserDeletionsArgs<ExtArgs>
+  documentOrgDeletions?: boolean | Prisma.User$documentOrgDeletionsArgs<ExtArgs>
+  documentRestorations?: boolean | Prisma.User$documentRestorationsArgs<ExtArgs>
+  documentPurges?: boolean | Prisma.User$documentPurgesArgs<ExtArgs>
+  documentAccessGrants?: boolean | Prisma.User$documentAccessGrantsArgs<ExtArgs>
+  documentAccessGranted?: boolean | Prisma.User$documentAccessGrantedArgs<ExtArgs>
+  documentUploadSessions?: boolean | Prisma.User$documentUploadSessionsArgs<ExtArgs>
   platformRoleAssignments?: boolean | Prisma.User$platformRoleAssignmentsArgs<ExtArgs>
   platformRoleAssignmentsMade?: boolean | Prisma.User$platformRoleAssignmentsMadeArgs<ExtArgs>
   membershipRoleAssignmentsMade?: boolean | Prisma.User$membershipRoleAssignmentsMadeArgs<ExtArgs>
@@ -2602,6 +4770,15 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     joinRequests: Prisma.$JoinRequestPayload<ExtArgs>[]
     joinRequestsReviewed: Prisma.$JoinRequestPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    documentsCreated: Prisma.$DocumentPayload<ExtArgs>[]
+    documentVersionsCreated: Prisma.$DocumentVersionPayload<ExtArgs>[]
+    documentUserDeletions: Prisma.$DocumentPayload<ExtArgs>[]
+    documentOrgDeletions: Prisma.$DocumentPayload<ExtArgs>[]
+    documentRestorations: Prisma.$DocumentPayload<ExtArgs>[]
+    documentPurges: Prisma.$DocumentPayload<ExtArgs>[]
+    documentAccessGrants: Prisma.$DocumentAccessPayload<ExtArgs>[]
+    documentAccessGranted: Prisma.$DocumentAccessPayload<ExtArgs>[]
+    documentUploadSessions: Prisma.$DocumentUploadSessionPayload<ExtArgs>[]
     platformRoleAssignments: Prisma.$PlatformUserRolePayload<ExtArgs>[]
     platformRoleAssignmentsMade: Prisma.$PlatformUserRolePayload<ExtArgs>[]
     membershipRoleAssignmentsMade: Prisma.$MembershipRolePayload<ExtArgs>[]
@@ -3021,6 +5198,15 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   joinRequests<T extends Prisma.User$joinRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$joinRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   joinRequestsReviewed<T extends Prisma.User$joinRequestsReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$joinRequestsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentsCreated<T extends Prisma.User$documentsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentVersionsCreated<T extends Prisma.User$documentVersionsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentVersionsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentUserDeletions<T extends Prisma.User$documentUserDeletionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentUserDeletionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentOrgDeletions<T extends Prisma.User$documentOrgDeletionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentOrgDeletionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentRestorations<T extends Prisma.User$documentRestorationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentRestorationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentPurges<T extends Prisma.User$documentPurgesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentPurgesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentAccessGrants<T extends Prisma.User$documentAccessGrantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentAccessGrantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentAccessGranted<T extends Prisma.User$documentAccessGrantedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentAccessGrantedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentUploadSessions<T extends Prisma.User$documentUploadSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentUploadSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentUploadSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   platformRoleAssignments<T extends Prisma.User$platformRoleAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$platformRoleAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlatformUserRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   platformRoleAssignmentsMade<T extends Prisma.User$platformRoleAssignmentsMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$platformRoleAssignmentsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlatformUserRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   membershipRoleAssignmentsMade<T extends Prisma.User$membershipRoleAssignmentsMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipRoleAssignmentsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MembershipRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3693,6 +5879,222 @@ export type User$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * User.documentsCreated
+ */
+export type User$documentsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * User.documentVersionsCreated
+ */
+export type User$documentVersionsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentVersion
+   */
+  select?: Prisma.DocumentVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentVersion
+   */
+  omit?: Prisma.DocumentVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentVersionInclude<ExtArgs> | null
+  where?: Prisma.DocumentVersionWhereInput
+  orderBy?: Prisma.DocumentVersionOrderByWithRelationInput | Prisma.DocumentVersionOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentVersionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentVersionScalarFieldEnum | Prisma.DocumentVersionScalarFieldEnum[]
+}
+
+/**
+ * User.documentUserDeletions
+ */
+export type User$documentUserDeletionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * User.documentOrgDeletions
+ */
+export type User$documentOrgDeletionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * User.documentRestorations
+ */
+export type User$documentRestorationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * User.documentPurges
+ */
+export type User$documentPurgesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * User.documentAccessGrants
+ */
+export type User$documentAccessGrantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentAccess
+   */
+  select?: Prisma.DocumentAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentAccess
+   */
+  omit?: Prisma.DocumentAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentAccessInclude<ExtArgs> | null
+  where?: Prisma.DocumentAccessWhereInput
+  orderBy?: Prisma.DocumentAccessOrderByWithRelationInput | Prisma.DocumentAccessOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentAccessScalarFieldEnum | Prisma.DocumentAccessScalarFieldEnum[]
+}
+
+/**
+ * User.documentAccessGranted
+ */
+export type User$documentAccessGrantedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentAccess
+   */
+  select?: Prisma.DocumentAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentAccess
+   */
+  omit?: Prisma.DocumentAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentAccessInclude<ExtArgs> | null
+  where?: Prisma.DocumentAccessWhereInput
+  orderBy?: Prisma.DocumentAccessOrderByWithRelationInput | Prisma.DocumentAccessOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentAccessScalarFieldEnum | Prisma.DocumentAccessScalarFieldEnum[]
+}
+
+/**
+ * User.documentUploadSessions
+ */
+export type User$documentUploadSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentUploadSession
+   */
+  select?: Prisma.DocumentUploadSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentUploadSession
+   */
+  omit?: Prisma.DocumentUploadSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentUploadSessionInclude<ExtArgs> | null
+  where?: Prisma.DocumentUploadSessionWhereInput
+  orderBy?: Prisma.DocumentUploadSessionOrderByWithRelationInput | Prisma.DocumentUploadSessionOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentUploadSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentUploadSessionScalarFieldEnum | Prisma.DocumentUploadSessionScalarFieldEnum[]
 }
 
 /**
