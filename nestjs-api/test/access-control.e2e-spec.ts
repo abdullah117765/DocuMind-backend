@@ -75,7 +75,7 @@ describe('Epic 2 access control security (e2e)', () => {
     const uniqueValue = randomUUID();
     const password = 'EpicSecurityP@ss1';
     const passwordHash = await bcrypt.hash(password, 4);
-    const [admin, viewer] = await Promise.all([
+    const [admin, employee] = await Promise.all([
       prisma.user.create({
         data: {
           email: `epic-admin-${uniqueValue}@example.com`,
@@ -86,14 +86,14 @@ describe('Epic 2 access control security (e2e)', () => {
       }),
       prisma.user.create({
         data: {
-          email: `epic-viewer-${uniqueValue}@example.com`,
+          email: `epic-employee-${uniqueValue}@example.com`,
           passwordHash,
           isVerified: true,
         },
         select: { id: true, email: true },
       }),
     ]);
-    userIds.push(admin.id, viewer.id);
+    userIds.push(admin.id, employee.id);
 
     const [organization, foreignOrganization] = await Promise.all([
       prisma.organization.create({
@@ -114,7 +114,7 @@ describe('Epic 2 access control security (e2e)', () => {
     ]);
     organizationIds.push(organization.id, foreignOrganization.id);
 
-    const [adminMembership, viewerMembership] = await Promise.all([
+    const [adminMembership, employeeMembership] = await Promise.all([
       prisma.organizationMembership.create({
         data: {
           organizationId: organization.id,
@@ -125,18 +125,18 @@ describe('Epic 2 access control security (e2e)', () => {
       prisma.organizationMembership.create({
         data: {
           organizationId: organization.id,
-          userId: viewer.id,
+          userId: employee.id,
         },
         select: { id: true },
       }),
     ]);
-    const [organizationAdminRole, viewerRole] = await Promise.all([
+    const [organizationAdminRole, employeeRole] = await Promise.all([
       prisma.role.findUniqueOrThrow({
         where: { systemKey: 'organization_admin' },
         select: { id: true },
       }),
       prisma.role.findUniqueOrThrow({
-        where: { systemKey: 'viewer' },
+        where: { systemKey: 'employee' },
         select: { id: true },
       }),
     ]);
@@ -149,8 +149,8 @@ describe('Epic 2 access control security (e2e)', () => {
           assignedByUserId: admin.id,
         },
         {
-          membershipId: viewerMembership.id,
-          roleId: viewerRole.id,
+          membershipId: employeeMembership.id,
+          roleId: employeeRole.id,
           assignedByUserId: admin.id,
         },
       ],
@@ -184,22 +184,22 @@ describe('Epic 2 access control security (e2e)', () => {
       .send({ email: admin.email, password })
       .expect(200);
 
-    const viewerAgent = request.agent(app.getHttpServer());
-    const viewerCsrfResponse = await viewerAgent
+    const employeeAgent = request.agent(app.getHttpServer());
+    const employeeCsrfResponse = await employeeAgent
       .get('/api/auth/csrf')
       .expect(200);
-    const viewerCsrfToken = requireString(viewerCsrfResponse.body as unknown, [
-      'data',
-      'csrfToken',
-    ]);
+    const employeeCsrfToken = requireString(
+      employeeCsrfResponse.body as unknown,
+      ['data', 'csrfToken'],
+    );
 
-    await viewerAgent
+    await employeeAgent
       .post('/api/auth/login')
-      .set('x-csrf-token', viewerCsrfToken)
-      .send({ email: viewer.email, password })
+      .set('x-csrf-token', employeeCsrfToken)
+      .send({ email: employee.email, password })
       .expect(200);
 
-    await viewerAgent
+    await employeeAgent
       .get(`/api/organizations/${organization.id}/roles`)
       .expect(403);
 
@@ -231,7 +231,7 @@ describe('Epic 2 access control security (e2e)', () => {
 
     await adminAgent
       .put(
-        `/api/organizations/${organization.id}/members/${viewerMembership.id}/roles`,
+        `/api/organizations/${organization.id}/members/${employeeMembership.id}/roles`,
       )
       .set('x-csrf-token', adminCsrfToken)
       .send({ roleIds: [foreignRole.id] })
@@ -239,7 +239,7 @@ describe('Epic 2 access control security (e2e)', () => {
 
     await adminAgent
       .patch(
-        `/api/organizations/${organization.id}/members/${viewerMembership.id}/status`,
+        `/api/organizations/${organization.id}/members/${employeeMembership.id}/status`,
       )
       .set('x-csrf-token', adminCsrfToken)
       .send({ status: 'REMOVED' })
@@ -252,10 +252,10 @@ describe('Epic 2 access control security (e2e)', () => {
       .set('x-csrf-token', adminCsrfToken)
       .expect(409);
 
-    const viewerAccessResponse = await viewerAgent
+    const employeeAccessResponse = await employeeAgent
       .get('/api/access-control/me')
       .expect(200);
-    const organizationsValue = getPath(viewerAccessResponse.body as unknown, [
+    const organizationsValue = getPath(employeeAccessResponse.body as unknown, [
       'data',
       'access',
       'organizations',
@@ -272,11 +272,14 @@ describe('Epic 2 access control security (e2e)', () => {
       organization.id,
     );
     expect(getPath(organizationEntries[0], ['permissions'])).toEqual([
-      'analytics.view',
+      'ai.access',
+      'documents.create',
       'documents.read',
+      'documents.update',
+      'documents.upload',
     ]);
 
-    await viewerAgent
+    await employeeAgent
       .get(`/api/access-control/me/organizations/${foreignOrganization.id}`)
       .expect(404);
 

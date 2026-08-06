@@ -232,7 +232,9 @@ export class JoinRequestsService {
     now = new Date(),
   ): Promise<JoinRequestView> {
     if (!principal.isVerified) {
-      throw new ForbiddenException('Verify your email before requesting access.');
+      throw new ForbiddenException(
+        'Verify your email before requesting access.',
+      );
     }
 
     if (await this.userHasSuperAdminRole(principal.userId)) {
@@ -294,7 +296,9 @@ export class JoinRequestsService {
       membership &&
       membership.status !== OrganizationMembershipStatus.REMOVED
     ) {
-      throw new ConflictException('You are already a member of this organization.');
+      throw new ConflictException(
+        'You are already a member of this organization.',
+      );
     }
 
     if (latestRequest?.status === JoinRequestStatus.PENDING) {
@@ -381,7 +385,9 @@ export class JoinRequestsService {
     }
 
     if (request.status !== JoinRequestStatus.PENDING) {
-      throw new ConflictException('Only pending join requests can be accepted.');
+      throw new ConflictException(
+        'Only pending join requests can be accepted.',
+      );
     }
 
     if (request.userId === actorUserId) {
@@ -438,7 +444,9 @@ export class JoinRequestsService {
         });
 
         if (claimed.count !== 1) {
-          throw new ConflictException('This join request is no longer pending.');
+          throw new ConflictException(
+            'This join request is no longer pending.',
+          );
         }
 
         const membership = existingMembership
@@ -479,7 +487,9 @@ export class JoinRequestsService {
     );
 
     await this.accessControlService.invalidateUserAccess(request.userId);
-    await this.accessControlService.invalidateOrganizationAccess(organizationId);
+    await this.accessControlService.invalidateOrganizationAccess(
+      organizationId,
+    );
 
     return this.toView(acceptedRequest);
   }
@@ -506,7 +516,9 @@ export class JoinRequestsService {
     }
 
     if (request.status !== JoinRequestStatus.PENDING) {
-      throw new ConflictException('Only pending join requests can be rejected.');
+      throw new ConflictException(
+        'Only pending join requests can be rejected.',
+      );
     }
 
     if (request.userId === actorUserId) {
@@ -636,7 +648,7 @@ export class JoinRequestsService {
     if (blockedRoles.length > 0) {
       throw new ForbiddenException({
         message:
-          'Organization Admins can accept join requests only as Manager, Employee, Viewer, or non-admin custom roles.',
+          'Organization Admins can accept join requests only as Manager, Employee, or non-admin custom roles.',
         details: {
           blockedRoleIds: blockedRoles.map((role) => role.id),
         },

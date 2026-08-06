@@ -31,8 +31,8 @@ describe('OrganizationInvitesService', () => {
   const role = {
     id: roleId,
     organizationId: null,
-    systemKey: 'viewer',
-    name: 'Viewer',
+    systemKey: 'employee',
+    name: 'Employee',
     isSystem: true,
     permissions: [],
   };
@@ -212,7 +212,7 @@ describe('OrganizationInvitesService', () => {
       7,
       {
         invitedName: 'Member User',
-        roleNames: ['Viewer'],
+        roleNames: ['Employee'],
         temporaryPassword: expect.any(String),
         temporaryPasswordExpiresInHours: 24,
       },

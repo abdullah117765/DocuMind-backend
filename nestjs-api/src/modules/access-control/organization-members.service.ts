@@ -23,6 +23,16 @@ import {
 } from './rbac.constants';
 
 const MEMBER_MANAGEMENT_PERMISSION = ORGANIZATION_PERMISSIONS.membersManage;
+const MEMBER_VISIBILITY_TIER = {
+  none: 0,
+  employee: 1,
+  manager: 2,
+  organizationAdmin: 3,
+  platform: 4,
+} as const;
+
+type MemberVisibilityTier =
+  (typeof MEMBER_VISIBILITY_TIER)[keyof typeof MEMBER_VISIBILITY_TIER];
 
 interface MemberRoleRecord {
   id: string;
@@ -109,7 +119,10 @@ export class OrganizationMembersService {
     private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
-  async listMembers(organizationId: string): Promise<OrganizationMemberView[]> {
+  async listMembers(
+    organizationId: string,
+    actorUserId?: string,
+  ): Promise<OrganizationMemberView[]> {
     const memberships = await this.prisma.organizationMembership.findMany({
       where: {
         organizationId,
@@ -123,13 +136,23 @@ export class OrganizationMembersService {
       select: this.membershipSelect(organizationId),
       orderBy: [{ user: { email: 'asc' } }, { id: 'asc' }],
     });
+    const visibleMemberships = actorUserId
+      ? await this.filterVisibleMembershipsForActor(
+          organizationId,
+          actorUserId,
+          memberships,
+        )
+      : memberships;
 
-    return memberships.map((membership) => this.toMemberView(membership));
+    return visibleMemberships.map((membership) =>
+      this.toMemberView(membership),
+    );
   }
 
   async getMember(
     organizationId: string,
     membershipId: string,
+    actorUserId?: string,
   ): Promise<OrganizationMemberView> {
     const membership = await this.findCurrentMembership(
       organizationId,
@@ -137,6 +160,17 @@ export class OrganizationMembersService {
     );
 
     if (!membership) {
+      throw new NotFoundException('Organization member not found');
+    }
+
+    if (
+      actorUserId &&
+      !(await this.canActorViewMembership(
+        organizationId,
+        actorUserId,
+        membership,
+      ))
+    ) {
       throw new NotFoundException('Organization member not found');
     }
 
@@ -514,7 +548,7 @@ export class OrganizationMembersService {
     if (blockedRoles.length > 0) {
       throw new ForbiddenException({
         message:
-          'Organization Admins can assign only Manager, Employee, Viewer, or non-admin custom roles.',
+          'Organization Admins can assign only Manager, Employee, or non-admin custom roles.',
         details: {
           blockedRoleIds: blockedRoles.map((role) => role.id),
         },
@@ -562,6 +596,200 @@ export class OrganizationMembersService {
     return !role.permissions.some(({ permission }) =>
       ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
     );
+  }
+
+  private async filterVisibleMembershipsForActor(
+    organizationId: string,
+    actorUserId: string,
+    memberships: MembershipRecord[],
+  ): Promise<MembershipRecord[]> {
+    const actorTier = await this.resolveActorMemberVisibilityTier(
+      organizationId,
+      actorUserId,
+    );
+
+    if (actorTier >= MEMBER_VISIBILITY_TIER.organizationAdmin) {
+      return memberships;
+    }
+
+    if (actorTier < MEMBER_VISIBILITY_TIER.manager) {
+      throw new ForbiddenException(
+        'Only organization administrators and managers can view organization members.',
+      );
+    }
+
+    return memberships.filter(
+      (membership) =>
+        membership.userId !== actorUserId &&
+        this.getMemberVisibilityTierFromRoles(membership.roles) ===
+          MEMBER_VISIBILITY_TIER.employee,
+    );
+  }
+
+  private async canActorViewMembership(
+    organizationId: string,
+    actorUserId: string,
+    membership: MembershipRecord,
+  ): Promise<boolean> {
+    const actorTier = await this.resolveActorMemberVisibilityTier(
+      organizationId,
+      actorUserId,
+    );
+
+    if (actorTier >= MEMBER_VISIBILITY_TIER.organizationAdmin) {
+      return true;
+    }
+
+    return (
+      actorTier >= MEMBER_VISIBILITY_TIER.manager &&
+      membership.userId !== actorUserId &&
+      this.getMemberVisibilityTierFromRoles(membership.roles) ===
+        MEMBER_VISIBILITY_TIER.employee
+    );
+  }
+
+  private async resolveActorMemberVisibilityTier(
+    organizationId: string,
+    actorUserId: string,
+  ): Promise<MemberVisibilityTier> {
+    if (await this.userHasSuperAdminRole(actorUserId)) {
+      return MEMBER_VISIBILITY_TIER.platform;
+    }
+
+    const access = await this.accessControlService.resolveOrganizationAccess(
+      actorUserId,
+      organizationId,
+    );
+
+    if (!access) {
+      return MEMBER_VISIBILITY_TIER.none;
+    }
+
+    if (
+      access.roles.some((role) => role.scope === AccessScope.PLATFORM) ||
+      access.permissions.includes(ORGANIZATION_PERMISSIONS.membersManage)
+    ) {
+      return MEMBER_VISIBILITY_TIER.organizationAdmin;
+    }
+
+    const actorMembership = await this.prisma.organizationMembership.findFirst({
+      where: {
+        organizationId,
+        userId: actorUserId,
+        status: OrganizationMembershipStatus.ACTIVE,
+      },
+      select: {
+        roles: this.memberVisibilityRoleSelect(organizationId),
+      },
+    });
+
+    return actorMembership
+      ? this.getMemberVisibilityTierFromRoles(actorMembership.roles)
+      : MEMBER_VISIBILITY_TIER.none;
+  }
+
+  private getMemberVisibilityTierFromRoles(
+    roles: Array<{ role: MemberRoleRecord }>,
+  ): MemberVisibilityTier {
+    if (roles.length === 0) {
+      return MEMBER_VISIBILITY_TIER.employee;
+    }
+
+    return roles.reduce<MemberVisibilityTier>(
+      (highestTier, { role }) =>
+        Math.max(
+          highestTier,
+          this.getMemberVisibilityTierFromRole(role),
+        ) as MemberVisibilityTier,
+      MEMBER_VISIBILITY_TIER.none,
+    );
+  }
+
+  private getMemberVisibilityTierFromRole(
+    role: MemberRoleRecord,
+  ): MemberVisibilityTier {
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.organizationAdmin) {
+      return MEMBER_VISIBILITY_TIER.organizationAdmin;
+    }
+
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.manager) {
+      return MEMBER_VISIBILITY_TIER.manager;
+    }
+
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.employee) {
+      return MEMBER_VISIBILITY_TIER.employee;
+    }
+
+    const permissionCodes = new Set(
+      role.permissions.map(({ permission }) => permission.code),
+    );
+
+    if (
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.membersManage) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.rolesManage) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.permissionsAssign) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsDelete)
+    ) {
+      return MEMBER_VISIBILITY_TIER.organizationAdmin;
+    }
+
+    if (permissionCodes.has(ORGANIZATION_PERMISSIONS.analyticsView)) {
+      return MEMBER_VISIBILITY_TIER.manager;
+    }
+
+    if (
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsRead) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsCreate) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsUpdate) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsUpload) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.aiAccess)
+    ) {
+      return MEMBER_VISIBILITY_TIER.employee;
+    }
+
+    return MEMBER_VISIBILITY_TIER.none;
+  }
+
+  private memberVisibilityRoleSelect(organizationId: string) {
+    return {
+      where: {
+        role: {
+          is: {
+            scope: AccessScope.ORGANIZATION,
+            isActive: true,
+            OR: [{ organizationId: null }, { organizationId }],
+          },
+        },
+      },
+      select: {
+        role: {
+          select: {
+            id: true,
+            organizationId: true,
+            systemKey: true,
+            name: true,
+            isSystem: true,
+            permissions: {
+              where: {
+                permission: {
+                  is: {
+                    scope: AccessScope.ORGANIZATION,
+                    isActive: true,
+                  },
+                },
+              },
+              select: {
+                permission: {
+                  select: {
+                    code: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
   }
 
   private async ensureAnotherUserManager(

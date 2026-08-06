@@ -35,8 +35,8 @@ describe('OrganizationMembersService', () => {
   const viewerRole = {
     id: 'e49feaf4-2d74-4d94-ae9b-1ac8a35be9ea',
     organizationId: null,
-    systemKey: 'viewer',
-    name: 'Viewer',
+    systemKey: 'employee',
+    name: 'Employee',
     isSystem: true,
     permissions: [],
   };
@@ -251,12 +251,10 @@ describe('OrganizationMembersService', () => {
 
   it('creates a membership with initial roles and invalidates user access', async () => {
     roleFindMany.mockResolvedValue([viewerRole]);
-    membershipFindFirst
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({
-        ...membership,
-        roles: [{ role: viewerRole }],
-      });
+    membershipFindFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({
+      ...membership,
+      roles: [{ role: viewerRole }],
+    });
 
     await expect(
       service.addMember(organizationId, actorUserId, {
@@ -343,12 +341,10 @@ describe('OrganizationMembersService', () => {
       status: OrganizationMembershipStatus.REMOVED,
     });
     roleFindMany.mockResolvedValue([viewerRole]);
-    membershipFindFirst
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({
-        ...membership,
-        roles: [{ role: viewerRole }],
-      });
+    membershipFindFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({
+      ...membership,
+      roles: [{ role: viewerRole }],
+    });
 
     await service.addMember(organizationId, actorUserId, {
       email: 'member@example.com',

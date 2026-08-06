@@ -18,7 +18,10 @@ import {
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
 import type { OrganizationAccess } from '../access-control/access-control.types';
-import { ORGANIZATION_PERMISSIONS } from '../access-control/rbac.constants';
+import {
+  ORGANIZATION_PERMISSIONS,
+  ORGANIZATION_ROLE_KEYS,
+} from '../access-control/rbac.constants';
 import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { PrismaService } from '../prisma/prisma.service';
@@ -379,6 +382,29 @@ function hasPermission(
   return Boolean(access?.permissions.includes(permissionCode));
 }
 
+const DOCUMENT_ROLE_TIER = {
+  none: 0,
+  employee: 1,
+  manager: 2,
+  organizationAdmin: 3,
+  platform: 4,
+} as const;
+
+type DocumentRoleTier =
+  (typeof DOCUMENT_ROLE_TIER)[keyof typeof DOCUMENT_ROLE_TIER];
+
+interface DocumentRoleAssignmentRecord {
+  role: {
+    systemKey: string | null;
+    scope: AccessScope;
+    permissions: Array<{
+      permission: {
+        code: string;
+      };
+    }>;
+  };
+}
+
 @Injectable()
 export class DocumentsService {
   constructor(
@@ -694,7 +720,7 @@ export class DocumentsService {
     );
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
-    const where = this.buildOrganizationDocumentWhere(
+    const where = await this.buildOrganizationDocumentWhere(
       organizationId,
       principal.userId,
       access,
@@ -888,7 +914,14 @@ export class DocumentsService {
       );
     }
 
-    if (!this.canModifyDocument(document, access, principal.userId)) {
+    if (
+      !(await this.canModifyDocument(
+        organizationId,
+        document,
+        access,
+        principal.userId,
+      ))
+    ) {
       throw new ForbiddenException('You can update only documents you manage.');
     }
 
@@ -996,10 +1029,20 @@ export class DocumentsService {
       throw new NotFoundException('Document not found.');
     }
 
-    const now = new Date();
-    const isDocumentManager = this.canManageAllDocuments(access);
+    const deleteDecision = await this.resolveDeleteDecision(
+      organizationId,
+      document,
+      access,
+      principal.userId,
+    );
 
-    if (isDocumentManager) {
+    if (!deleteDecision.allowed) {
+      throw new ForbiddenException('You can delete only documents you manage.');
+    }
+
+    const now = new Date();
+
+    if (deleteDecision.organizationLevel) {
       const updatedDocument = await this.prisma.document.update({
         where: { id: documentId },
         data: {
@@ -1013,24 +1056,23 @@ export class DocumentsService {
       return this.toDocumentView(updatedDocument);
     }
 
-    if (
-      document.status === DocumentStatus.ACTIVE &&
-      document.createdByUserId === principal.userId
-    ) {
-      const updatedDocument = await this.prisma.document.update({
-        where: { id: documentId },
-        data: {
-          status: DocumentStatus.SOFT_DELETED_BY_USER,
-          userDeletedByUserId: principal.userId,
-          userDeletedAt: now,
-        },
-        select: documentSelect,
-      });
-
-      return this.toDocumentView(updatedDocument);
+    if (document.status !== DocumentStatus.ACTIVE) {
+      throw new ConflictException(
+        'This document is already in organization trash.',
+      );
     }
 
-    throw new ForbiddenException('You can delete only documents you manage.');
+    const updatedDocument = await this.prisma.document.update({
+      where: { id: documentId },
+      data: {
+        status: DocumentStatus.SOFT_DELETED_BY_USER,
+        userDeletedByUserId: principal.userId,
+        userDeletedAt: now,
+      },
+      select: documentSelect,
+    });
+
+    return this.toDocumentView(updatedDocument);
   }
 
   async restoreOrganizationDocument(
@@ -1054,8 +1096,12 @@ export class DocumentsService {
     }
 
     if (
-      !this.canManageAllDocuments(access) &&
-      document.createdByUserId !== principal.userId
+      !(await this.canReachDocumentByHierarchy(
+        organizationId,
+        document.createdByUserId,
+        access,
+        principal.userId,
+      ))
     ) {
       throw new ForbiddenException(
         'You can restore only documents you manage.',
@@ -1125,7 +1171,14 @@ export class DocumentsService {
       );
     }
 
-    if (!this.canModifyDocument(document, access, principal.userId)) {
+    if (
+      !(await this.canModifyDocument(
+        organizationId,
+        document,
+        access,
+        principal.userId,
+      ))
+    ) {
       throw new ForbiddenException(
         'You can grant access only for documents you manage.',
       );
@@ -1197,7 +1250,14 @@ export class DocumentsService {
       documentId,
     );
 
-    if (!this.canModifyDocument(document, access, principal.userId)) {
+    if (
+      !(await this.canModifyDocument(
+        organizationId,
+        document,
+        access,
+        principal.userId,
+      ))
+    ) {
       throw new ForbiddenException(
         'You can revoke access only for documents you manage.',
       );
@@ -1411,81 +1471,77 @@ export class DocumentsService {
     return session;
   }
 
-  private buildOrganizationDocumentWhere(
+  private async buildOrganizationDocumentWhere(
     organizationId: string,
     userId: string,
     access: OrganizationAccess,
     query: ListDocumentsQueryDto,
-  ): Prisma.DocumentWhereInput {
+  ): Promise<Prisma.DocumentWhereInput> {
     const search = query.search?.trim();
-    const canManageAllDocuments = this.canManageAllDocuments(access);
-    const canReadAllDocuments = this.canReadAllDocuments(access);
-
-    return {
+    const actorTier = await this.resolveActorDocumentTier(
       organizationId,
-      ...(query.view === 'trash'
+      userId,
+      access,
+    );
+    const visibleCreatorUserIds =
+      await this.resolveVisibleDocumentCreatorUserIds(
+        organizationId,
+        userId,
+        actorTier,
+      );
+    const filters: Prisma.DocumentWhereInput[] = [
+      { organizationId },
+      query.view === 'trash'
         ? {
             status: DocumentStatus.SOFT_DELETED_BY_USER,
-            ...(canManageAllDocuments
-              ? {}
-              : {
-                  createdByUserId: userId,
-                }),
+            createdByUserId: { in: visibleCreatorUserIds },
+            ...(actorTier <= DOCUMENT_ROLE_TIER.employee
+              ? { userDeletedByUserId: userId }
+              : {}),
           }
         : {
             status: DocumentStatus.ACTIVE,
-            ...(canReadAllDocuments
-              ? {}
-              : {
-                  OR: [
-                    { createdByUserId: userId },
-                    {
-                      accessGrants: {
-                        some: {
-                          userId,
-                          revokedAt: null,
-                        },
-                      },
-                    },
-                  ],
-                }),
-          }),
-      ...(search
-        ? {
-            OR: [
-              {
-                name: { contains: search, mode: Prisma.QueryMode.insensitive },
-              },
-              {
-                originalFilename: {
+            createdByUserId: { in: visibleCreatorUserIds },
+          },
+    ];
+
+    if (search) {
+      filters.push({
+        OR: [
+          {
+            name: { contains: search, mode: Prisma.QueryMode.insensitive },
+          },
+          {
+            originalFilename: {
+              contains: search,
+              mode: Prisma.QueryMode.insensitive,
+            },
+          },
+          {
+            createdBy: {
+              is: {
+                email: {
                   contains: search,
                   mode: Prisma.QueryMode.insensitive,
                 },
               },
-              {
-                createdBy: {
-                  is: {
-                    email: {
-                      contains: search,
-                      mode: Prisma.QueryMode.insensitive,
-                    },
-                  },
+            },
+          },
+          {
+            createdBy: {
+              is: {
+                name: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
                 },
               },
-              {
-                createdBy: {
-                  is: {
-                    name: {
-                      contains: search,
-                      mode: Prisma.QueryMode.insensitive,
-                    },
-                  },
-                },
-              },
-            ],
-          }
-        : {}),
-    };
+            },
+          },
+        ],
+      });
+    }
+
+    return { AND: filters };
   }
 
   private buildPlatformDocumentWhere(
@@ -1560,7 +1616,14 @@ export class DocumentsService {
       documentId,
     );
 
-    if (!this.canReadDocument(document, access, principal.userId)) {
+    if (
+      !(await this.canReadDocument(
+        organizationId,
+        document,
+        access,
+        principal.userId,
+      ))
+    ) {
       throw new NotFoundException('Document not found.');
     }
 
@@ -1652,11 +1715,12 @@ export class DocumentsService {
     };
   }
 
-  private canReadDocument(
+  private async canReadDocument(
+    organizationId: string,
     document: DocumentRecord,
     access: OrganizationAccess,
     userId: string,
-  ): boolean {
+  ): Promise<boolean> {
     if (document.status === DocumentStatus.PURGED) {
       return false;
     }
@@ -1667,33 +1731,308 @@ export class DocumentsService {
 
     if (
       document.status === DocumentStatus.SOFT_DELETED_BY_USER &&
-      !this.canManageAllDocuments(access) &&
-      document.createdByUserId !== userId
+      document.createdByUserId === userId &&
+      document.userDeletedBy?.id &&
+      document.userDeletedBy.id !== userId &&
+      (await this.resolveActorDocumentTier(organizationId, userId, access)) <=
+        DOCUMENT_ROLE_TIER.employee
     ) {
       return false;
     }
 
-    if (this.canReadAllDocuments(access)) {
-      return true;
-    }
-
-    return (
-      document.createdByUserId === userId ||
-      document.accessGrants.some((grant) => grant.userId === userId)
+    return this.canReachDocumentByHierarchy(
+      organizationId,
+      document.createdByUserId,
+      access,
+      userId,
     );
   }
 
-  private canModifyDocument(
+  private async resolveDeleteDecision(
+    organizationId: string,
+    document: DocumentRecord,
+    access: OrganizationAccess,
+    actorUserId: string,
+  ): Promise<{ allowed: boolean; organizationLevel: boolean }> {
+    const actorTier = await this.resolveActorDocumentTier(
+      organizationId,
+      actorUserId,
+      access,
+    );
+    const creatorTier = await this.resolveUserDocumentTier(
+      organizationId,
+      document.createdByUserId,
+    );
+    const isOwnDocument = document.createdByUserId === actorUserId;
+
+    if (actorTier === DOCUMENT_ROLE_TIER.platform) {
+      return { allowed: true, organizationLevel: true };
+    }
+
+    if (isOwnDocument) {
+      return {
+        allowed: true,
+        organizationLevel: actorTier >= DOCUMENT_ROLE_TIER.organizationAdmin,
+      };
+    }
+
+    if (actorTier > creatorTier && actorTier >= DOCUMENT_ROLE_TIER.manager) {
+      return {
+        allowed: true,
+        organizationLevel: actorTier >= DOCUMENT_ROLE_TIER.organizationAdmin,
+      };
+    }
+
+    return { allowed: false, organizationLevel: false };
+  }
+
+  private async canReachDocumentByHierarchy(
+    organizationId: string,
+    creatorUserId: string,
+    access: OrganizationAccess,
+    actorUserId: string,
+  ): Promise<boolean> {
+    const actorTier = await this.resolveActorDocumentTier(
+      organizationId,
+      actorUserId,
+      access,
+    );
+
+    if (actorTier === DOCUMENT_ROLE_TIER.platform) {
+      return true;
+    }
+
+    if (creatorUserId === actorUserId) {
+      return true;
+    }
+
+    const creatorTier = await this.resolveUserDocumentTier(
+      organizationId,
+      creatorUserId,
+    );
+
+    return actorTier > creatorTier;
+  }
+
+  private async resolveVisibleDocumentCreatorUserIds(
+    organizationId: string,
+    actorUserId: string,
+    actorTier: DocumentRoleTier,
+  ): Promise<string[]> {
+    if (actorTier === DOCUMENT_ROLE_TIER.platform) {
+      const creators = await this.prisma.document.findMany({
+        where: {
+          organizationId,
+          status: { not: DocumentStatus.PURGED },
+        },
+        distinct: ['createdByUserId'],
+        select: { createdByUserId: true },
+      });
+
+      return creators.map(({ createdByUserId }) => createdByUserId);
+    }
+
+    const memberships = await this.prisma.organizationMembership.findMany({
+      where: {
+        organizationId,
+        status: { not: OrganizationMembershipStatus.REMOVED },
+      },
+      select: {
+        userId: true,
+        roles: this.documentRoleAssignmentsSelect(organizationId),
+      },
+    });
+    const visibleUserIds = new Set<string>([actorUserId]);
+    const usersWithMembership = new Set<string>();
+
+    for (const membership of memberships) {
+      usersWithMembership.add(membership.userId);
+
+      if (membership.userId === actorUserId) {
+        continue;
+      }
+
+      const creatorTier = this.getDocumentTierFromAssignments(membership.roles);
+
+      if (actorTier > creatorTier) {
+        visibleUserIds.add(membership.userId);
+      }
+    }
+
+    if (actorTier > DOCUMENT_ROLE_TIER.employee) {
+      const documentCreators = await this.prisma.document.findMany({
+        where: {
+          organizationId,
+          status: { not: DocumentStatus.PURGED },
+        },
+        distinct: ['createdByUserId'],
+        select: { createdByUserId: true },
+      });
+
+      for (const { createdByUserId } of documentCreators) {
+        if (!usersWithMembership.has(createdByUserId)) {
+          visibleUserIds.add(createdByUserId);
+        }
+      }
+    }
+
+    return [...visibleUserIds].sort((left, right) => left.localeCompare(right));
+  }
+
+  private async resolveActorDocumentTier(
+    organizationId: string,
+    actorUserId: string,
+    access: OrganizationAccess,
+  ): Promise<DocumentRoleTier> {
+    if (access.roles.some((role) => role.scope === AccessScope.PLATFORM)) {
+      return DOCUMENT_ROLE_TIER.platform;
+    }
+
+    return this.resolveUserDocumentTier(organizationId, actorUserId);
+  }
+
+  private async resolveUserDocumentTier(
+    organizationId: string,
+    userId: string,
+  ): Promise<DocumentRoleTier> {
+    const membership = await this.prisma.organizationMembership.findFirst({
+      where: {
+        organizationId,
+        userId,
+        status: { not: OrganizationMembershipStatus.REMOVED },
+      },
+      select: {
+        roles: this.documentRoleAssignmentsSelect(organizationId),
+      },
+    });
+
+    if (!membership) {
+      return DOCUMENT_ROLE_TIER.employee;
+    }
+
+    return this.getDocumentTierFromAssignments(membership.roles);
+  }
+
+  private getDocumentTierFromAssignments(
+    assignments: DocumentRoleAssignmentRecord[],
+  ): DocumentRoleTier {
+    if (assignments.length === 0) {
+      return DOCUMENT_ROLE_TIER.employee;
+    }
+
+    return assignments.reduce<DocumentRoleTier>(
+      (highestTier, assignment) =>
+        Math.max(
+          highestTier,
+          this.getDocumentTierFromRole(assignment.role),
+        ) as DocumentRoleTier,
+      DOCUMENT_ROLE_TIER.none,
+    );
+  }
+
+  private getDocumentTierFromRole(
+    role: DocumentRoleAssignmentRecord['role'],
+  ): DocumentRoleTier {
+    if (role.scope === AccessScope.PLATFORM) {
+      return DOCUMENT_ROLE_TIER.platform;
+    }
+
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.organizationAdmin) {
+      return DOCUMENT_ROLE_TIER.organizationAdmin;
+    }
+
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.manager) {
+      return DOCUMENT_ROLE_TIER.manager;
+    }
+
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.employee) {
+      return DOCUMENT_ROLE_TIER.employee;
+    }
+
+    const permissionCodes = new Set(
+      role.permissions.map(({ permission }) => permission.code),
+    );
+
+    if (
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.membersManage) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.rolesManage) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.permissionsAssign) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsDelete)
+    ) {
+      return DOCUMENT_ROLE_TIER.organizationAdmin;
+    }
+
+    if (permissionCodes.has(ORGANIZATION_PERMISSIONS.analyticsView)) {
+      return DOCUMENT_ROLE_TIER.manager;
+    }
+
+    if (
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsRead) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsCreate) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsUpdate) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsUpload) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.aiAccess)
+    ) {
+      return DOCUMENT_ROLE_TIER.employee;
+    }
+
+    return DOCUMENT_ROLE_TIER.none;
+  }
+
+  private documentRoleAssignmentsSelect(organizationId: string) {
+    return {
+      where: {
+        role: {
+          is: {
+            scope: AccessScope.ORGANIZATION,
+            isActive: true,
+            OR: [{ organizationId: null }, { organizationId }],
+          },
+        },
+      },
+      select: {
+        role: {
+          select: {
+            systemKey: true,
+            scope: true,
+            permissions: {
+              where: {
+                permission: {
+                  is: {
+                    scope: AccessScope.ORGANIZATION,
+                    isActive: true,
+                  },
+                },
+              },
+              select: {
+                permission: {
+                  select: {
+                    code: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
+  private async canModifyDocument(
+    organizationId: string,
     document: DocumentRecord,
     access: OrganizationAccess,
     userId: string,
-  ): boolean {
+  ): Promise<boolean> {
     if (document.status !== DocumentStatus.ACTIVE) {
       return false;
     }
 
-    return (
-      this.canManageAllDocuments(access) || document.createdByUserId === userId
+    return this.canReachDocumentByHierarchy(
+      organizationId,
+      document.createdByUserId,
+      access,
+      userId,
     );
   }
 

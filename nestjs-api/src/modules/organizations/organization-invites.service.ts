@@ -195,10 +195,7 @@ export class OrganizationInvitesService {
     const temporaryPasswordExpiresAt = temporaryPassword
       ? new Date(
           now.getTime() +
-            ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS *
-              60 *
-              60 *
-              1000,
+            ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS * 60 * 60 * 1000,
         )
       : null;
 
@@ -353,10 +350,7 @@ export class OrganizationInvitesService {
     const temporaryPasswordExpiresAt = temporaryPassword
       ? new Date(
           now.getTime() +
-            ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS *
-              60 *
-              60 *
-              1000,
+            ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS * 60 * 60 * 1000,
         )
       : null;
     const expiresAt = new Date(
@@ -683,23 +677,25 @@ export class OrganizationInvitesService {
             select: { id: true },
           });
 
-          const claimedInvite = await transaction.organizationInvite.updateMany({
-            where: {
-              id: invite.id,
-              status: OrganizationInviteStatus.PENDING,
-              acceptedAt: null,
-              revokedAt: null,
-              temporaryPasswordUsedAt: null,
-              temporaryPasswordExpiresAt: { gt: now },
-              expiresAt: { gt: now },
+          const claimedInvite = await transaction.organizationInvite.updateMany(
+            {
+              where: {
+                id: invite.id,
+                status: OrganizationInviteStatus.PENDING,
+                acceptedAt: null,
+                revokedAt: null,
+                temporaryPasswordUsedAt: null,
+                temporaryPasswordExpiresAt: { gt: now },
+                expiresAt: { gt: now },
+              },
+              data: {
+                status: OrganizationInviteStatus.ACCEPTED,
+                acceptedAt: now,
+                acceptedByUserId: user.id,
+                temporaryPasswordUsedAt: now,
+              },
             },
-            data: {
-              status: OrganizationInviteStatus.ACCEPTED,
-              acceptedAt: now,
-              acceptedByUserId: user.id,
-              temporaryPasswordUsedAt: now,
-            },
-          });
+          );
 
           if (claimedInvite.count !== 1) {
             throw new ConflictException(
@@ -796,7 +792,7 @@ export class OrganizationInvitesService {
           },
           select: {
             id: true,
-        organization: {
+            organization: {
               select: {
                 name: true,
               },
@@ -897,7 +893,7 @@ export class OrganizationInvitesService {
     if (blockedRoles.length > 0) {
       throw new ForbiddenException({
         message:
-          'Organization Admins can invite users only as Manager, Employee, Viewer, or non-admin custom roles.',
+          'Organization Admins can invite users only as Manager, Employee, or non-admin custom roles.',
         details: {
           blockedRoleIds: blockedRoles.map((role) => role.id),
         },
@@ -943,9 +939,7 @@ export class OrganizationInvitesService {
   private async resolveInviteRolesForAcceptance(
     invite: InviteRecord & { invitedByUserId: string | null },
   ): Promise<AssignableInviteRoleRecord[]> {
-    const roleIds = normalizeRoleIds(
-      invite.roles.map(({ role }) => role.id),
-    );
+    const roleIds = normalizeRoleIds(invite.roles.map(({ role }) => role.id));
 
     if (roleIds.length !== 1) {
       throw new ConflictException(
@@ -958,7 +952,10 @@ export class OrganizationInvitesService {
         id: { in: roleIds },
         scope: AccessScope.ORGANIZATION,
         isActive: true,
-        OR: [{ organizationId: null }, { organizationId: invite.organizationId }],
+        OR: [
+          { organizationId: null },
+          { organizationId: invite.organizationId },
+        ],
       },
       select: {
         id: true,

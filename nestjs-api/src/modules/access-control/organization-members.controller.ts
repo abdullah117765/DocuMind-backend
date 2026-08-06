@@ -27,7 +27,10 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { RequireOrganizationPermissions } from '../../common/decorators/require-permissions.decorator';
+import {
+  RequireAnyOrganizationPermission,
+  RequireOrganizationPermissions,
+} from '../../common/decorators/require-permissions.decorator';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { ORGANIZATION_PERMISSIONS } from './rbac.constants';
@@ -95,15 +98,21 @@ export class OrganizationMembersController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @RequireAnyOrganizationPermission(
+    ORGANIZATION_PERMISSIONS.membersManage,
+    ORGANIZATION_PERMISSIONS.documentsRead,
+  )
   @ApiOperation({ summary: 'List current organization members' })
   @ApiOkResponse({ description: 'Active and suspended organization members' })
   async listMembers(
     @Param() params: OrganizationIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
   ): Promise<MemberListResult> {
     return {
       data: {
         members: await this.organizationMembersService.listMembers(
           params.organizationId,
+          principal.userId,
         ),
       },
     };
@@ -111,18 +120,24 @@ export class OrganizationMembersController {
 
   @Get(':membershipId')
   @HttpCode(HttpStatus.OK)
+  @RequireAnyOrganizationPermission(
+    ORGANIZATION_PERMISSIONS.membersManage,
+    ORGANIZATION_PERMISSIONS.documentsRead,
+  )
   @ApiParam(MEMBERSHIP_ID_PARAM)
   @ApiOperation({ summary: 'Get one current organization member' })
   @ApiOkResponse({ description: 'Organization member and assigned roles' })
   @ApiNotFoundResponse({ description: 'Organization member not found' })
   async getMember(
     @Param() params: OrganizationMemberParamsDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
   ): Promise<MemberResult> {
     return {
       data: {
         member: await this.organizationMembersService.getMember(
           params.organizationId,
           params.membershipId,
+          principal.userId,
         ),
       },
     };

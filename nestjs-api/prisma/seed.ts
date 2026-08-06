@@ -280,15 +280,6 @@ const roleDefinitions: readonly SeedRoleDefinition[] = [
       ORGANIZATION_PERMISSIONS.aiAccess,
     ],
   },
-  {
-    systemKey: 'viewer',
-    name: 'Viewer',
-    normalizedName: 'viewer',
-    description: 'Read documents and shared organization information.',
-    scope: AccessScope.ORGANIZATION,
-    autoGrantNewPermissions: false,
-    permissionCodes: [ORGANIZATION_PERMISSIONS.documentsRead],
-  },
 ];
 
 function getConnectionString(): string {
@@ -389,6 +380,18 @@ async function seed(): Promise<void> {
           },
         });
       }
+
+      await transaction.role.updateMany({
+        where: {
+          systemKey: 'viewer',
+          scope: AccessScope.ORGANIZATION,
+        },
+        data: {
+          isActive: false,
+          description:
+            'Retired role. Existing Viewer assignments are migrated to Employee.',
+        },
+      });
     });
 
     console.info(

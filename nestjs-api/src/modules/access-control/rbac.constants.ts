@@ -6,7 +6,6 @@ export const ORGANIZATION_ROLE_KEYS = {
   organizationAdmin: 'organization_admin',
   manager: 'manager',
   employee: 'employee',
-  viewer: 'viewer',
 } as const;
 
 export const PLATFORM_PERMISSIONS = {
@@ -45,11 +44,7 @@ export const LEGACY_PERMISSIONS = {
 } as const;
 
 export const ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS: ReadonlySet<string> =
-  new Set([
-    ORGANIZATION_ROLE_KEYS.manager,
-    ORGANIZATION_ROLE_KEYS.employee,
-    ORGANIZATION_ROLE_KEYS.viewer,
-  ]);
+  new Set([ORGANIZATION_ROLE_KEYS.manager, ORGANIZATION_ROLE_KEYS.employee]);
 
 export const ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS: ReadonlySet<string> =
   new Set([
