@@ -1,0 +1,2 @@
+-- RenameIndex
+ALTER INDEX "document_upload_sessions_created_by_user_id_status_created_at_i" RENAME TO "document_upload_sessions_created_by_user_id_status_created__idx";

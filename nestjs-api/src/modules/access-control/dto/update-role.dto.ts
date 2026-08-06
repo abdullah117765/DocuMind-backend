@@ -3,10 +3,13 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+
+const ROLE_NAME_PATTERN = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
 
 function normalizeName(value: unknown): unknown {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : value;
@@ -33,6 +36,10 @@ export class UpdateRoleDto {
   @IsNotEmpty({ message: 'Role name cannot be empty' })
   @MinLength(2, { message: 'Role name must be at least 2 characters long' })
   @MaxLength(100, { message: 'Role name must not exceed 100 characters' })
+  @Matches(ROLE_NAME_PATTERN, {
+    message:
+      'Role name can contain only letters, numbers, and single spaces',
+  })
   name?: string;
 
   @ApiPropertyOptional({

@@ -1,26 +1,29 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   OrganizationMembershipStatus,
+  OrganizationStatus,
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
-import {
-  DEFAULT_ORGANIZATION_LIMITS,
-  DEFAULT_ORGANIZATION_SUBSCRIPTION,
-} from './organization-defaults';
+import { UpdateOrganizationSettingsDto } from './dto/update-organization-settings.dto';
+import { UpdatePlatformOrganizationDto } from './dto/update-platform-organization.dto';
 
 const MAX_SLUG_ATTEMPTS = 50;
+const ORGANIZATION_NAME_PATTERN = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
 
 const organizationSelect = {
   id: true,
   name: true,
   slug: true,
   createdByUserId: true,
+  status: true,
   allowJoinRequests: true,
   createdAt: true,
   updatedAt: true,
@@ -46,6 +49,7 @@ export interface PlatformOrganizationView {
   name: string;
   slug: string;
   createdByUserId: string | null;
+  status: OrganizationStatus;
   allowJoinRequests: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -54,6 +58,14 @@ export interface PlatformOrganizationView {
 
 function normalizeOrganizationName(name: string): string {
   return name.trim().replace(/\s+/g, ' ');
+}
+
+function assertCleanOrganizationName(name: string): void {
+  if (!ORGANIZATION_NAME_PATTERN.test(name)) {
+    throw new BadRequestException(
+      'Organization name can contain only letters, numbers, and single spaces',
+    );
+  }
 }
 
 function buildSlugSeed(value: string): string {
@@ -92,11 +104,27 @@ export class OrganizationsService {
     return organizations.map((organization) => this.toView(organization));
   }
 
+  async getOrganization(
+    organizationId: string,
+  ): Promise<PlatformOrganizationView> {
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: organizationSelect,
+    });
+
+    if (!organization) {
+      throw new NotFoundException('Organization not found');
+    }
+
+    return this.toView(organization);
+  }
+
   async createOrganization(
     actorUserId: string,
     dto: CreateOrganizationDto,
   ): Promise<PlatformOrganizationView> {
     const name = normalizeOrganizationName(dto.name);
+    assertCleanOrganizationName(name);
     const slugSeed = buildSlugSeed(dto.slug ?? name);
     const slug = dto.slug
       ? slugSeed
@@ -110,22 +138,9 @@ export class OrganizationsService {
               name,
               slug,
               createdByUserId: actorUserId,
+              allowJoinRequests: dto.allowJoinRequests ?? true,
             },
             select: { id: true },
-          });
-
-          await transaction.organizationSubscription.create({
-            data: {
-              organizationId: createdOrganization.id,
-              plan: DEFAULT_ORGANIZATION_SUBSCRIPTION.plan,
-              status: DEFAULT_ORGANIZATION_SUBSCRIPTION.status,
-            },
-          });
-          await transaction.organizationLimit.create({
-            data: {
-              organizationId: createdOrganization.id,
-              ...DEFAULT_ORGANIZATION_LIMITS,
-            },
           });
 
           return transaction.organization.findUniqueOrThrow({
@@ -135,14 +150,94 @@ export class OrganizationsService {
         },
       );
 
+      await Promise.all([
+        this.accessControlService.invalidateOrganizationAccess(organization.id),
+      ]);
+
+      return this.toView(organization);
+    } catch (error: unknown) {
+      if (isUniqueConstraintError(error)) {
+        throw new ConflictException('Organization slug is already in use');
+      }
+
+      throw error;
+    }
+  }
+
+  async updateOrganizationSettings(
+    organizationId: string,
+    dto: UpdateOrganizationSettingsDto,
+  ): Promise<PlatformOrganizationView> {
+    return this.updateOrganization(organizationId, dto);
+  }
+
+  async updatePlatformOrganization(
+    organizationId: string,
+    dto: UpdatePlatformOrganizationDto,
+  ): Promise<PlatformOrganizationView> {
+    return this.updateOrganization(organizationId, dto);
+  }
+
+  async deleteOrganization(organizationId: string): Promise<void> {
+    try {
+      await this.prisma.organization.delete({
+        where: { id: organizationId },
+      });
+    } catch (error: unknown) {
+      if (this.isMissingRecordError(error)) {
+        throw new NotFoundException('Organization not found');
+      }
+
+      throw error;
+    }
+
+    await this.accessControlService.invalidateOrganizationAccess(
+      organizationId,
+    );
+  }
+
+  private async updateOrganization(
+    organizationId: string,
+    dto: UpdateOrganizationSettingsDto & { status?: OrganizationStatus },
+  ): Promise<PlatformOrganizationView> {
+    const data: Prisma.OrganizationUpdateInput = {
+      ...(dto.name
+        ? (() => {
+            const name = normalizeOrganizationName(dto.name);
+            assertCleanOrganizationName(name);
+            return { name };
+          })()
+        : {}),
+      ...(dto.slug ? { slug: buildSlugSeed(dto.slug) } : {}),
+      ...(dto.allowJoinRequests !== undefined
+        ? { allowJoinRequests: dto.allowJoinRequests }
+        : {}),
+      ...(dto.status ? { status: dto.status } : {}),
+    };
+
+    if (Object.keys(data).length === 0) {
+      throw new BadRequestException('At least one organization field is required');
+    }
+
+    try {
+      const organization = await this.prisma.organization.update({
+        where: { id: organizationId },
+        data,
+        select: organizationSelect,
+      });
+
       await this.accessControlService.invalidateOrganizationAccess(
-        organization.id,
+        organizationId,
       );
 
       return this.toView(organization);
     } catch (error: unknown) {
       if (isUniqueConstraintError(error)) {
         throw new ConflictException('Organization slug is already in use');
+      }
+
+      if (this.isMissingRecordError(error)) {
+        throw new NotFoundException('Organization not found');
       }
 
       throw error;
@@ -172,10 +267,18 @@ export class OrganizationsService {
       name: organization.name,
       slug: organization.slug,
       createdByUserId: organization.createdByUserId,
+      status: organization.status,
       allowJoinRequests: organization.allowJoinRequests,
       createdAt: organization.createdAt,
       updatedAt: organization.updatedAt,
       memberCount: organization._count.memberships,
     };
+  }
+
+  private isMissingRecordError(error: unknown): boolean {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
+    );
   }
 }

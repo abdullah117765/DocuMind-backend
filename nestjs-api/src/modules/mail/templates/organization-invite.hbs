@@ -13,14 +13,46 @@
             <tr>
               <td>
                 <p style="margin: 0 0 8px; color: #5b4cf0; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">
-                  AI Document Intelligence
+                  {{productName}}
                 </p>
                 <h1 style="margin: 0 0 16px; font-size: 24px;">
                   You're invited to {{organizationName}}
                 </h1>
-                <p style="margin: 0 0 24px; line-height: 1.6;">
-                  An administrator invited you to join this organization. Sign in with <strong>{{invitedEmail}}</strong>, then accept the invitation.
+                {{#if invitedName}}
+                <p style="margin: 0 0 8px; line-height: 1.6;">
+                  Hello <strong>{{invitedName}}</strong>,
                 </p>
+                {{/if}}
+                <p style="margin: 0 0 24px; line-height: 1.6;">
+                  An administrator invited you to join this organization with <strong>{{invitedEmail}}</strong>.
+                </p>
+                {{#if roleSummary}}
+                <div style="margin: 0 0 24px; padding: 14px 16px; border: 1px solid #e3e7ef; border-radius: 10px; background: #fbfcfe;">
+                  <p style="margin: 0 0 6px; color: #5f6b7a; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">
+                    Assigned role
+                  </p>
+                  <p style="margin: 0; font-weight: 700;">
+                    {{roleSummary}}
+                  </p>
+                </div>
+                {{/if}}
+                {{#if hasTemporaryPassword}}
+                <div style="margin: 0 0 24px; padding: 16px; border: 1px solid #d9def3; border-radius: 10px; background: #f7f8ff;">
+                  <p style="margin: 0 0 8px; color: #5f6b7a; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;">
+                    One-time password
+                  </p>
+                  <p style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: .08em;">
+                    {{temporaryPassword}}
+                  </p>
+                  <p style="margin: 8px 0 0; color: #5f6b7a; line-height: 1.5;">
+                    This password expires in {{temporaryPasswordExpiresInHours}} hours and can be used only once. After accepting the invite, set your permanent password.
+                  </p>
+                </div>
+                {{else}}
+                <p style="margin: 0 0 24px; line-height: 1.6;">
+                  Sign in with your existing account, then accept the invitation.
+                </p>
+                {{/if}}
                 <p style="margin: 0 0 24px;">
                   <a href="{{inviteUrl}}" style="display: inline-block; padding: 12px 20px; border-radius: 8px; background: #5b4cf0; color: #ffffff; text-decoration: none; font-weight: 700;">
                     Accept invitation

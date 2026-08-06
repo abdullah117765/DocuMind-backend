@@ -68,9 +68,20 @@ export class MailService {
     organizationName: string,
     token: string,
     expiresInDays: number,
+    options: {
+      invitedName?: string | null;
+      roleNames?: string[];
+      temporaryPassword?: string | null;
+      temporaryPasswordExpiresInHours?: number | null;
+    } = {},
   ): Promise<void> {
     const inviteUrl = this.createInviteUrl(token);
     const invitedEmail = email.trim().toLowerCase();
+    const productName = this.getProductName();
+    const hasTemporaryPassword = Boolean(options.temporaryPassword);
+    const invitedName = options.invitedName?.trim() || null;
+    const roleNames = options.roleNames ?? [];
+    const roleSummary = roleNames.length ? roleNames.join(', ') : null;
 
     await this.mailerService.sendMail({
       to: invitedEmail,
@@ -78,15 +89,40 @@ export class MailService {
       template: 'organization-invite',
       context: {
         expiresInDays,
+        hasTemporaryPassword,
         invitedEmail,
+        invitedName,
         inviteUrl,
         organizationName,
+        productName,
+        roleSummary,
+        temporaryPassword: options.temporaryPassword,
+        temporaryPasswordExpiresInHours:
+          options.temporaryPasswordExpiresInHours,
       },
       text: [
-        `You have been invited to join ${organizationName} on AI Document Intelligence.`,
+        invitedName
+          ? `Hello ${invitedName},`
+          : `You have been invited to join ${organizationName} on ${productName}.`,
         '',
-        `This invitation is for ${invitedEmail}.`,
+        invitedName
+          ? `You have been invited to join ${organizationName} on ${productName}.`
+          : `This invitation is for ${invitedEmail}.`,
+        `Invited email: ${invitedEmail}.`,
+        ...(roleSummary ? [`Assigned role: ${roleSummary}.`] : []),
         '',
+        ...(hasTemporaryPassword
+          ? [
+              `Your one-time password is: ${options.temporaryPassword}`,
+              `It expires in ${options.temporaryPasswordExpiresInHours} hours and can be used only once.`,
+              '',
+              'Open the invitation link, enter your email and one-time password, then set your permanent password.',
+              '',
+            ]
+          : [
+              'Sign in with your existing account, then accept the invitation.',
+              '',
+            ]),
         'Accept your invitation by opening this link:',
         inviteUrl,
         '',
@@ -106,6 +142,13 @@ export class MailService {
     verificationUrl.hash = new URLSearchParams({ token }).toString();
 
     return verificationUrl.toString();
+  }
+
+  private getProductName(): string {
+    return (
+      this.configService.get<string>('APP_NAME')?.trim() ||
+      'AI Document Intelligence'
+    );
   }
 
   private createInviteUrl(token: string): string {

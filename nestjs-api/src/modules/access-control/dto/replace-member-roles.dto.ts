@@ -1,17 +1,27 @@
-import { ArrayMaxSize, ArrayUnique, IsArray, IsUUID } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  ArrayUnique,
+  IsArray,
+  IsUUID,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ReplaceMemberRolesDto {
   @ApiProperty({
     description:
-      'Complete replacement set of applicable organization role IDs; an empty array removes every role',
+      'Replacement organization role ID. Exactly one role is required.',
     type: [String],
     example: ['b429b596-1865-4ace-bd6d-9ca3b52da710'],
-    maxItems: 20,
+    minItems: 1,
+    maxItems: 1,
   })
   @IsArray({ message: 'Role IDs must be an array' })
-  @ArrayMaxSize(20, {
-    message: 'A member cannot have more than 20 roles',
+  @ArrayMinSize(1, {
+    message: 'Select one role for this member',
+  })
+  @ArrayMaxSize(1, {
+    message: 'Only one role can be assigned to a user',
   })
   @ArrayUnique({ message: 'Role IDs must be unique' })
   @IsUUID('4', {

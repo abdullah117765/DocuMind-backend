@@ -1,12 +1,11 @@
 import { ConflictException } from '@nestjs/common';
 import {
   OrganizationMembershipStatus,
+  OrganizationStatus,
   Prisma,
-  SubscriptionStatus,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { DEFAULT_ORGANIZATION_LIMITS } from './organization-defaults';
 import { OrganizationsService } from './organizations.service';
 
 describe('OrganizationsService', () => {
@@ -18,6 +17,7 @@ describe('OrganizationsService', () => {
     name: 'Acme Finance',
     slug: 'acme-finance',
     createdByUserId: actorUserId,
+    status: OrganizationStatus.ACTIVE,
     allowJoinRequests: true,
     createdAt: now,
     updatedAt: now,
@@ -28,19 +28,13 @@ describe('OrganizationsService', () => {
   const organizationFindMany = jest.fn();
   const organizationFindUnique = jest.fn();
   const organizationCreate = jest.fn();
+  const organizationUpdate = jest.fn();
+  const organizationDelete = jest.fn();
   const organizationFindUniqueOrThrow = jest.fn();
-  const organizationSubscriptionCreate = jest.fn();
-  const organizationLimitCreate = jest.fn();
   const transaction = {
     organization: {
       create: organizationCreate,
       findUniqueOrThrow: organizationFindUniqueOrThrow,
-    },
-    organizationSubscription: {
-      create: organizationSubscriptionCreate,
-    },
-    organizationLimit: {
-      create: organizationLimitCreate,
     },
   };
   const runTransaction = jest.fn(
@@ -51,6 +45,8 @@ describe('OrganizationsService', () => {
     organization: {
       findMany: organizationFindMany,
       findUnique: organizationFindUnique,
+      update: organizationUpdate,
+      delete: organizationDelete,
     },
     $transaction: runTransaction,
   } as unknown as PrismaService;
@@ -65,9 +61,9 @@ describe('OrganizationsService', () => {
     organizationFindMany.mockResolvedValue([organizationRecord]);
     organizationFindUnique.mockResolvedValue(null);
     organizationCreate.mockResolvedValue({ id: organizationId });
+    organizationUpdate.mockResolvedValue(organizationRecord);
+    organizationDelete.mockResolvedValue(organizationRecord);
     organizationFindUniqueOrThrow.mockResolvedValue(organizationRecord);
-    organizationSubscriptionCreate.mockResolvedValue({});
-    organizationLimitCreate.mockResolvedValue({});
     invalidateOrganizationAccess.mockResolvedValue(undefined);
   });
 
@@ -78,6 +74,7 @@ describe('OrganizationsService', () => {
         name: 'Acme Finance',
         slug: 'acme-finance',
         createdByUserId: actorUserId,
+        status: OrganizationStatus.ACTIVE,
         allowJoinRequests: true,
         createdAt: now,
         updatedAt: now,
@@ -90,6 +87,7 @@ describe('OrganizationsService', () => {
         name: true,
         slug: true,
         createdByUserId: true,
+        status: true,
         allowJoinRequests: true,
         createdAt: true,
         updatedAt: true,
@@ -123,21 +121,9 @@ describe('OrganizationsService', () => {
         name: 'Acme Finance',
         slug: 'acme-finance',
         createdByUserId: actorUserId,
+        allowJoinRequests: true,
       },
       select: { id: true },
-    });
-    expect(organizationSubscriptionCreate).toHaveBeenCalledWith({
-      data: {
-        organizationId,
-        plan: 'FREE',
-        status: SubscriptionStatus.ACTIVE,
-      },
-    });
-    expect(organizationLimitCreate).toHaveBeenCalledWith({
-      data: {
-        organizationId,
-        ...DEFAULT_ORGANIZATION_LIMITS,
-      },
     });
     expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
   });
@@ -162,6 +148,7 @@ describe('OrganizationsService', () => {
         name: 'Acme Finance',
         slug: 'acme-finance-2',
         createdByUserId: actorUserId,
+        allowJoinRequests: true,
       },
       select: { id: true },
     });

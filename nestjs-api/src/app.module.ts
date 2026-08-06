@@ -11,6 +11,8 @@ import cookieConfig from './config/cookie.config';
 import emailVerificationConfig from './config/email-verification.config';
 import mailConfig from './config/mail.config';
 import passwordResetConfig from './config/password-reset.config';
+import storageConfig from './config/storage.config';
+import superAdminConfig from './config/super-admin.config';
 import { AccessControlModule } from './modules/access-control/access-control.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './modules/mail/mail.module';
@@ -19,6 +21,7 @@ import { AuditLogInterceptor } from './modules/platform-admin/audit-log.intercep
 import { PlatformAdminModule } from './modules/platform-admin/platform-admin.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 
 @Module({
   imports: [
@@ -33,6 +36,8 @@ import { RedisModule } from './modules/redis/redis.module';
         emailVerificationConfig,
         mailConfig,
         passwordResetConfig,
+        storageConfig,
+        superAdminConfig,
       ],
     }),
     PrismaModule,
@@ -40,6 +45,7 @@ import { RedisModule } from './modules/redis/redis.module';
     MailModule,
     AuthModule,
     AccessControlModule,
+    DocumentsModule,
     OrganizationsModule,
     PlatformAdminModule,
   ],

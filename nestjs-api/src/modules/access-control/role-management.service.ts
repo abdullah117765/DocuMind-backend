@@ -17,9 +17,11 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import {
   LEGACY_PERMISSIONS,
   ORGANIZATION_PERMISSIONS,
+  ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
   ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
-  PLATFORM_ROLE_KEYS,
+  ORGANIZATION_ROLE_KEYS,
 } from './rbac.constants';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 
 interface PermissionRecord {
   id: string;
@@ -33,6 +35,7 @@ interface PermissionRecord {
 interface RoleRecord {
   id: string;
   organizationId: string | null;
+  systemKey: string | null;
   name: string;
   description: string | null;
   scope: AccessScope;
@@ -49,6 +52,7 @@ interface RoleRecord {
 }
 
 const MEMBER_MANAGEMENT_PERMISSION = ORGANIZATION_PERMISSIONS.membersManage;
+const ROLE_NAME_PATTERN = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
 
 export interface PermissionView {
   id: string;
@@ -62,11 +66,13 @@ export interface PermissionView {
 export interface RoleView {
   id: string;
   organizationId: string | null;
+  systemKey: string | null;
   name: string;
   description: string | null;
   scope: AccessScope;
   isSystem: boolean;
   isActive: boolean;
+  canAssign: boolean;
   assignedMembersCount: number;
   permissions: PermissionView[];
   createdAt: Date;
@@ -79,6 +85,14 @@ function cleanRoleName(name: string): string {
 
 function normalizeRoleName(name: string): string {
   return cleanRoleName(name).toLowerCase();
+}
+
+function assertCleanRoleName(name: string): void {
+  if (!ROLE_NAME_PATTERN.test(name)) {
+    throw new BadRequestException(
+      'Role name can contain only letters, numbers, and single spaces',
+    );
+  }
 }
 
 function normalizeDescription(
@@ -112,6 +126,7 @@ export class RoleManagementService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async listPermissions(): Promise<PermissionView[]> {
@@ -133,7 +148,10 @@ export class RoleManagementService {
     });
   }
 
-  async listRoles(organizationId: string): Promise<RoleView[]> {
+  async listRoles(
+    organizationId: string,
+    actorUserId?: string,
+  ): Promise<RoleView[]> {
     const roles = await this.prisma.role.findMany({
       where: {
         scope: AccessScope.ORGANIZATION,
@@ -143,8 +161,16 @@ export class RoleManagementService {
       select: this.roleSelect(organizationId),
       orderBy: [{ isSystem: 'desc' }, { name: 'asc' }, { id: 'asc' }],
     });
+    const actorIsSuperAdmin = actorUserId
+      ? await this.envSuperAdminService.isConfiguredUserId(actorUserId)
+      : false;
 
-    return roles.map((role) => this.toRoleView(role));
+    return roles.map((role) =>
+      this.toRoleView(
+        role,
+        actorIsSuperAdmin || this.isAssignableByOrganizationAdmin(role),
+      ),
+    );
   }
 
   async getRole(organizationId: string, roleId: string): Promise<RoleView> {
@@ -162,10 +188,11 @@ export class RoleManagementService {
     actorUserId: string,
     dto: CreateRoleDto,
   ): Promise<RoleView> {
+    await this.assertActorIsSuperAdmin(actorUserId);
     const permissionCodes = normalizePermissionCodes(dto.permissionCodes ?? []);
     const permissions = await this.resolvePermissions(permissionCodes);
-    await this.assertPermissionsAssignableByActor(actorUserId, permissions);
     const name = cleanRoleName(dto.name);
+    assertCleanRoleName(name);
     const normalizedName = normalizeRoleName(name);
 
     await this.ensureRoleNameAvailable(organizationId, normalizedName);
@@ -223,6 +250,7 @@ export class RoleManagementService {
     actorUserId: string,
     dto: UpdateRoleDto,
   ): Promise<RoleView> {
+    await this.assertActorIsSuperAdmin(actorUserId);
     await this.requireMutableRole(organizationId, roleId);
     await this.ensureRoleIsNotAssignedToActor(
       organizationId,
@@ -238,6 +266,7 @@ export class RoleManagementService {
 
     if (dto.name !== undefined) {
       const name = cleanRoleName(dto.name);
+      assertCleanRoleName(name);
       const normalizedName = normalizeRoleName(name);
 
       await this.ensureRoleNameAvailable(
@@ -281,6 +310,7 @@ export class RoleManagementService {
     actorUserId: string,
     permissionCodesInput: string[],
   ): Promise<RoleView> {
+    await this.assertActorIsSuperAdmin(actorUserId);
     const role = await this.requireMutableRole(organizationId, roleId);
     await this.ensureRoleIsNotAssignedToActor(
       organizationId,
@@ -290,7 +320,6 @@ export class RoleManagementService {
 
     const permissionCodes = normalizePermissionCodes(permissionCodesInput);
     const permissions = await this.resolvePermissions(permissionCodes);
-    await this.assertPermissionsAssignableByActor(actorUserId, permissions);
     const revokesUserManagement =
       role.permissions.some(
         ({ permission }) => permission.code === MEMBER_MANAGEMENT_PERMISSION,
@@ -335,6 +364,7 @@ export class RoleManagementService {
     roleId: string,
     actorUserId: string,
   ): Promise<void> {
+    await this.assertActorIsSuperAdmin(actorUserId);
     const role = await this.requireMutableRole(organizationId, roleId);
     await this.ensureRoleIsNotAssignedToActor(
       organizationId,
@@ -528,50 +558,14 @@ export class RoleManagementService {
     return permissions;
   }
 
-  private async assertPermissionsAssignableByActor(
-    actorUserId: string,
-    permissions: Array<{ code: string }>,
-  ): Promise<void> {
-    if (
-      permissions.length === 0 ||
-      (await this.userHasSuperAdminRole(actorUserId))
-    ) {
+  private async assertActorIsSuperAdmin(userId: string): Promise<void> {
+    if (await this.envSuperAdminService.isConfiguredUserId(userId)) {
       return;
     }
 
-    const blockedPermissionCodes = permissions
-      .map((permission) => permission.code)
-      .filter((permissionCode) =>
-        ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permissionCode),
-      );
-
-    if (blockedPermissionCodes.length > 0) {
-      throw new ForbiddenException({
-        message:
-          'Organization Admins cannot grant admin, billing, queue, prompt, or settings permissions to custom roles.',
-        details: {
-          blockedPermissionCodes,
-        },
-      });
-    }
-  }
-
-  private async userHasSuperAdminRole(userId: string): Promise<boolean> {
-    const assignment = await this.prisma.platformUserRole.findFirst({
-      where: {
-        userId,
-        role: {
-          is: {
-            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
-            scope: AccessScope.PLATFORM,
-            isActive: true,
-          },
-        },
-      },
-      select: { roleId: true },
-    });
-
-    return Boolean(assignment);
+    throw new ForbiddenException(
+      'Only Super Admin can create or modify custom roles.',
+    );
   }
 
   private async ensureRoleNameAvailable(
@@ -633,6 +627,7 @@ export class RoleManagementService {
     return {
       id: true,
       organizationId: true,
+      systemKey: true,
       name: true,
       description: true,
       scope: true,
@@ -676,15 +671,33 @@ export class RoleManagementService {
     } as const satisfies Prisma.RoleSelect;
   }
 
-  private toRoleView(role: RoleRecord): RoleView {
+  private isAssignableByOrganizationAdmin(role: RoleRecord): boolean {
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.organizationAdmin) {
+      return false;
+    }
+
+    if (role.systemKey) {
+      return ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS.has(
+        role.systemKey,
+      );
+    }
+
+    return !role.permissions.some(({ permission }) =>
+      ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
+    );
+  }
+
+  private toRoleView(role: RoleRecord, canAssign = true): RoleView {
     return {
       id: role.id,
       organizationId: role.organizationId,
+      systemKey: role.systemKey,
       name: role.name,
       description: role.description,
       scope: role.scope,
       isSystem: role.isSystem,
       isActive: role.isActive,
+      canAssign,
       assignedMembersCount: role._count.membershipAssignments,
       permissions: role.permissions
         .map(({ permission }) => permission)

@@ -129,3 +129,28 @@ export type JoinRequest = Prisma.JoinRequestModel
  * 
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model Document
+ * 
+ */
+export type Document = Prisma.DocumentModel
+/**
+ * Model DocumentVersion
+ * 
+ */
+export type DocumentVersion = Prisma.DocumentVersionModel
+/**
+ * Model DocumentAccess
+ * 
+ */
+export type DocumentAccess = Prisma.DocumentAccessModel
+/**
+ * Model DocumentUploadSession
+ * 
+ */
+export type DocumentUploadSession = Prisma.DocumentUploadSessionModel
+/**
+ * Model DocumentUploadStagedFile
+ * 
+ */
+export type DocumentUploadStagedFile = Prisma.DocumentUploadStagedFileModel

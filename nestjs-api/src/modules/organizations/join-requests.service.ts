@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   GoneException,
@@ -9,6 +10,7 @@ import {
   AccessScope,
   JoinRequestStatus,
   OrganizationMembershipStatus,
+  OrganizationStatus,
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
@@ -16,14 +18,13 @@ import {
   ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
   ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
   ORGANIZATION_ROLE_KEYS,
-  PLATFORM_ROLE_KEYS,
 } from '../access-control/rbac.constants';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { AcceptJoinRequestDto } from './dto/accept-join-request.dto';
 import { CreateJoinRequestDto } from './dto/create-join-request.dto';
 import { RejectJoinRequestDto } from './dto/reject-join-request.dto';
-import { DEFAULT_ORGANIZATION_LIMITS } from './organization-defaults';
 
 const JOIN_REQUEST_RETRY_COOLDOWN_HOURS = 24;
 const EMPLOYEE_SYSTEM_KEY = 'employee';
@@ -124,12 +125,13 @@ export class JoinRequestsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async discoverOrganizations(
     userId: string,
   ): Promise<DiscoverOrganizationView[]> {
-    if (await this.userHasSuperAdminRole(userId)) {
+    if (await this.userHasAnyCurrentRole(userId)) {
       return [];
     }
 
@@ -147,7 +149,10 @@ export class JoinRequestsService {
         select: { organizationId: true },
       }),
       this.prisma.organization.findMany({
-        where: { allowJoinRequests: true },
+        where: {
+          allowJoinRequests: true,
+          status: OrganizationStatus.ACTIVE,
+        },
         select: {
           id: true,
           name: true,
@@ -227,7 +232,9 @@ export class JoinRequestsService {
     now = new Date(),
   ): Promise<JoinRequestView> {
     if (!principal.isVerified) {
-      throw new ForbiddenException('Verify your email before requesting access.');
+      throw new ForbiddenException(
+        'Verify your email before requesting access.',
+      );
     }
 
     if (await this.userHasSuperAdminRole(principal.userId)) {
@@ -240,10 +247,12 @@ export class JoinRequestsService {
       });
     }
 
+    await this.assertUserCanReceiveOrganizationRole(principal.userId);
+
     const [organization, membership, latestRequest] = await Promise.all([
       this.prisma.organization.findUnique({
         where: { id: organizationId },
-        select: { id: true, allowJoinRequests: true },
+        select: { id: true, allowJoinRequests: true, status: true },
       }),
       this.prisma.organizationMembership.findUnique({
         where: {
@@ -271,6 +280,12 @@ export class JoinRequestsService {
       throw new NotFoundException('Organization not found');
     }
 
+    if (organization.status !== OrganizationStatus.ACTIVE) {
+      throw new ForbiddenException(
+        'This organization is suspended and is not accepting join requests.',
+      );
+    }
+
     if (!organization.allowJoinRequests) {
       throw new ForbiddenException(
         'This organization is not accepting join requests.',
@@ -281,7 +296,9 @@ export class JoinRequestsService {
       membership &&
       membership.status !== OrganizationMembershipStatus.REMOVED
     ) {
-      throw new ConflictException('You are already a member of this organization.');
+      throw new ConflictException(
+        'You are already a member of this organization.',
+      );
     }
 
     if (latestRequest?.status === JoinRequestStatus.PENDING) {
@@ -368,7 +385,9 @@ export class JoinRequestsService {
     }
 
     if (request.status !== JoinRequestStatus.PENDING) {
-      throw new ConflictException('Only pending join requests can be accepted.');
+      throw new ConflictException(
+        'Only pending join requests can be accepted.',
+      );
     }
 
     if (request.userId === actorUserId) {
@@ -391,6 +410,8 @@ export class JoinRequestsService {
       });
     }
 
+    await this.assertUserCanReceiveOrganizationRole(request.userId);
+
     const roles = await this.resolveRoles(
       organizationId,
       dto.roleIds ?? [],
@@ -409,37 +430,6 @@ export class JoinRequestsService {
             select: { id: true, status: true },
           });
 
-        if (
-          !existingMembership ||
-          existingMembership.status === OrganizationMembershipStatus.REMOVED
-        ) {
-          const [limits, memberCount] = await Promise.all([
-            transaction.organizationLimit.findUnique({
-              where: { organizationId },
-              select: { maxMembers: true },
-            }),
-            transaction.organizationMembership.count({
-              where: {
-                organizationId,
-                status: {
-                  in: [
-                    OrganizationMembershipStatus.ACTIVE,
-                    OrganizationMembershipStatus.SUSPENDED,
-                  ],
-                },
-              },
-            }),
-          ]);
-          const maxMembers =
-            limits?.maxMembers ?? DEFAULT_ORGANIZATION_LIMITS.maxMembers;
-
-          if (memberCount + 1 > maxMembers) {
-            throw new ConflictException(
-              'Organization member limit reached. Increase the limit before accepting this request.',
-            );
-          }
-        }
-
         const claimed = await transaction.joinRequest.updateMany({
           where: {
             id: requestId,
@@ -454,7 +444,9 @@ export class JoinRequestsService {
         });
 
         if (claimed.count !== 1) {
-          throw new ConflictException('This join request is no longer pending.');
+          throw new ConflictException(
+            'This join request is no longer pending.',
+          );
         }
 
         const membership = existingMembership
@@ -476,15 +468,13 @@ export class JoinRequestsService {
           where: { membershipId: membership.id },
         });
 
-        if (roles.length > 0) {
-          await transaction.membershipRole.createMany({
-            data: roles.map((role) => ({
-              membershipId: membership.id,
-              roleId: role.id,
-              assignedByUserId: actorUserId,
-            })),
-          });
-        }
+        await transaction.membershipRole.create({
+          data: {
+            membershipId: membership.id,
+            roleId: roles[0].id,
+            assignedByUserId: actorUserId,
+          },
+        });
 
         return transaction.joinRequest.findUniqueOrThrow({
           where: { id: requestId },
@@ -497,7 +487,9 @@ export class JoinRequestsService {
     );
 
     await this.accessControlService.invalidateUserAccess(request.userId);
-    await this.accessControlService.invalidateOrganizationAccess(organizationId);
+    await this.accessControlService.invalidateOrganizationAccess(
+      organizationId,
+    );
 
     return this.toView(acceptedRequest);
   }
@@ -524,7 +516,9 @@ export class JoinRequestsService {
     }
 
     if (request.status !== JoinRequestStatus.PENDING) {
-      throw new ConflictException('Only pending join requests can be rejected.');
+      throw new ConflictException(
+        'Only pending join requests can be rejected.',
+      );
     }
 
     if (request.userId === actorUserId) {
@@ -563,6 +557,12 @@ export class JoinRequestsService {
     actorUserId?: string,
   ): Promise<AssignableJoinRequestRoleRecord[]> {
     const roleIds = normalizeRoleIds(roleIdsInput);
+
+    if (roleIds.length > 1) {
+      throw new BadRequestException(
+        'Select exactly one role. A user can have only one role globally.',
+      );
+    }
 
     if (roleIds.length === 0) {
       const employeeRole = await this.prisma.role.findFirst({
@@ -648,7 +648,7 @@ export class JoinRequestsService {
     if (blockedRoles.length > 0) {
       throw new ForbiddenException({
         message:
-          'Organization Admins can accept join requests only as Manager, Employee, Viewer, or non-admin custom roles.',
+          'Organization Admins can accept join requests only as Manager, Employee, or non-admin custom roles.',
         details: {
           blockedRoleIds: blockedRoles.map((role) => role.id),
         },
@@ -692,20 +692,100 @@ export class JoinRequestsService {
   }
 
   private async userHasSuperAdminRole(userId: string): Promise<boolean> {
-    const assignment = await this.prisma.platformUserRole.findFirst({
-      where: {
-        userId,
-        role: {
-          is: {
-            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
-            scope: AccessScope.PLATFORM,
-            isActive: true,
+    return this.envSuperAdminService.isConfiguredUserId(userId);
+  }
+
+  private async userHasAnyCurrentRole(userId: string): Promise<boolean> {
+    if (await this.envSuperAdminService.isConfiguredUserId(userId)) {
+      return true;
+    }
+
+    const [platformRole, membership] = await Promise.all([
+      this.prisma.platformUserRole.findFirst({
+        where: {
+          userId,
+          role: {
+            is: {
+              isActive: true,
+            },
           },
         },
-      },
-      select: { roleId: true },
-    });
+        select: { roleId: true },
+      }),
+      this.prisma.organizationMembership.findFirst({
+        where: {
+          userId,
+          status: {
+            in: [
+              OrganizationMembershipStatus.ACTIVE,
+              OrganizationMembershipStatus.SUSPENDED,
+            ],
+          },
+        },
+        select: { id: true },
+      }),
+    ]);
 
-    return Boolean(assignment);
+    return Boolean(platformRole || membership);
+  }
+
+  private async assertUserCanReceiveOrganizationRole(
+    userId: string,
+  ): Promise<void> {
+    if (await this.envSuperAdminService.isConfiguredUserId(userId)) {
+      throw new ConflictException({
+        message:
+          'Super Admin accounts operate from the platform level and cannot become organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
+        },
+      });
+    }
+
+    const [platformRole, existingMembership] = await Promise.all([
+      this.prisma.platformUserRole.findFirst({
+        where: {
+          userId,
+          role: {
+            is: {
+              scope: AccessScope.PLATFORM,
+              isActive: true,
+            },
+          },
+        },
+        select: { roleId: true },
+      }),
+      this.prisma.organizationMembership.findFirst({
+        where: {
+          userId,
+          status: {
+            in: [
+              OrganizationMembershipStatus.ACTIVE,
+              OrganizationMembershipStatus.SUSPENDED,
+            ],
+          },
+        },
+        select: {
+          id: true,
+          organization: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    if (platformRole) {
+      throw new ConflictException(
+        'This user already has a platform role and cannot receive an organization role.',
+      );
+    }
+
+    if (existingMembership) {
+      throw new ConflictException(
+        `This user already has a role in ${existingMembership.organization.name}. A user can have only one role globally.`,
+      );
+    }
   }
 }

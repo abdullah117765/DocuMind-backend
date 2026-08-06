@@ -85,19 +85,11 @@ describe('AuthController', () => {
     expect(issueCsrfToken).toHaveBeenCalledWith(response);
   });
 
-  it('delegates registration to AuthService', async () => {
-    const dto = {
-      email: 'user@example.com',
-      password: 'SecureP@ss1',
-    };
-    const result = {
-      message:
-        'Registration successful. Please check your email to verify your account.',
-    };
-    registerUser.mockResolvedValue(result);
-
-    await expect(controller.register(dto)).resolves.toEqual(result);
-    expect(registerUser).toHaveBeenCalledWith(dto);
+  it('rejects public registration because onboarding is invite-only', () => {
+    expect(() => controller.register()).toThrow(
+      'Public sign-up is disabled. Ask an administrator for an invitation.',
+    );
+    expect(registerUser).not.toHaveBeenCalled();
   });
 
   it('delegates explicit email verification using the request body token', async () => {

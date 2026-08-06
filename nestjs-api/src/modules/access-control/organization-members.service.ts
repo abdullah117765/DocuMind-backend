@@ -11,9 +11,9 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlService } from './access-control.service';
 import { AddOrganizationMemberDto } from './dto/add-organization-member.dto';
-import { DEFAULT_ORGANIZATION_LIMITS } from '../organizations/organization-defaults';
 import {
   ORGANIZATION_PERMISSIONS,
   ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
@@ -23,6 +23,16 @@ import {
 } from './rbac.constants';
 
 const MEMBER_MANAGEMENT_PERMISSION = ORGANIZATION_PERMISSIONS.membersManage;
+const MEMBER_VISIBILITY_TIER = {
+  none: 0,
+  employee: 1,
+  manager: 2,
+  organizationAdmin: 3,
+  platform: 4,
+} as const;
+
+type MemberVisibilityTier =
+  (typeof MEMBER_VISIBILITY_TIER)[keyof typeof MEMBER_VISIBILITY_TIER];
 
 interface MemberRoleRecord {
   id: string;
@@ -46,6 +56,7 @@ interface MembershipRecord {
   updatedAt: Date;
   user: {
     id: string;
+    name: string | null;
     email: string;
     isVerified: boolean;
     isActive: boolean;
@@ -58,6 +69,7 @@ interface MembershipRecord {
 export interface MemberRoleView {
   id: string;
   organizationId: string | null;
+  systemKey: string | null;
   name: string;
   isSystem: boolean;
 }
@@ -68,6 +80,7 @@ export interface OrganizationMemberView {
   status: OrganizationMembershipStatus;
   user: {
     id: string;
+    name: string | null;
     email: string;
     isVerified: boolean;
   };
@@ -103,9 +116,13 @@ export class OrganizationMembersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
-  async listMembers(organizationId: string): Promise<OrganizationMemberView[]> {
+  async listMembers(
+    organizationId: string,
+    actorUserId?: string,
+  ): Promise<OrganizationMemberView[]> {
     const memberships = await this.prisma.organizationMembership.findMany({
       where: {
         organizationId,
@@ -119,13 +136,23 @@ export class OrganizationMembersService {
       select: this.membershipSelect(organizationId),
       orderBy: [{ user: { email: 'asc' } }, { id: 'asc' }],
     });
+    const visibleMemberships = actorUserId
+      ? await this.filterVisibleMembershipsForActor(
+          organizationId,
+          actorUserId,
+          memberships,
+        )
+      : memberships;
 
-    return memberships.map((membership) => this.toMemberView(membership));
+    return visibleMemberships.map((membership) =>
+      this.toMemberView(membership),
+    );
   }
 
   async getMember(
     organizationId: string,
     membershipId: string,
+    actorUserId?: string,
   ): Promise<OrganizationMemberView> {
     const membership = await this.findCurrentMembership(
       organizationId,
@@ -133,6 +160,17 @@ export class OrganizationMembersService {
     );
 
     if (!membership) {
+      throw new NotFoundException('Organization member not found');
+    }
+
+    if (
+      actorUserId &&
+      !(await this.canActorViewMembership(
+        organizationId,
+        actorUserId,
+        membership,
+      ))
+    ) {
       throw new NotFoundException('Organization member not found');
     }
 
@@ -152,6 +190,7 @@ export class OrganizationMembersService {
       },
       select: {
         id: true,
+        email: true,
         platformRoleAssignments: {
           where: {
             role: {
@@ -172,7 +211,10 @@ export class OrganizationMembersService {
       throw new NotFoundException('Active verified user not found');
     }
 
-    if (user.platformRoleAssignments.length > 0) {
+    if (
+      this.envSuperAdminService.isConfiguredUser(user) ||
+      user.platformRoleAssignments.length > 0
+    ) {
       throw new ConflictException({
         message:
           'Super Admin accounts operate from the platform level and cannot become organization members.',
@@ -216,7 +258,7 @@ export class OrganizationMembersService {
       );
     }
 
-    await this.assertMemberLimitAllowsAdd(organizationId);
+    await this.assertUserCanReceiveOrganizationRole(user.id);
 
     let membershipId: string;
 
@@ -289,10 +331,19 @@ export class OrganizationMembersService {
       );
     }
 
+    await this.assertActorCanManageTargetMember(
+      actorUserId,
+      membership.roles.map(({ role }) => role),
+    );
+
     const roles = await this.resolveApplicableRoles(
       organizationId,
       actorUserId,
       roleIdsInput,
+    );
+    await this.assertUserCanReceiveOrganizationRole(
+      membership.userId,
+      membershipId,
     );
     const currentlyManagesUsers =
       membership.status === OrganizationMembershipStatus.ACTIVE &&
@@ -347,6 +398,11 @@ export class OrganizationMembersService {
       );
     }
 
+    await this.assertActorCanManageTargetMember(
+      actorUserId,
+      membership.roles.map(({ role }) => role),
+    );
+
     if (membership.status === status) {
       return this.toMemberView(membership);
     }
@@ -390,6 +446,11 @@ export class OrganizationMembersService {
       );
     }
 
+    await this.assertActorCanManageTargetMember(
+      actorUserId,
+      membership.roles.map(({ role }) => role),
+    );
+
     await this.runSerializableMembershipMutation(async (transaction) => {
       if (
         membership.status === OrganizationMembershipStatus.ACTIVE &&
@@ -423,8 +484,10 @@ export class OrganizationMembersService {
   ): Promise<MemberRoleRecord[]> {
     const roleIds = normalizeRoleIds(roleIdsInput);
 
-    if (roleIds.length === 0) {
-      return [];
+    if (roleIds.length !== 1) {
+      throw new BadRequestException(
+        'Select exactly one role. A user can have only one role globally.',
+      );
     }
 
     const roles = await this.prisma.role.findMany({
@@ -485,9 +548,35 @@ export class OrganizationMembersService {
     if (blockedRoles.length > 0) {
       throw new ForbiddenException({
         message:
-          'Organization Admins can assign only Manager, Employee, Viewer, or non-admin custom roles.',
+          'Organization Admins can assign only Manager, Employee, or non-admin custom roles.',
         details: {
           blockedRoleIds: blockedRoles.map((role) => role.id),
+        },
+      });
+    }
+  }
+
+  private async assertActorCanManageTargetMember(
+    actorUserId: string,
+    currentRoles: MemberRoleRecord[],
+  ): Promise<void> {
+    if (
+      currentRoles.length === 0 ||
+      (await this.userHasSuperAdminRole(actorUserId))
+    ) {
+      return;
+    }
+
+    const protectedRoles = currentRoles.filter(
+      (role) => !this.isAssignableByOrganizationAdmin(role),
+    );
+
+    if (protectedRoles.length > 0) {
+      throw new ForbiddenException({
+        message:
+          'Only Super Admin can manage members with Organization Admin or protected custom roles.',
+        details: {
+          protectedRoleIds: protectedRoles.map((role) => role.id),
         },
       });
     }
@@ -507,6 +596,200 @@ export class OrganizationMembersService {
     return !role.permissions.some(({ permission }) =>
       ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
     );
+  }
+
+  private async filterVisibleMembershipsForActor(
+    organizationId: string,
+    actorUserId: string,
+    memberships: MembershipRecord[],
+  ): Promise<MembershipRecord[]> {
+    const actorTier = await this.resolveActorMemberVisibilityTier(
+      organizationId,
+      actorUserId,
+    );
+
+    if (actorTier >= MEMBER_VISIBILITY_TIER.organizationAdmin) {
+      return memberships;
+    }
+
+    if (actorTier < MEMBER_VISIBILITY_TIER.manager) {
+      throw new ForbiddenException(
+        'Only organization administrators and managers can view organization members.',
+      );
+    }
+
+    return memberships.filter(
+      (membership) =>
+        membership.userId !== actorUserId &&
+        this.getMemberVisibilityTierFromRoles(membership.roles) ===
+          MEMBER_VISIBILITY_TIER.employee,
+    );
+  }
+
+  private async canActorViewMembership(
+    organizationId: string,
+    actorUserId: string,
+    membership: MembershipRecord,
+  ): Promise<boolean> {
+    const actorTier = await this.resolveActorMemberVisibilityTier(
+      organizationId,
+      actorUserId,
+    );
+
+    if (actorTier >= MEMBER_VISIBILITY_TIER.organizationAdmin) {
+      return true;
+    }
+
+    return (
+      actorTier >= MEMBER_VISIBILITY_TIER.manager &&
+      membership.userId !== actorUserId &&
+      this.getMemberVisibilityTierFromRoles(membership.roles) ===
+        MEMBER_VISIBILITY_TIER.employee
+    );
+  }
+
+  private async resolveActorMemberVisibilityTier(
+    organizationId: string,
+    actorUserId: string,
+  ): Promise<MemberVisibilityTier> {
+    if (await this.userHasSuperAdminRole(actorUserId)) {
+      return MEMBER_VISIBILITY_TIER.platform;
+    }
+
+    const access = await this.accessControlService.resolveOrganizationAccess(
+      actorUserId,
+      organizationId,
+    );
+
+    if (!access) {
+      return MEMBER_VISIBILITY_TIER.none;
+    }
+
+    if (
+      access.roles.some((role) => role.scope === AccessScope.PLATFORM) ||
+      access.permissions.includes(ORGANIZATION_PERMISSIONS.membersManage)
+    ) {
+      return MEMBER_VISIBILITY_TIER.organizationAdmin;
+    }
+
+    const actorMembership = await this.prisma.organizationMembership.findFirst({
+      where: {
+        organizationId,
+        userId: actorUserId,
+        status: OrganizationMembershipStatus.ACTIVE,
+      },
+      select: {
+        roles: this.memberVisibilityRoleSelect(organizationId),
+      },
+    });
+
+    return actorMembership
+      ? this.getMemberVisibilityTierFromRoles(actorMembership.roles)
+      : MEMBER_VISIBILITY_TIER.none;
+  }
+
+  private getMemberVisibilityTierFromRoles(
+    roles: Array<{ role: MemberRoleRecord }>,
+  ): MemberVisibilityTier {
+    if (roles.length === 0) {
+      return MEMBER_VISIBILITY_TIER.employee;
+    }
+
+    return roles.reduce<MemberVisibilityTier>(
+      (highestTier, { role }) =>
+        Math.max(
+          highestTier,
+          this.getMemberVisibilityTierFromRole(role),
+        ) as MemberVisibilityTier,
+      MEMBER_VISIBILITY_TIER.none,
+    );
+  }
+
+  private getMemberVisibilityTierFromRole(
+    role: MemberRoleRecord,
+  ): MemberVisibilityTier {
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.organizationAdmin) {
+      return MEMBER_VISIBILITY_TIER.organizationAdmin;
+    }
+
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.manager) {
+      return MEMBER_VISIBILITY_TIER.manager;
+    }
+
+    if (role.systemKey === ORGANIZATION_ROLE_KEYS.employee) {
+      return MEMBER_VISIBILITY_TIER.employee;
+    }
+
+    const permissionCodes = new Set(
+      role.permissions.map(({ permission }) => permission.code),
+    );
+
+    if (
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.membersManage) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.rolesManage) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.permissionsAssign) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsDelete)
+    ) {
+      return MEMBER_VISIBILITY_TIER.organizationAdmin;
+    }
+
+    if (permissionCodes.has(ORGANIZATION_PERMISSIONS.analyticsView)) {
+      return MEMBER_VISIBILITY_TIER.manager;
+    }
+
+    if (
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsRead) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsCreate) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsUpdate) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.documentsUpload) ||
+      permissionCodes.has(ORGANIZATION_PERMISSIONS.aiAccess)
+    ) {
+      return MEMBER_VISIBILITY_TIER.employee;
+    }
+
+    return MEMBER_VISIBILITY_TIER.none;
+  }
+
+  private memberVisibilityRoleSelect(organizationId: string) {
+    return {
+      where: {
+        role: {
+          is: {
+            scope: AccessScope.ORGANIZATION,
+            isActive: true,
+            OR: [{ organizationId: null }, { organizationId }],
+          },
+        },
+      },
+      select: {
+        role: {
+          select: {
+            id: true,
+            organizationId: true,
+            systemKey: true,
+            name: true,
+            isSystem: true,
+            permissions: {
+              where: {
+                permission: {
+                  is: {
+                    scope: AccessScope.ORGANIZATION,
+                    isActive: true,
+                  },
+                },
+              },
+              select: {
+                permission: {
+                  select: {
+                    code: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
   }
 
   private async ensureAnotherUserManager(
@@ -585,34 +868,40 @@ export class OrganizationMembersService {
   }
 
   private async userHasSuperAdminRole(userId: string): Promise<boolean> {
-    const assignment = await this.prisma.platformUserRole.findFirst({
-      where: {
-        userId,
-        role: {
-          is: {
-            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
-            scope: AccessScope.PLATFORM,
-            isActive: true,
-          },
-        },
-      },
-      select: { roleId: true },
-    });
-
-    return Boolean(assignment);
+    return this.envSuperAdminService.isConfiguredUserId(userId);
   }
 
-  private async assertMemberLimitAllowsAdd(
-    organizationId: string,
+  private async assertUserCanReceiveOrganizationRole(
+    userId: string,
+    currentMembershipId?: string,
   ): Promise<void> {
-    const [limits, memberCount] = await Promise.all([
-      this.prisma.organizationLimit.findUnique({
-        where: { organizationId },
-        select: { maxMembers: true },
-      }),
-      this.prisma.organizationMembership.count({
+    if (await this.envSuperAdminService.isConfiguredUserId(userId)) {
+      throw new ConflictException({
+        message:
+          'Super Admin accounts operate from the platform level and cannot become organization members.',
+        details: {
+          reason: 'PLATFORM_ADMIN_CANNOT_JOIN_ORGANIZATION',
+        },
+      });
+    }
+
+    const [platformRole, existingMembership] = await Promise.all([
+      this.prisma.platformUserRole.findFirst({
         where: {
-          organizationId,
+          userId,
+          role: {
+            is: {
+              scope: AccessScope.PLATFORM,
+              isActive: true,
+            },
+          },
+        },
+        select: { roleId: true },
+      }),
+      this.prisma.organizationMembership.findFirst({
+        where: {
+          userId,
+          ...(currentMembershipId ? { id: { not: currentMembershipId } } : {}),
           status: {
             in: [
               OrganizationMembershipStatus.ACTIVE,
@@ -620,14 +909,26 @@ export class OrganizationMembersService {
             ],
           },
         },
+        select: {
+          id: true,
+          organization: {
+            select: {
+              name: true,
+            },
+          },
+        },
       }),
     ]);
-    const maxMembers =
-      limits?.maxMembers ?? DEFAULT_ORGANIZATION_LIMITS.maxMembers;
 
-    if (memberCount + 1 > maxMembers) {
+    if (platformRole) {
       throw new ConflictException(
-        'Organization member limit reached. Increase the limit before adding more members.',
+        'This user already has a platform role and cannot receive an organization role.',
+      );
+    }
+
+    if (existingMembership) {
+      throw new ConflictException(
+        `This user already has a role in ${existingMembership.organization.name}. A user can have only one role globally.`,
       );
     }
   }
@@ -678,6 +979,7 @@ export class OrganizationMembersService {
       user: {
         select: {
           id: true,
+          name: true,
           email: true,
           isVerified: true,
           isActive: true,
@@ -705,7 +1007,6 @@ export class OrganizationMembersService {
                 where: {
                   permission: {
                     is: {
-                      code: MEMBER_MANAGEMENT_PERMISSION,
                       scope: AccessScope.ORGANIZATION,
                       isActive: true,
                     },
@@ -736,6 +1037,7 @@ export class OrganizationMembersService {
         .map(({ role }) => ({
           id: role.id,
           organizationId: role.organizationId,
+          systemKey: role.systemKey,
           name: role.name,
           isSystem: role.isSystem,
         }))

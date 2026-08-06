@@ -9,8 +9,10 @@ import {
   Patch,
   Post,
   Put,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
+import { AccessScope } from '../../generated/prisma/client';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -27,9 +29,16 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { RequireOrganizationPermissions } from '../../common/decorators/require-permissions.decorator';
+import {
+  RequireOrganizationPermissions,
+  RequirePlatformSuperAdmin,
+} from '../../common/decorators/require-permissions.decorator';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
+import {
+  PERMISSION_REQUIREMENT_METADATA,
+  PermissionMatch,
+} from './permission-requirement';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { OrganizationIdDto } from './dto/organization-id.dto';
 import { OrganizationRoleParamsDto } from './dto/organization-role-params.dto';
@@ -97,6 +106,7 @@ export class RoleManagementController {
     summary: 'List active permissions available to organization roles',
   })
   @ApiOkResponse({ description: 'Organization permission catalog' })
+  @RequirePlatformSuperAdmin()
   async listPermissions(): Promise<PermissionListResult> {
     return {
       data: {
@@ -106,16 +116,29 @@ export class RoleManagementController {
   }
 
   @Get('roles')
+  @SetMetadata(PERMISSION_REQUIREMENT_METADATA, {
+    scope: AccessScope.ORGANIZATION,
+    match: PermissionMatch.ANY,
+    permissionCodes: [
+      ORGANIZATION_PERMISSIONS.rolesManage,
+      ORGANIZATION_PERMISSIONS.membersManage,
+    ],
+    organizationIdParam: 'organizationId',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'List system and custom roles available in an organization',
   })
   @ApiOkResponse({ description: 'Available organization roles' })
-  async listRoles(@Param() params: OrganizationIdDto): Promise<RoleListResult> {
+  async listRoles(
+    @Param() params: OrganizationIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Promise<RoleListResult> {
     return {
       data: {
         roles: await this.roleManagementService.listRoles(
           params.organizationId,
+          principal.userId,
         ),
       },
     };
@@ -147,10 +170,7 @@ export class RoleManagementController {
   @Post('roles')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(CsrfGuard)
-  @RequireOrganizationPermissions(
-    ORGANIZATION_PERMISSIONS.rolesManage,
-    ORGANIZATION_PERMISSIONS.permissionsAssign,
-  )
+  @RequirePlatformSuperAdmin()
   @ApiHeader(CSRF_HEADER)
   @ApiOperation({ summary: 'Create a custom organization role' })
   @ApiCreatedResponse({ description: 'Custom role created' })
@@ -184,6 +204,7 @@ export class RoleManagementController {
     format: 'uuid',
   })
   @UseGuards(CsrfGuard)
+  @RequirePlatformSuperAdmin()
   @ApiHeader(CSRF_HEADER)
   @ApiOperation({ summary: 'Update a custom organization role' })
   @ApiOkResponse({ description: 'Custom role updated' })
@@ -218,10 +239,7 @@ export class RoleManagementController {
     format: 'uuid',
   })
   @UseGuards(CsrfGuard)
-  @RequireOrganizationPermissions(
-    ORGANIZATION_PERMISSIONS.rolesManage,
-    ORGANIZATION_PERMISSIONS.permissionsAssign,
-  )
+  @RequirePlatformSuperAdmin()
   @ApiHeader(CSRF_HEADER)
   @ApiOperation({
     summary: 'Replace every permission assigned to a custom role',
@@ -257,6 +275,7 @@ export class RoleManagementController {
     format: 'uuid',
   })
   @UseGuards(CsrfGuard)
+  @RequirePlatformSuperAdmin()
   @ApiHeader(CSRF_HEADER)
   @ApiOperation({
     summary: 'Deactivate a custom role and revoke its member assignments',

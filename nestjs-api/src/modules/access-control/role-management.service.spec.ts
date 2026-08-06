@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { AccessScope } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlService } from './access-control.service';
 import { RoleManagementService } from './role-management.service';
 
@@ -24,6 +25,7 @@ describe('RoleManagementService', () => {
   const customRole = {
     id: roleId,
     organizationId,
+    systemKey: null,
     name: 'Reviewer',
     description: 'Reviews documents.',
     scope: AccessScope.ORGANIZATION,
@@ -52,6 +54,7 @@ describe('RoleManagementService', () => {
     ...customRole,
     id: 'e49feaf4-2d74-4d94-ae9b-1ac8a35be9ea',
     organizationId: null,
+    systemKey: 'organization_admin',
     name: 'Organization Admin',
     isSystem: true,
   };
@@ -101,10 +104,18 @@ describe('RoleManagementService', () => {
     $transaction: runTransaction,
   } as unknown as PrismaService;
   const invalidateOrganizationAccess = jest.fn();
+  const isConfiguredSuperAdminUserId = jest.fn();
   const accessControlService = {
     invalidateOrganizationAccess,
   } as unknown as AccessControlService;
-  const service = new RoleManagementService(prisma, accessControlService);
+  const envSuperAdminService = {
+    isConfiguredUserId: isConfiguredSuperAdminUserId,
+  } as unknown as EnvSuperAdminService;
+  const service = new RoleManagementService(
+    prisma,
+    accessControlService,
+    envSuperAdminService,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -123,6 +134,7 @@ describe('RoleManagementService', () => {
     membershipRoleDeleteMany.mockResolvedValue({ count: 1 });
     transactionMembershipFindFirst.mockResolvedValue(null);
     invalidateOrganizationAccess.mockResolvedValue();
+    isConfiguredSuperAdminUserId.mockResolvedValue(true);
   });
 
   it('lists the active organization permission catalog', async () => {
@@ -143,18 +155,53 @@ describe('RoleManagementService', () => {
   it('lists applicable system and custom roles as API views', async () => {
     roleFindMany.mockResolvedValue([systemRole, customRole]);
 
-    const result = await service.listRoles(organizationId);
+    const result = await service.listRoles(organizationId, actorUserId);
 
     expect(result).toEqual([
       expect.objectContaining({
         id: systemRole.id,
         isSystem: true,
+        canAssign: true,
         assignedMembersCount: 2,
       }),
       expect.objectContaining({
         id: customRole.id,
         isSystem: false,
+        canAssign: true,
         permissions: [permission],
+      }),
+    ]);
+  });
+
+  it('marks protected roles as not assignable for organization admins', async () => {
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
+    roleFindMany.mockResolvedValue([
+      systemRole,
+      customUserManagerRole,
+      {
+        ...customRole,
+        id: '748cf2a2-f08b-46ee-8578-0d70407e6d35',
+        systemKey: 'manager',
+        name: 'Manager',
+        isSystem: true,
+      },
+    ]);
+
+    const result = await service.listRoles(organizationId, actorUserId);
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: systemRole.id,
+        systemKey: 'organization_admin',
+        canAssign: false,
+      }),
+      expect.objectContaining({
+        id: customUserManagerRole.id,
+        canAssign: false,
+      }),
+      expect.objectContaining({
+        systemKey: 'manager',
+        canAssign: true,
       }),
     ]);
   });
@@ -210,6 +257,20 @@ describe('RoleManagementService', () => {
     expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
   });
 
+  it('blocks organization admins from creating custom roles', async () => {
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
+
+    await expect(
+      service.createRole(organizationId, actorUserId, {
+        name: 'Reviewer',
+        permissionCodes: ['documents.read'],
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(permissionFindMany).not.toHaveBeenCalled();
+    expect(roleCreate).not.toHaveBeenCalled();
+  });
+
   it('rejects unknown, inactive, or wrong-scope permission codes', async () => {
     permissionFindMany.mockResolvedValue([]);
 
@@ -240,6 +301,19 @@ describe('RoleManagementService', () => {
         name: 'Changed',
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(roleUpdate).not.toHaveBeenCalled();
+  });
+
+  it('blocks organization admins from updating custom roles', async () => {
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
+
+    await expect(
+      service.updateRole(organizationId, roleId, actorUserId, {
+        name: 'Senior Reviewer',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(roleFindFirst).not.toHaveBeenCalled();
     expect(roleUpdate).not.toHaveBeenCalled();
   });
 
@@ -319,6 +393,19 @@ describe('RoleManagementService', () => {
     expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
   });
 
+  it('blocks organization admins from replacing custom-role permissions', async () => {
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
+
+    await expect(
+      service.replaceRolePermissions(organizationId, roleId, actorUserId, [
+        'documents.read',
+      ]),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(roleFindFirst).not.toHaveBeenCalled();
+    expect(rolePermissionDeleteMany).not.toHaveBeenCalled();
+  });
+
   it('prevents changing permissions on a role assigned to the acting user', async () => {
     roleFindFirst.mockResolvedValue(customRole);
     membershipFindFirst.mockResolvedValue({ id: 'own-membership' });
@@ -390,6 +477,17 @@ describe('RoleManagementService', () => {
       },
     });
     expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
+  });
+
+  it('blocks organization admins from deleting custom roles', async () => {
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
+
+    await expect(
+      service.deleteRole(organizationId, roleId, actorUserId),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(roleFindFirst).not.toHaveBeenCalled();
+    expect(membershipRoleDeleteMany).not.toHaveBeenCalled();
   });
 
   it('prevents deleting a custom role assigned to the acting user', async () => {

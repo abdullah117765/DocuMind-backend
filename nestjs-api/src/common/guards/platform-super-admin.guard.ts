@@ -6,10 +6,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { AccessScope } from '../../generated/prisma/client';
-import { PLATFORM_ROLE_KEYS } from '../../modules/access-control/rbac.constants';
+import { EnvSuperAdminService } from '../../modules/auth/env-super-admin.service';
 import type { AuthenticatedPrincipal } from '../../modules/auth/interfaces/authenticated-principal.interface';
-import { PrismaService } from '../../modules/prisma/prisma.service';
 
 type PlatformSuperAdminRequest = Request & {
   user?: AuthenticatedPrincipal;
@@ -17,7 +15,7 @@ type PlatformSuperAdminRequest = Request & {
 
 @Injectable()
 export class PlatformSuperAdminGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly envSuperAdminService: EnvSuperAdminService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context
@@ -29,21 +27,10 @@ export class PlatformSuperAdminGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    const assignment = await this.prisma.platformUserRole.findFirst({
-      where: {
-        userId,
-        role: {
-          is: {
-            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
-            scope: AccessScope.PLATFORM,
-            isActive: true,
-          },
-        },
-      },
-      select: { roleId: true },
-    });
-
-    if (!assignment) {
+    if (
+      !request.user?.isEnvSuperAdmin &&
+      !(await this.envSuperAdminService.isConfiguredUserId(userId))
+    ) {
       throw new ForbiddenException('Super Admin access is required.');
     }
 

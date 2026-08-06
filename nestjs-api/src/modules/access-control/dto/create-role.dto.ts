@@ -13,6 +13,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 const PERMISSION_CODE_PATTERN = /^[a-z][a-z0-9._:-]{0,119}$/;
+const ROLE_NAME_PATTERN = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/;
 
 function normalizeName(value: unknown): unknown {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : value;
@@ -48,6 +49,10 @@ export class CreateRoleDto {
   @IsNotEmpty({ message: 'Role name is required' })
   @MinLength(2, { message: 'Role name must be at least 2 characters long' })
   @MaxLength(100, { message: 'Role name must not exceed 100 characters' })
+  @Matches(ROLE_NAME_PATTERN, {
+    message:
+      'Role name can contain only letters, numbers, and single spaces',
+  })
   name!: string;
 
   @ApiPropertyOptional({

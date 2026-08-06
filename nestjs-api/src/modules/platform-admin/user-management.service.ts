@@ -8,10 +8,10 @@ import { hash } from 'bcrypt';
 import {
   AccessScope,
   Prisma,
-  RoleAssignmentSource,
 } from '../../generated/prisma/client';
 import { normalizeEmail } from '../../common/validation/email.validation';
 import { AccessControlService } from '../access-control/access-control.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import {
   SESSION_REVOCATION_REASONS,
   SessionService,
@@ -20,15 +20,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PLATFORM_ROLE_KEYS } from '../access-control/rbac.constants';
 import { CreateManagedUserDto } from './dto/create-managed-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
-import { ReplacePlatformRolesDto } from './dto/replace-platform-roles.dto';
 import { UpdateManagedUserDto } from './dto/update-managed-user.dto';
 
 const PASSWORD_HASH_ROUNDS = 12;
 
 const managedUserSelect = {
   id: true,
+  name: true,
   email: true,
-  isVerified: true,
   isActive: true,
   deactivatedAt: true,
   createdAt: true,
@@ -40,6 +39,15 @@ const managedUserSelect = {
     },
   },
   platformRoleAssignments: {
+    where: {
+      role: {
+        is: {
+          NOT: {
+            systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+          },
+        },
+      },
+    },
     select: {
       role: {
         select: {
@@ -48,15 +56,6 @@ const managedUserSelect = {
           systemKey: true,
           scope: true,
           isSystem: true,
-          permissions: {
-            select: {
-              permission: {
-                select: {
-                  code: true,
-                },
-              },
-            },
-          },
         },
       },
       source: true,
@@ -111,8 +110,8 @@ type ManagedUserRecord = Prisma.UserGetPayload<{
 
 export interface ManagedUserView {
   id: string;
+  name: string | null;
   email: string;
-  isVerified: boolean;
   isActive: boolean;
   deactivatedAt: Date | null;
   createdAt: Date;
@@ -124,7 +123,6 @@ export interface ManagedUserView {
     name: string;
     systemKey: string | null;
     isSystem: boolean;
-    permissionCodes: string[];
   }>;
   memberships: Array<{
     id: string;
@@ -153,14 +151,6 @@ export interface ManagedUserListResult {
   };
 }
 
-export interface PlatformRoleView {
-  id: string;
-  name: string;
-  systemKey: string | null;
-  isSystem: boolean;
-  permissionCodes: string[];
-}
-
 function toNormalizedEmail(email: string): string {
   return normalizeEmail(email) as string;
 }
@@ -178,6 +168,7 @@ export class UserManagementService {
     private readonly prisma: PrismaService,
     private readonly sessionService: SessionService,
     private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async listUsers(query: ListUsersQueryDto): Promise<ManagedUserListResult> {
@@ -216,66 +207,31 @@ export class UserManagementService {
       throw new NotFoundException('User not found');
     }
 
+    if (this.envSuperAdminService.isConfiguredUser(user)) {
+      throw new NotFoundException('User not found');
+    }
+
     return this.toUserView(user);
-  }
-
-  async listPlatformRoles(): Promise<PlatformRoleView[]> {
-    const roles = await this.prisma.role.findMany({
-      where: {
-        organizationId: null,
-        scope: AccessScope.PLATFORM,
-        isActive: true,
-        NOT: {
-          systemKey: PLATFORM_ROLE_KEYS.superAdmin,
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        systemKey: true,
-        isSystem: true,
-        permissions: {
-          where: {
-            permission: {
-              is: {
-                scope: AccessScope.PLATFORM,
-                isActive: true,
-              },
-            },
-          },
-          select: {
-            permission: {
-              select: {
-                code: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: [{ name: 'asc' }, { id: 'asc' }],
-    });
-
-    return roles.map((role) => ({
-      id: role.id,
-      name: role.name,
-      systemKey: role.systemKey,
-      isSystem: role.isSystem,
-      permissionCodes: role.permissions
-        .map(({ permission }) => permission.code)
-        .sort((left, right) => left.localeCompare(right)),
-    }));
   }
 
   async createUser(dto: CreateManagedUserDto): Promise<ManagedUserView> {
     const email = toNormalizedEmail(dto.email);
+
+    if (this.envSuperAdminService.isConfiguredEmail(email)) {
+      throw new ConflictException(
+        'Super Admin account is managed through environment variables.',
+      );
+    }
+
     const passwordHash = await hash(dto.password, PASSWORD_HASH_ROUNDS);
 
     try {
       const user = await this.prisma.user.create({
         data: {
+          name: dto.name,
           email,
           passwordHash,
-          isVerified: dto.isVerified ?? true,
+          isVerified: true,
           isActive: true,
         },
         select: {
@@ -306,6 +262,7 @@ export class UserManagementService {
       where: { id: userId },
       select: {
         id: true,
+        email: true,
         isActive: true,
         platformRoleAssignments: {
           where: {
@@ -330,8 +287,9 @@ export class UserManagementService {
     const nextIsActive = dto.isActive ?? existingUser.isActive;
 
     if (
-      existingUser.platformRoleAssignments.length > 0 &&
-      (dto.isActive !== undefined || dto.isVerified !== undefined)
+      (this.envSuperAdminService.isConfiguredUser(existingUser) ||
+        existingUser.platformRoleAssignments.length > 0) &&
+      dto.isActive !== undefined
     ) {
       throw new ForbiddenException(
         'Super Admin accounts are protected and cannot be changed from user management.',
@@ -341,7 +299,6 @@ export class UserManagementService {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        ...(dto.isVerified === undefined ? {} : { isVerified: dto.isVerified }),
         ...(dto.isActive === undefined
           ? {}
           : {
@@ -363,101 +320,6 @@ export class UserManagementService {
     return this.getUser(userId);
   }
 
-  async replacePlatformRoles(
-    actorUserId: string,
-    userId: string,
-    dto: ReplacePlatformRolesDto,
-  ): Promise<ManagedUserView> {
-    if (actorUserId === userId) {
-      throw new ForbiddenException('You cannot change your own platform roles.');
-    }
-
-    const roleIds = [...new Set(dto.roleIds)].sort((left, right) =>
-      left.localeCompare(right),
-    );
-    const [user, roles] = await Promise.all([
-      this.prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          platformRoleAssignments: {
-            where: {
-              role: {
-                is: {
-                  systemKey: PLATFORM_ROLE_KEYS.superAdmin,
-                  scope: AccessScope.PLATFORM,
-                  isActive: true,
-                },
-              },
-            },
-            select: { roleId: true },
-            take: 1,
-          },
-        },
-      }),
-      this.prisma.role.findMany({
-        where: {
-          id: { in: roleIds },
-          organizationId: null,
-          scope: AccessScope.PLATFORM,
-          isActive: true,
-        },
-        select: { id: true, systemKey: true },
-      }),
-    ]);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    if (user.platformRoleAssignments.length > 0) {
-      throw new ForbiddenException(
-        'Super Admin platform roles are backend/database-only and cannot be changed from the application.',
-      );
-    }
-
-    const requestedSuperAdminRole = roles.find(
-      (role) => role.systemKey === PLATFORM_ROLE_KEYS.superAdmin,
-    );
-
-    if (requestedSuperAdminRole) {
-      throw new ForbiddenException(
-        'Super Admin cannot be assigned from the application.',
-      );
-    }
-
-    const validRoleIds = new Set(roles.map((role) => role.id));
-    const invalidRoleIds = roleIds.filter((roleId) => !validRoleIds.has(roleId));
-
-    if (invalidRoleIds.length > 0) {
-      throw new ConflictException({
-        message: 'One or more platform roles are invalid or inactive',
-        details: { invalidRoleIds },
-      });
-    }
-
-    await this.prisma.$transaction(async (transaction) => {
-      await transaction.platformUserRole.deleteMany({
-        where: { userId },
-      });
-
-      if (roleIds.length > 0) {
-        await transaction.platformUserRole.createMany({
-          data: roleIds.map((roleId) => ({
-            userId,
-            roleId,
-            assignedByUserId: actorUserId,
-            source: RoleAssignmentSource.ADMIN,
-          })),
-        });
-      }
-    });
-
-    await this.accessControlService.invalidateUserAccess(userId);
-
-    return this.getUser(userId);
-  }
-
   private buildUserWhere(query: ListUsersQueryDto): Prisma.UserWhereInput {
     const search = query.search?.trim();
 
@@ -465,7 +327,9 @@ export class UserManagementService {
       ...(query.status && query.status !== 'all'
         ? { isActive: query.status === 'active' }
         : {}),
-      ...(query.verified === undefined ? {} : { isVerified: query.verified }),
+      ...(this.envSuperAdminService.getConfiguredEmail()
+        ? { email: { not: this.envSuperAdminService.getConfiguredEmail() as string } }
+        : {}),
       ...(search
         ? {
             OR: [
@@ -496,25 +360,35 @@ export class UserManagementService {
   }
 
   private toUserView(user: ManagedUserRecord): ManagedUserView {
+    const superAdminRole = this.envSuperAdminService.isConfiguredUser(user)
+      ? this.envSuperAdminService.getVirtualRole()
+      : null;
+
     return {
       id: user.id,
+      name: user.name,
       email: user.email,
-      isVerified: user.isVerified,
       isActive: user.isActive,
       deactivatedAt: user.deactivatedAt,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       sessionCount: user._count.sessions,
       organizationMembershipCount: user._count.organizationMemberships,
-      platformRoles: user.platformRoleAssignments.map(({ role }) => ({
-        id: role.id,
-        name: role.name,
-        systemKey: role.systemKey,
-        isSystem: role.isSystem,
-        permissionCodes: role.permissions
-          .map(({ permission }) => permission.code)
-          .sort((left, right) => left.localeCompare(right)),
-      })),
+      platformRoles: superAdminRole
+        ? [
+            {
+              id: superAdminRole.id,
+              name: superAdminRole.name,
+              systemKey: PLATFORM_ROLE_KEYS.superAdmin,
+              isSystem: true,
+            },
+          ]
+        : user.platformRoleAssignments.map(({ role }) => ({
+            id: role.id,
+            name: role.name,
+            systemKey: role.systemKey,
+            isSystem: role.isSystem,
+          })),
       memberships: user.organizationMemberships.map((membership) => ({
         id: membership.id,
         status: membership.status,

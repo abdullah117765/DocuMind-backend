@@ -1,7 +1,7 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
+  GoneException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -31,6 +31,7 @@ import {
   EmailVerificationResendResult,
   EmailVerificationService,
 } from './email-verification.service';
+import { EnvSuperAdminService } from './env-super-admin.service';
 import { PasswordResetService } from './password-reset.service';
 import {
   DeviceMetadata,
@@ -45,15 +46,6 @@ const DUMMY_PASSWORD_HASH =
   '$2b$12$puR9afvrAILWKKnVKbDCX.0CXlT.969TXmlk0BC2aAbR/9yjc5..y';
 const PASSWORD_RESET_REQUEST_MESSAGE =
   'A six-digit verification code has been sent to your email.';
-
-function isUniqueConstraintError(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    error.code === 'P2002'
-  );
-}
 
 export interface AuthActionResult {
   message: string;
@@ -81,11 +73,13 @@ export interface PasswordResetSessionResult {
 
 export interface AuthenticatedSessionResult {
   data: {
-        user: {
-          id: string;
-          email: string;
-          isVerified: boolean;
-        };
+    user: {
+      id: string;
+      name?: string;
+      email: string;
+      isVerified: boolean;
+      isSuperAdmin?: boolean;
+    };
     session: {
       id: string;
       expiresAt: Date;
@@ -122,59 +116,16 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly passwordResetService: PasswordResetService,
     private readonly emailVerificationService: EmailVerificationService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
     configService: ConfigService,
   ) {
     this.authConfig = configService.getOrThrow<AuthConfiguration>('auth');
   }
 
-  async register(dto: RegisterDto): Promise<AuthActionResult> {
-    const existingUser = await this.usersService.findByEmail(dto.email);
-
-    if (existingUser) {
-      if (!existingUser.isVerified) {
-        throw new ConflictException({
-          message:
-            'This account already exists but is still awaiting email verification.',
-          details: { reason: AUTH_ERROR_REASONS.emailNotVerified },
-        });
-      }
-
-      throw new ConflictException('Email is already registered');
-    }
-
-    const passwordHash = await hash(dto.password, PASSWORD_HASH_ROUNDS);
-    let user: User;
-
-    try {
-      user = await this.usersService.create({
-        email: dto.email,
-        passwordHash,
-      });
-    } catch (error: unknown) {
-      if (!isUniqueConstraintError(error)) {
-        throw error;
-      }
-
-      const concurrentlyCreatedUser = await this.usersService.findByEmail(
-        dto.email,
-      );
-
-      if (concurrentlyCreatedUser && !concurrentlyCreatedUser.isVerified) {
-        throw new ConflictException({
-          message:
-            'This account already exists but is still awaiting email verification.',
-          details: { reason: AUTH_ERROR_REASONS.emailNotVerified },
-        });
-      }
-
-      throw new ConflictException('Email is already registered');
-    }
-    await this.emailVerificationService.sendForUser(user);
-
-    return {
-      message:
-        'Registration successful. Please check your email to verify your account.',
-    };
+  async register(_dto: RegisterDto): Promise<AuthActionResult> {
+    throw new GoneException(
+      'Public sign-up is disabled. Ask an administrator for an invitation.',
+    );
   }
 
   verifyEmail(token: string): Promise<EmailVerificationActionResult> {
@@ -215,6 +166,38 @@ export class AuthService {
       );
     }
 
+    if (this.envSuperAdminService.isConfiguredEmail(dto.email)) {
+      const superAdminUser = await this.envSuperAdminService.authenticate(
+        dto.email,
+        dto.password,
+      );
+
+      if (!superAdminUser) {
+        await Promise.all(
+          rateLimitIdentifiers.map((identifier) =>
+            this.redisService.recordLoginFailure(
+              identifier,
+              this.authConfig.loginRateLimit.windowSeconds,
+            ),
+          ),
+        );
+        throw new UnauthorizedException('Invalid email or password');
+      }
+
+      await Promise.all(
+        rateLimitIdentifiers.map((identifier) =>
+          this.redisService.clearLoginFailures(identifier),
+        ),
+      );
+
+      const session = await this.sessionService.createSession(
+        superAdminUser.id,
+        metadata,
+      );
+
+      return this.createAuthenticatedSessionResult(superAdminUser, session);
+    }
+
     const user = await this.usersService.findByEmail(dto.email);
     const passwordMatches = await compare(
       dto.password,
@@ -233,7 +216,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    await this.redisService.clearLoginFailures(rateLimitIdentifiers[0]);
+    await Promise.all(
+      rateLimitIdentifiers.map((identifier) =>
+        this.redisService.clearLoginFailures(identifier),
+      ),
+    );
 
     if (!user.isVerified) {
       throw new ForbiddenException({
@@ -258,7 +245,16 @@ export class AuthService {
       rotatedSession.session.userId,
     );
 
-    if (!user || !user.isVerified || user.isActive === false) {
+    const refreshedUser =
+      user && this.envSuperAdminService.isConfiguredUser(user)
+        ? await this.envSuperAdminService.ensureUserRecord()
+        : user;
+
+    if (
+      !refreshedUser ||
+      !refreshedUser.isVerified ||
+      refreshedUser.isActive === false
+    ) {
       await this.sessionService.revokeSession(
         rotatedSession.session.id,
         SESSION_REVOCATION_REASONS.accountUnavailable,
@@ -266,13 +262,19 @@ export class AuthService {
       throw new InvalidRefreshTokenException();
     }
 
-    return this.createAuthenticatedSessionResult(user, rotatedSession);
+    return this.createAuthenticatedSessionResult(refreshedUser, rotatedSession);
   }
 
   async forgotPassword(
     dto: ForgotPasswordDto,
     ipAddress?: string | null,
   ): Promise<PasswordResetRequestResult> {
+    if (this.envSuperAdminService.isConfiguredEmail(dto.email)) {
+      throw new BadRequestException(
+        'Super Admin password is managed through environment variables. Update SUPER_ADMIN_PASSWORD and restart the API.',
+      );
+    }
+
     await this.passwordResetService.assertRequestAllowed(dto.email, ipAddress);
 
     const user = await this.usersService.findByEmail(dto.email);
@@ -320,6 +322,12 @@ export class AuthService {
     dto: VerifyPasswordResetOtpDto,
   ): Promise<PasswordResetOtpVerificationResult> {
     const user = await this.usersService.findByEmail(dto.email);
+
+    if (this.envSuperAdminService.isConfiguredEmail(dto.email)) {
+      throw new BadRequestException(
+        'Super Admin password is managed through environment variables. Update SUPER_ADMIN_PASSWORD and restart the API.',
+      );
+    }
 
     if (!user) {
       throw new NotFoundException('No account found with this email address');
@@ -375,6 +383,12 @@ export class AuthService {
 
     if (!user) {
       throw new InvalidPasswordResetAuthorizationException();
+    }
+
+    if (this.envSuperAdminService.isConfiguredUser(user)) {
+      throw new BadRequestException(
+        'Super Admin password is managed through environment variables. Update SUPER_ADMIN_PASSWORD and restart the API.',
+      );
     }
 
     if (await compare(dto.newPassword, user.passwordHash)) {
@@ -486,12 +500,17 @@ export class AuthService {
       throw error;
     }
 
+    const superAdminMetadata =
+      this.envSuperAdminService.getSessionUserMetadata(user);
+
     return {
       data: {
         user: {
           id: user.id,
+          ...(user.name ? { name: user.name } : {}),
           email: user.email,
           isVerified: user.isVerified,
+          ...(superAdminMetadata ?? {}),
         },
         session: {
           id: sessionWithToken.session.id,

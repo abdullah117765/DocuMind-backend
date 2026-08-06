@@ -7,6 +7,7 @@ import { getCookieValue } from '../../../common/utils/cookie.util';
 import { AuthConfiguration } from '../../../config/auth.config';
 import { CookieConfiguration } from '../../../config/cookie.config';
 import { UsersService } from '../../users/users.service';
+import { EnvSuperAdminService } from '../env-super-admin.service';
 import { AuthenticatedPrincipal } from '../interfaces/authenticated-principal.interface';
 import { SessionService } from '../session.service';
 import { AccessTokenPayload } from '../token.service';
@@ -56,6 +57,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     configService: ConfigService,
     private readonly sessionService: SessionService,
     private readonly usersService: UsersService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {
     const authConfig = configService.getOrThrow<AuthConfiguration>('auth');
     const cookieConfig =
@@ -90,14 +92,34 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const user = await this.usersService.findById(parsedPayload.sub);
 
-    if (!user || !user.isVerified || user.isActive === false) {
+    if (!user) {
       throw new UnauthorizedException();
     }
+
+    const superAdminMetadata =
+      this.envSuperAdminService.getSessionUserMetadata(user);
+
+    if (
+      !superAdminMetadata &&
+      (!user.isVerified || user.isActive === false)
+    ) {
+      throw new UnauthorizedException();
+    }
+
+    const nameMetadata = superAdminMetadata
+      ? {
+          isEnvSuperAdmin: true,
+          name: superAdminMetadata.name,
+        }
+      : user.name
+        ? { name: user.name }
+        : {};
 
     return {
       userId: user.id,
       email: user.email,
-      isVerified: user.isVerified,
+      isVerified: superAdminMetadata ? true : user.isVerified,
+      ...nameMetadata,
       sessionId: session.id,
       tokenId: parsedPayload.jti,
     };

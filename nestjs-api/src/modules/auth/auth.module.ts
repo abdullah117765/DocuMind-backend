@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { AuthCookieService } from './auth-cookie.service';
 import { CsrfService } from './csrf.service';
 import { EmailVerificationService } from './email-verification.service';
+import { EnvSuperAdminService } from './env-super-admin.service';
 import { PasswordResetService } from './password-reset.service';
 import { SessionService } from './session.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -46,6 +47,7 @@ import { TokenService } from './token.service';
     CsrfGuard,
     CsrfService,
     EmailVerificationService,
+    EnvSuperAdminService,
     JwtAuthGuard,
     JwtStrategy,
     PasswordResetService,
@@ -57,6 +59,7 @@ import { TokenService } from './token.service';
     AuthService,
     CsrfGuard,
     CsrfService,
+    EnvSuperAdminService,
     JwtAuthGuard,
     SessionService,
     TokenService,

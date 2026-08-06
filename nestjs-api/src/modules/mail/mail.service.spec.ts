@@ -4,17 +4,20 @@ import { MailService } from './mail.service';
 
 describe('MailService', () => {
   const sendMail = jest.fn();
+  const get = jest.fn();
   const getOrThrow = jest.fn();
   const mailerService = {
     sendMail,
   } as unknown as MailerService;
   const configService = {
+    get,
     getOrThrow,
   } as unknown as ConfigService;
   const service = new MailService(mailerService, configService);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    get.mockReturnValue('WhimsyWorld');
     getOrThrow.mockImplementation((key: string) =>
       key === 'emailVerification'
         ? { tokenTtlSeconds: 86_400 }
@@ -86,12 +89,66 @@ describe('MailService', () => {
         to: 'member@example.com',
         subject: "You're invited to Acme Finance",
         template: 'organization-invite',
-        context: {
+        context: expect.objectContaining({
           expiresInDays: 7,
+          hasTemporaryPassword: false,
           invitedEmail: 'member@example.com',
+          invitedName: null,
           inviteUrl: 'http://localhost:5173/accept-invite#token=invite-token',
           organizationName: 'Acme Finance',
-        },
+          productName: 'WhimsyWorld',
+          roleSummary: null,
+          temporaryPassword: undefined,
+          temporaryPasswordExpiresInHours: undefined,
+        }),
+      }),
+    );
+  });
+
+  it('includes invited name and assigned role summary in organization invites', async () => {
+    await service.sendOrganizationInvite(
+      'member@example.com',
+      'Acme Finance',
+      'invite-token',
+      7,
+      {
+        invitedName: 'Member User',
+        roleNames: ['Manager'],
+      },
+    );
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          invitedName: 'Member User',
+          roleSummary: 'Manager',
+        }),
+        text: expect.stringContaining('Hello Member User,'),
+      }),
+    );
+  });
+
+  it('sends a new-user organization invite with a one-time password', async () => {
+    await service.sendOrganizationInvite(
+      'member@example.com',
+      'Acme Finance',
+      'invite-token',
+      7,
+      {
+        temporaryPassword: 'F7K2M9Q4R8ZA',
+        temporaryPasswordExpiresInHours: 24,
+      },
+    );
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          hasTemporaryPassword: true,
+          productName: 'WhimsyWorld',
+          temporaryPassword: 'F7K2M9Q4R8ZA',
+          temporaryPasswordExpiresInHours: 24,
+        }),
+        text: expect.stringContaining('F7K2M9Q4R8ZA'),
       }),
     );
   });

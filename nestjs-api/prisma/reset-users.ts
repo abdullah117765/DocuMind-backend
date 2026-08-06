@@ -1,17 +1,13 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { hash } from 'bcrypt';
 import Redis from 'ioredis';
-import {
-  Prisma,
-  PrismaClient,
-  RoleAssignmentSource,
-} from '../src/generated/prisma/client';
+import { AccessScope, Prisma, PrismaClient } from '../src/generated/prisma/client';
 
 const CONFIRMATION_VALUE = 'RESET_TEST_USERS';
 const SUPER_ADMIN_SYSTEM_KEY = 'super_admin';
 const ACCESS_CONTROL_GLOBAL_VERSION_KEY = 'access-control:v1:version:global';
-const PASSWORD_HASH_ROUNDS = 12;
+const ENV_ONLY_PASSWORD_HASH_PLACEHOLDER =
+  '$2b$12$puR9afvrAILWKKnVKbDCX.0CXlT.969TXmlk0BC2aAbR/9yjc5..y';
 
 interface ResetSummary {
   database: string;
@@ -63,73 +59,48 @@ function getKeepEmails(): string[] {
     .filter((email) => email.length > 0);
 }
 
-function getBootstrapSuperAdmin():
+function getConfiguredSuperAdmin():
   | {
       email: string;
-      password: string;
     }
   | null {
-  const email = process.env.RESET_SUPER_ADMIN_EMAIL?.trim();
-  const password = process.env.RESET_SUPER_ADMIN_PASSWORD;
+  const email = process.env.SUPER_ADMIN_EMAIL?.trim();
+  const password = process.env.SUPER_ADMIN_PASSWORD;
+  const name = process.env.SUPER_ADMIN_NAME?.trim();
 
-  if (!email && !password) {
+  if (!email && !password && !name) {
     return null;
   }
 
-  if (!email || !password) {
+  if (!email || !password || !name) {
     throw new Error(
-      'Set both RESET_SUPER_ADMIN_EMAIL and RESET_SUPER_ADMIN_PASSWORD, or set neither.',
+      'Set SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, and SUPER_ADMIN_NAME together, or set none.',
     );
-  }
-
-  if (password.length < 8) {
-    throw new Error('RESET_SUPER_ADMIN_PASSWORD must be at least 8 characters.');
   }
 
   return {
     email: normalizeEmail(email),
-    password,
   };
 }
 
-async function ensureBootstrapSuperAdmin(
+async function ensureConfiguredSuperAdminUser(
   prisma: PrismaClient,
 ): Promise<string | null> {
-  const bootstrap = getBootstrapSuperAdmin();
+  const configuredSuperAdmin = getConfiguredSuperAdmin();
 
-  if (!bootstrap) {
+  if (!configuredSuperAdmin) {
     return null;
   }
 
-  const superAdminRole = await prisma.role.findUnique({
-    where: { systemKey: SUPER_ADMIN_SYSTEM_KEY },
-    select: { id: true },
-  });
-
-  if (!superAdminRole) {
-    throw new Error(
-      'Super Admin role does not exist. Run `npm run db:seed` before resetting users.',
-    );
-  }
-
-  const passwordHash = await hash(bootstrap.password, PASSWORD_HASH_ROUNDS);
-
   const user = await prisma.user.upsert({
-    where: { email: bootstrap.email },
+    where: { email: configuredSuperAdmin.email },
     create: {
-      email: bootstrap.email,
-      passwordHash,
+      email: configuredSuperAdmin.email,
+      passwordHash: ENV_ONLY_PASSWORD_HASH_PLACEHOLDER,
       isVerified: true,
       isActive: true,
-      platformRoleAssignments: {
-        create: {
-          roleId: superAdminRole.id,
-          source: RoleAssignmentSource.BOOTSTRAP,
-        },
-      },
     },
     update: {
-      passwordHash,
       isVerified: true,
       isActive: true,
       deactivatedAt: null,
@@ -137,21 +108,34 @@ async function ensureBootstrapSuperAdmin(
     select: { id: true },
   });
 
-  await prisma.platformUserRole.upsert({
-    where: {
-      userId_roleId: {
-        userId: user.id,
-        roleId: superAdminRole.id,
+  await prisma.$transaction(async (transaction) => {
+    await transaction.membershipRole.deleteMany({
+      where: {
+        membership: {
+          is: {
+            userId: user.id,
+          },
+        },
       },
-    },
-    create: {
-      userId: user.id,
-      roleId: superAdminRole.id,
-      source: RoleAssignmentSource.BOOTSTRAP,
-    },
-    update: {
-      source: RoleAssignmentSource.BOOTSTRAP,
-    },
+    });
+    await transaction.organizationMembership.deleteMany({
+      where: { userId: user.id },
+    });
+    await transaction.platformUserRole.deleteMany({
+      where: {
+        OR: [
+          { userId: user.id },
+          {
+            role: {
+              is: {
+                systemKey: SUPER_ADMIN_SYSTEM_KEY,
+                scope: AccessScope.PLATFORM,
+              },
+            },
+          },
+        ],
+      },
+    });
   });
 
   return user.id;
@@ -162,31 +146,24 @@ async function buildResetSummary(
   database: string,
   dryRun: boolean,
 ): Promise<ResetSummary & { keepUserIds: string[] }> {
-  const keepEmails = getKeepEmails();
-  const keepWhere: Prisma.UserWhereInput = {
-    OR: [
-      {
-        platformRoleAssignments: {
-          some: {
-            role: {
-              is: {
-                systemKey: SUPER_ADMIN_SYSTEM_KEY,
-              },
-            },
-          },
+  const configuredSuperAdmin = getConfiguredSuperAdmin();
+  const keepEmails = [
+    ...new Set([
+      ...getKeepEmails(),
+      ...(configuredSuperAdmin ? [configuredSuperAdmin.email] : []),
+    ]),
+  ];
+  const keepWhere: Prisma.UserWhereInput = keepEmails.length
+    ? {
+        email: {
+          in: keepEmails,
         },
-      },
-      ...(keepEmails.length > 0
-        ? [
-            {
-              email: {
-                in: keepEmails,
-              },
-            },
-          ]
-        : []),
-    ],
-  };
+      }
+    : {
+        id: {
+          in: [],
+        },
+      };
 
   const keepUsers = await prisma.user.findMany({
     where: keepWhere,
@@ -219,8 +196,8 @@ async function buildResetSummary(
   if (keepUserIds.length === 0) {
     throw new Error(
       [
-        'No Super Admin user was found, so the reset was refused.',
-        'Run `npm run db:seed`, then create/assign a Super Admin, or provide RESET_SUPER_ADMIN_EMAIL and RESET_SUPER_ADMIN_PASSWORD.',
+        'No user was selected to keep, so the reset was refused.',
+        'Provide SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, and SUPER_ADMIN_NAME, or set RESET_KEEP_EMAILS.',
       ].join(' '),
     );
   }
@@ -252,9 +229,12 @@ async function buildResetSummary(
     keepUsers: keepUsers.map((user) => ({
       id: user.id,
       email: user.email,
-      platformRoles: user.platformRoleAssignments.map(
-        ({ role }) => role.systemKey ?? role.name,
-      ),
+      platformRoles:
+        configuredSuperAdmin?.email === user.email
+          ? ['env_super_admin']
+          : user.platformRoleAssignments.map(
+              ({ role }) => role.systemKey ?? role.name,
+            ),
     })),
     counts: {
       totalUsers,
@@ -362,7 +342,9 @@ async function main(): Promise<void> {
   });
 
   try {
-    await ensureBootstrapSuperAdmin(prisma);
+    if (!dryRun) {
+      await ensureConfiguredSuperAdminUser(prisma);
+    }
 
     const summary = await buildResetSummary(prisma, database, dryRun);
     printSummary(summary);

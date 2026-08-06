@@ -4,6 +4,7 @@ import {
   OrganizationInviteStatus,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -30,14 +31,15 @@ describe('OrganizationInvitesService', () => {
   const role = {
     id: roleId,
     organizationId: null,
-    systemKey: 'viewer',
-    name: 'Viewer',
+    systemKey: 'employee',
+    name: 'Employee',
     isSystem: true,
     permissions: [],
   };
   const inviteRecord = {
     id: inviteId,
     organizationId,
+    invitedName: 'Member User',
     email: 'member@example.com',
     status: OrganizationInviteStatus.PENDING,
     expiresAt: new Date('2026-08-11T09:00:00.000Z'),
@@ -115,13 +117,20 @@ describe('OrganizationInvitesService', () => {
     sendOrganizationInvite,
   } as unknown as MailService;
   const invalidateUserAccess = jest.fn();
+  const isConfiguredSuperAdminEmail = jest.fn();
+  const isConfiguredSuperAdminUserId = jest.fn();
   const accessControlService = {
     invalidateUserAccess,
   } as unknown as AccessControlService;
+  const envSuperAdminService = {
+    isConfiguredEmail: isConfiguredSuperAdminEmail,
+    isConfiguredUserId: isConfiguredSuperAdminUserId,
+  } as unknown as EnvSuperAdminService;
   const service = new OrganizationInvitesService(
     prisma,
     mailService,
     accessControlService,
+    envSuperAdminService,
   );
 
   beforeEach(() => {
@@ -149,6 +158,8 @@ describe('OrganizationInvitesService', () => {
     organizationInviteUpdateMany.mockResolvedValue({ count: 1 });
     sendOrganizationInvite.mockResolvedValue(undefined);
     invalidateUserAccess.mockResolvedValue(undefined);
+    isConfiguredSuperAdminEmail.mockReturnValue(false);
+    isConfiguredSuperAdminUserId.mockResolvedValue(false);
   });
 
   it('creates an invite, assigns initial roles, and sends the email', async () => {
@@ -157,6 +168,7 @@ describe('OrganizationInvitesService', () => {
         organizationId,
         actor,
         {
+          name: 'Member User',
           email: ' MEMBER@example.com ',
           roleIds: [roleId],
         },
@@ -198,7 +210,20 @@ describe('OrganizationInvitesService', () => {
       'Acme Finance',
       expect.any(String),
       7,
+      {
+        invitedName: 'Member User',
+        roleNames: ['Employee'],
+        temporaryPassword: expect.any(String),
+        temporaryPasswordExpiresInHours: 24,
+      },
     );
+    expect(
+      transactionInviteCreate.mock.calls[0]?.[0].data.temporaryPasswordHash,
+    ).toEqual(expect.stringMatching(/^\$2[aby]\$/));
+    expect(
+      transactionInviteCreate.mock.calls[0]?.[0].data
+        .temporaryPasswordExpiresAt,
+    ).toBeInstanceOf(Date);
     const supersedingInviteCleanup =
       organizationInviteUpdateMany.mock.calls[0]?.[0];
 
@@ -222,8 +247,9 @@ describe('OrganizationInvitesService', () => {
         organizationId,
         actor,
         {
+          name: 'Member User',
           email: 'member@example.com',
-          roleIds: [],
+          roleIds: [roleId],
         },
         now,
       );

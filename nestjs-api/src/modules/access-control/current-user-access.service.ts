@@ -2,8 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   AccessScope,
   OrganizationMembershipStatus,
+  OrganizationStatus,
 } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlService } from './access-control.service';
 import {
   EffectiveRole,
@@ -45,16 +47,23 @@ export class CurrentUserAccessService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessControlService: AccessControlService,
+    private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
   async getCurrentUserAccess(userId: string): Promise<CurrentUserAccessView> {
-    const [platform, memberships, globalOrganizationGrant] = await Promise.all([
+    const [platform, memberships, globalOrganizationGrant, isEnvSuperAdmin] =
+      await Promise.all([
       this.accessControlService.resolvePlatformAccess(userId),
       this.prisma.organizationMembership.findMany({
         where: {
           userId,
           status: {
             not: OrganizationMembershipStatus.REMOVED,
+          },
+          organization: {
+            is: {
+              status: OrganizationStatus.ACTIVE,
+            },
           },
         },
         select: {
@@ -102,12 +111,14 @@ export class CurrentUserAccessService {
           roleId: true,
         },
       }),
+      this.envSuperAdminService.isConfiguredUserId(userId),
     ]);
     const membershipByOrganizationId = new Map(
       memberships.map((membership) => [membership.organization.id, membership]),
     );
-    const organizations = globalOrganizationGrant
+    const organizations = globalOrganizationGrant || isEnvSuperAdmin
       ? await this.prisma.organization.findMany({
+          where: { status: OrganizationStatus.ACTIVE },
           select: {
             id: true,
             name: true,
@@ -127,7 +138,8 @@ export class CurrentUserAccessService {
 
     return {
       platform,
-      hasGlobalOrganizationAccess: Boolean(globalOrganizationGrant),
+      hasGlobalOrganizationAccess:
+        Boolean(globalOrganizationGrant) || isEnvSuperAdmin,
       organizations: organizations.map((organization, index) => {
         const membership = membershipByOrganizationId.get(organization.id);
 
