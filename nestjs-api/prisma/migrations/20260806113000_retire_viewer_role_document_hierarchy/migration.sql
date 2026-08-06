@@ -2,6 +2,23 @@
 -- invite role assignments are moved to Employee so users are not stranded with
 -- an inactive role after the role disappears from the UI.
 
+BEGIN;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM "roles"
+    WHERE "system_key" = 'viewer'
+  ) AND NOT EXISTS (
+    SELECT 1
+    FROM "roles"
+    WHERE "system_key" = 'employee'
+  ) THEN
+    RAISE EXCEPTION 'Cannot retire Viewer role because the Employee system role does not exist.';
+  END IF;
+END $$;
+
 WITH viewer_role AS (
   SELECT "id"
   FROM "roles"
@@ -38,9 +55,16 @@ WITH viewer_role AS (
   FROM "roles"
   WHERE "system_key" = 'viewer'
   LIMIT 1
+),
+employee_role AS (
+  SELECT "id"
+  FROM "roles"
+  WHERE "system_key" = 'employee'
+  LIMIT 1
 )
 DELETE FROM "membership_roles"
 USING viewer_role
+  CROSS JOIN employee_role
 WHERE "membership_roles"."role_id" = viewer_role."id";
 
 WITH viewer_role AS (
@@ -75,9 +99,16 @@ WITH viewer_role AS (
   FROM "roles"
   WHERE "system_key" = 'viewer'
   LIMIT 1
+),
+employee_role AS (
+  SELECT "id"
+  FROM "roles"
+  WHERE "system_key" = 'employee'
+  LIMIT 1
 )
 DELETE FROM "organization_invite_roles"
 USING viewer_role
+  CROSS JOIN employee_role
 WHERE "organization_invite_roles"."role_id" = viewer_role."id";
 
 UPDATE "roles"
@@ -87,3 +118,4 @@ SET
   "updated_at" = CURRENT_TIMESTAMP
 WHERE "system_key" = 'viewer';
 
+COMMIT;
