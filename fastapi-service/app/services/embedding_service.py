@@ -1,13 +1,13 @@
 from functools import cached_property
 
-from sentence_transformers import SentenceTransformer
-
 from app.config.settings import get_settings
 
 
 class EmbeddingService:
     @cached_property
-    def model(self) -> SentenceTransformer:
+    def model(self):
+        from sentence_transformers import SentenceTransformer
+
         return SentenceTransformer(get_settings().EMBEDDING_MODEL)
 
     def embed_chunks(self, texts: list[str]) -> list[list[float]]:

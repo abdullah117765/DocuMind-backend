@@ -9,6 +9,7 @@ import {
   NotFoundException,
   OnModuleDestroy,
   OnModuleInit,
+  RequestTimeoutException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
@@ -301,9 +302,23 @@ export interface RagDocumentStatusView {
   documentId: string;
   status: DocumentRagIndexStatus | 'NOT_INDEXED';
   chunksCount: number;
+  progress: number;
+  message: string;
   errorMessage: string | null;
   indexedAt: Date | null;
   updatedAt: Date | null;
+}
+
+interface RagIndexRecord {
+  documentId: string;
+  versionId: string | null;
+  versionNumber: number;
+  status: DocumentRagIndexStatus;
+  chunksCount: number;
+  embeddingModel: string;
+  errorMessage: string | null;
+  indexedAt: Date | null;
+  updatedAt: Date;
 }
 
 export interface RagSearchView extends RagSearchResponse {
@@ -1187,18 +1202,9 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       indexes.map((index) => [index.documentId, index]),
     );
 
-    return documents.map((document) => {
-      const index = byDocumentId.get(document.id);
-
-      return {
-        documentId: document.id,
-        status: index?.status ?? 'NOT_INDEXED',
-        chunksCount: index?.chunksCount ?? 0,
-        errorMessage: index?.errorMessage ?? null,
-        indexedAt: index?.indexedAt ?? null,
-        updatedAt: index?.updatedAt ?? null,
-      };
-    });
+    return documents.map((document) =>
+      this.toRagStatusView(document, byDocumentId.get(document.id)),
+    );
   }
 
   async reindexRagDocuments(
@@ -1235,29 +1241,46 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
             : RagDocumentScope.ALL,
       },
     );
-    const payloads = documents.map((document) =>
-      this.toRagIngestPayload(document),
+    const indexes = await this.prisma.documentRagIndex.findMany({
+      where: {
+        documentId: {
+          in: documents.map((document) => document.id),
+        },
+      },
+    });
+    const byDocumentId = new Map(
+      indexes.map((index) => [index.documentId, index]),
     );
+    const documentsToIndex = documents.filter((document) => {
+      const index = byDocumentId.get(document.id);
+
+      if (!index) return true;
+      if (
+        index.status === DocumentRagIndexStatus.PENDING ||
+        index.status === DocumentRagIndexStatus.INDEXING
+      ) {
+        return false;
+      }
+
+      return !this.isRagIndexCurrent(document, index);
+    });
 
     await Promise.all(
-      documents.map((document) =>
-        this.markRagIndexPending(document).catch(() => undefined),
+      documentsToIndex.map((document) =>
+        this.markRagIndexing(document).catch(() => undefined),
       ),
     );
-    const results = await this.executeRagRequest(() =>
-      this.ragOrchestrator.reindex(payloads),
-    );
 
-    if (results) {
-      await Promise.all(
-        results.map((result) =>
-          this.applyRagIngestResult(
-            result.document_id,
-            result.status,
-            result.chunks_created,
-            result.error_message ?? null,
-          ),
-        ),
+    if (documentsToIndex.length > 0) {
+      this.logger.log(
+        `Starting background RAG reindex for ${documentsToIndex.length} document(s) in organization ${organizationId}.`,
+      );
+      void this.runRagReindexInBackground(
+        documentsToIndex.map((document) => this.toRagIngestPayload(document)),
+      );
+    } else {
+      this.logger.log(
+        `Skipped RAG reindex for organization ${organizationId}; selected document(s) are already current or already indexing.`,
       );
     }
 
@@ -1875,6 +1898,16 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
           error instanceof Error ? error.message : String(error)
         }`,
       );
+
+      if (
+        error instanceof Error &&
+        (error.name === 'AbortError' || error.message.includes('aborted'))
+      ) {
+        throw new RequestTimeoutException(
+          'Document AI operation is still processing. For long indexing or reindexing jobs, increase RAG_INDEXING_TIMEOUT_MS or retry after the current job finishes.',
+        );
+      }
+
       throw new ServiceUnavailableException(
         'Document AI service is currently unavailable. Start the FastAPI RAG service and verify RAG_SERVICE_URL and RAG_HMAC_SECRET.',
       );
@@ -2012,6 +2045,151 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
         embeddingModel: this.ragOrchestrator.getEmbeddingModel(),
       },
     });
+  }
+
+  private async markRagIndexing(document: DocumentRecord): Promise<void> {
+    const latestVersion = document.versions[0] ?? null;
+
+    await this.prisma.documentRagIndex.upsert({
+      where: { documentId: document.id },
+      update: {
+        organizationId: document.organizationId,
+        versionId: latestVersion?.id ?? null,
+        versionNumber: latestVersion?.versionNumber ?? 1,
+        status: DocumentRagIndexStatus.INDEXING,
+        chunksCount: 0,
+        embeddingModel: this.ragOrchestrator.getEmbeddingModel(),
+        errorMessage: null,
+        indexedAt: null,
+      },
+      create: {
+        documentId: document.id,
+        organizationId: document.organizationId,
+        versionId: latestVersion?.id ?? null,
+        versionNumber: latestVersion?.versionNumber ?? 1,
+        status: DocumentRagIndexStatus.INDEXING,
+        chunksCount: 0,
+        embeddingModel: this.ragOrchestrator.getEmbeddingModel(),
+      },
+    });
+  }
+
+  private async runRagReindexInBackground(
+    payloads: RagIngestPayload[],
+  ): Promise<void> {
+    const startedAt = Date.now();
+
+    try {
+      const results = await this.ragOrchestrator.reindex(payloads);
+
+      if (!results) return;
+
+      await Promise.all(
+        results.map((result) =>
+          this.applyRagIngestResult(
+            result.document_id,
+            result.status,
+            result.chunks_created,
+            result.error_message ?? null,
+          ),
+        ),
+      );
+      this.logger.log(
+        `Background RAG reindex completed for ${
+          results.length
+        } document(s) in ${Date.now() - startedAt}ms.`,
+      );
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Document AI reindex failed.';
+
+      this.logger.warn(
+        `Background RAG reindex failed for ${payloads.length} document(s): ${message}`,
+      );
+      await Promise.all(
+        payloads.map((payload) =>
+          this.applyRagIngestResult(
+            payload.document_id,
+            DocumentRagIndexStatus.FAILED,
+            0,
+            message.slice(0, 1000),
+          ).catch(() => undefined),
+        ),
+      );
+    }
+  }
+
+  private isRagIndexCurrent(
+    document: DocumentRecord,
+    index: RagIndexRecord,
+  ): boolean {
+    const latestVersion = document.versions[0] ?? null;
+    const latestVersionNumber = latestVersion?.versionNumber ?? 1;
+    const isTerminalCurrentStatus =
+      index.status === DocumentRagIndexStatus.INDEXED ||
+      index.status === DocumentRagIndexStatus.NO_CONTENT;
+
+    return (
+      isTerminalCurrentStatus &&
+      index.versionNumber === latestVersionNumber &&
+      (latestVersion?.id ? index.versionId === latestVersion.id : true) &&
+      index.embeddingModel === this.ragOrchestrator.getEmbeddingModel()
+    );
+  }
+
+  private toRagStatusView(
+    document: DocumentRecord,
+    index: RagIndexRecord | undefined,
+  ): RagDocumentStatusView {
+    const status = index?.status ?? 'NOT_INDEXED';
+
+    return {
+      documentId: document.id,
+      status,
+      chunksCount: index?.chunksCount ?? 0,
+      progress: this.resolveRagStatusProgress(status),
+      message: this.resolveRagStatusMessage(status, index),
+      errorMessage: index?.errorMessage ?? null,
+      indexedAt: index?.indexedAt ?? null,
+      updatedAt: index?.updatedAt ?? null,
+    };
+  }
+
+  private resolveRagStatusProgress(
+    status: DocumentRagIndexStatus | 'NOT_INDEXED',
+  ): number {
+    if (status === DocumentRagIndexStatus.INDEXED) return 100;
+    if (status === DocumentRagIndexStatus.NO_CONTENT) return 100;
+    if (status === DocumentRagIndexStatus.FAILED) return 100;
+    if (status === DocumentRagIndexStatus.INDEXING) return 55;
+    if (status === DocumentRagIndexStatus.PENDING) return 15;
+
+    return 0;
+  }
+
+  private resolveRagStatusMessage(
+    status: DocumentRagIndexStatus | 'NOT_INDEXED',
+    index: RagIndexRecord | undefined,
+  ): string {
+    if (status === DocumentRagIndexStatus.INDEXED) {
+      return `Ready for Ask AI${
+        index?.chunksCount ? ` · ${index.chunksCount} chunk(s)` : ''
+      }`;
+    }
+    if (status === DocumentRagIndexStatus.INDEXING) {
+      return 'Extracting text and building the search index.';
+    }
+    if (status === DocumentRagIndexStatus.PENDING) {
+      return 'Queued for indexing.';
+    }
+    if (status === DocumentRagIndexStatus.NO_CONTENT) {
+      return 'No readable text was found in this file.';
+    }
+    if (status === DocumentRagIndexStatus.FAILED) {
+      return index?.errorMessage ?? 'Indexing failed. Reindex this file.';
+    }
+
+    return 'Not indexed yet.';
   }
 
   private async applyRagIngestResult(

@@ -1,6 +1,7 @@
 import logging
 import math
 import re
+import time
 from functools import cached_property
 
 from app.config.settings import get_settings
@@ -31,14 +32,34 @@ class RerankerService:
 
         if settings.RAG_RERANKER_ENABLED:
             try:
-                return self._cross_encoder_rerank(query, candidates)
+                started = time.perf_counter()
+                logger.info(
+                    "RAG reranker started type=cross_encoder model=%s candidates=%s",
+                    settings.RAG_RERANKER_MODEL,
+                    len(candidates),
+                )
+                results = self._cross_encoder_rerank(query, candidates)
+                logger.info(
+                    "RAG reranker completed type=cross_encoder candidates=%s elapsed_ms=%s",
+                    len(results),
+                    int((time.perf_counter() - started) * 1000),
+                )
+                return results
             except Exception as error:
                 logger.warning(
                     "Cross-encoder reranker failed; using lightweight rerank: %s",
                     error,
                 )
 
-        return self._lightweight_rerank(query, candidates)
+        started = time.perf_counter()
+        results = self._lightweight_rerank(query, candidates)
+        logger.info(
+            "RAG reranker completed type=lightweight candidates=%s elapsed_ms=%s",
+            len(results),
+            int((time.perf_counter() - started) * 1000),
+        )
+
+        return results
 
     def _cross_encoder_rerank(
         self,

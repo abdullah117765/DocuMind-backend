@@ -68,7 +68,8 @@ export class RagOrchestratorService {
   private readonly enabled: boolean;
   private readonly serviceUrl: string;
   private readonly hmacSecret: string;
-  private readonly timeoutMs: number;
+  private readonly requestTimeoutMs: number;
+  private readonly indexingTimeoutMs: number;
 
   constructor(private readonly configService: ConfigService) {
     this.enabled =
@@ -82,8 +83,11 @@ export class RagOrchestratorService {
       'RAG_HMAC_SECRET',
       this.configService.get<string>('HMAC_SECRET', ''),
     );
-    this.timeoutMs = Number(
-      this.configService.get<string>('RAG_REQUEST_TIMEOUT_MS', '120000'),
+    this.requestTimeoutMs = Number(
+      this.configService.get<string>('RAG_REQUEST_TIMEOUT_MS', '240000'),
+    );
+    this.indexingTimeoutMs = Number(
+      this.configService.get<string>('RAG_INDEXING_TIMEOUT_MS', '1800000'),
     );
   }
 
@@ -101,7 +105,12 @@ export class RagOrchestratorService {
   async ingest(payload: RagIngestPayload): Promise<RagIngestResponse | null> {
     if (!this.isConfigured()) return null;
 
-    return this.request<RagIngestResponse>('POST', '/rag/ingest', payload);
+    return this.request<RagIngestResponse>(
+      'POST',
+      '/rag/ingest',
+      payload,
+      this.indexingTimeoutMs,
+    );
   }
 
   async reindex(
@@ -109,7 +118,12 @@ export class RagOrchestratorService {
   ): Promise<RagIngestResponse[] | null> {
     if (!this.isConfigured()) return null;
 
-    return this.request<RagIngestResponse[]>('POST', '/rag/reindex', payloads);
+    return this.request<RagIngestResponse[]>(
+      'POST',
+      '/rag/reindex',
+      payloads,
+      this.indexingTimeoutMs,
+    );
   }
 
   async search(payload: RagQueryPayload): Promise<RagSearchResponse> {
@@ -165,6 +179,7 @@ export class RagOrchestratorService {
     method: string,
     path: string,
     payload: unknown,
+    timeoutMs = this.requestTimeoutMs,
   ): Promise<T> {
     if (!this.isConfigured()) {
       throw new Error('RAG service is not configured.');
@@ -174,7 +189,7 @@ export class RagOrchestratorService {
     const timestamp = String(Math.floor(Date.now() / 1000));
     const signature = this.sign(method, path, timestamp, body);
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const response = await fetch(`${this.serviceUrl}${path}`, {

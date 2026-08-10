@@ -1,5 +1,11 @@
+import logging
+import time
+
 from app.config.settings import get_settings
 from app.models.rag import RagSearchResult
+
+
+logger = logging.getLogger(__name__)
 
 
 class LlmService:
@@ -20,11 +26,22 @@ class LlmService:
         try:
             from google import genai
 
+            started = time.perf_counter()
+            logger.info(
+                "RAG LLM request started model=%s context_chunks=%s",
+                settings.GEMINI_MODEL,
+                len(results),
+            )
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
             prompt = self._build_prompt(query, results)
             response = client.models.generate_content(
                 model=settings.GEMINI_MODEL,
                 contents=prompt,
+            )
+            logger.info(
+                "RAG LLM request completed model=%s elapsed_ms=%s",
+                settings.GEMINI_MODEL,
+                int((time.perf_counter() - started) * 1000),
             )
 
             return (
@@ -32,7 +49,8 @@ class LlmService:
                 settings.GEMINI_MODEL,
                 True,
             )
-        except Exception:
+        except Exception as error:
+            logger.exception("RAG LLM request failed model=%s", settings.GEMINI_MODEL)
             return (
                 "AI answer generation is temporarily unavailable. Search results are available below.",
                 settings.GEMINI_MODEL,
