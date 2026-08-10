@@ -14,12 +14,17 @@ logger = logging.getLogger(__name__)
 
 
 class IngestionService:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        embedding_service: EmbeddingService | None = None,
+        qdrant_service: QdrantService | None = None,
+    ) -> None:
         self.minio = MinioDocumentClient()
         self.extraction = ExtractionService()
         self.chunking = ChunkingService()
-        self.embedding = EmbeddingService()
-        self.qdrant = QdrantService()
+        self.embedding = embedding_service or EmbeddingService()
+        self.qdrant = qdrant_service or QdrantService()
 
     def ingest(self, request: IngestDocumentRequest) -> IngestDocumentResponse:
         started = time.perf_counter()

@@ -1363,12 +1363,18 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
 
     const latestVersion = document.versions[0] ?? null;
 
-    if (!latestVersion?.preview) {
-      return null;
+    let preview = latestVersion?.preview ?? null;
+
+    if (latestVersion && this.shouldRefreshPreview(document, preview)) {
+      preview = await this.refreshLatestDocumentPreview(document).catch(
+        () => preview,
+      );
     }
 
+    if (!preview) return null;
+
     return {
-      ...(latestVersion.preview as Record<string, unknown>),
+      ...(preview as Record<string, unknown>),
       contentPath: `/organizations/${organizationId}/documents/${documentId}/content`,
     };
   }
@@ -1385,6 +1391,57 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     );
 
     return this.toStreamResult(document);
+  }
+
+  private shouldRefreshPreview(
+    document: DocumentRecord,
+    preview: Prisma.JsonValue | null,
+  ): boolean {
+    if (!['doc', 'ppt'].includes(document.extension)) {
+      return false;
+    }
+
+    if (!preview || typeof preview !== 'object' || Array.isArray(preview)) {
+      return true;
+    }
+
+    const previewRecord = preview as Record<string, unknown>;
+    const kind = String(previewRecord.kind ?? '');
+    const message = String(previewRecord.message ?? '').toLowerCase();
+
+    return kind === 'legacy-office' || message.includes('libreoffice');
+  }
+
+  private async refreshLatestDocumentPreview(
+    document: DocumentRecord,
+  ): Promise<Prisma.JsonValue | null> {
+    const latestVersion = document.versions[0] ?? null;
+
+    if (!latestVersion) return null;
+
+    const buffer = await this.storageService.getObjectBuffer(
+      document.storageBucket,
+      document.storageKey,
+    );
+    const file: ValidatedDocumentBuffer = {
+      buffer,
+      checksumSha256: document.checksumSha256,
+      extension: document.extension,
+      mimeType: document.mimeType,
+      originalFilename: document.originalFilename,
+      sizeBytes: document.sizeBytes,
+    };
+    const { metadata, preview } = this.previewService.extractPreview(file);
+
+    await this.prisma.documentVersion.update({
+      where: { id: latestVersion.id },
+      data: {
+        metadata,
+        preview,
+      },
+    });
+
+    return preview as Prisma.JsonValue;
   }
 
   async downloadDocument(

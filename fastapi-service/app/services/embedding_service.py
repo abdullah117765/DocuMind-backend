@@ -1,14 +1,19 @@
-from functools import cached_property
+from functools import lru_cache
 
 from app.config.settings import get_settings
 
 
-class EmbeddingService:
-    @cached_property
-    def model(self):
-        from sentence_transformers import SentenceTransformer
+@lru_cache(maxsize=4)
+def _load_sentence_transformer(model_name: str):
+    from sentence_transformers import SentenceTransformer
 
-        return SentenceTransformer(get_settings().EMBEDDING_MODEL)
+    return SentenceTransformer(model_name)
+
+
+class EmbeddingService:
+    @property
+    def model(self):
+        return _load_sentence_transformer(get_settings().EMBEDDING_MODEL)
 
     def embed_chunks(self, texts: list[str]) -> list[list[float]]:
         if not texts:

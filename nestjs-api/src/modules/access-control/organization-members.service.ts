@@ -7,6 +7,8 @@ import {
 } from '@nestjs/common';
 import {
   AccessScope,
+  JoinRequestStatus,
+  OrganizationInviteStatus,
   OrganizationMembershipStatus,
   Prisma,
 } from '../../generated/prisma/client';
@@ -15,6 +17,7 @@ import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlService } from './access-control.service';
 import { AddOrganizationMemberDto } from './dto/add-organization-member.dto';
 import { ListMembersQueryDto } from './dto/list-members-query.dto';
+import { ListPeopleAccessQueryDto } from './dto/list-people-access-query.dto';
 import {
   ORGANIZATION_PERMISSIONS,
   ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
@@ -67,6 +70,52 @@ interface MembershipRecord {
   }>;
 }
 
+interface PeopleInviteRecord {
+  id: string;
+  organizationId: string;
+  invitedName: string | null;
+  email: string;
+  status: OrganizationInviteStatus;
+  expiresAt: Date;
+  acceptedAt: Date | null;
+  revokedAt: Date | null;
+  revocationReason: string | null;
+  lastSentAt: Date | null;
+  lastSendFailureAt: Date | null;
+  lastSendFailureReason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  roles: Array<{
+    role: {
+      id: string;
+      organizationId: string | null;
+      systemKey: string | null;
+      name: string;
+      isSystem: boolean;
+    };
+  }>;
+}
+
+interface PeopleJoinRequestRecord {
+  id: string;
+  userId: string;
+  organizationId: string;
+  message: string | null;
+  status: JoinRequestStatus;
+  rejectionReason: string | null;
+  reviewedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    isVerified: boolean;
+    isActive: boolean;
+  };
+  organization: PeopleAccessOrganizationView;
+}
+
 export interface MemberRoleView {
   id: string;
   organizationId: string | null;
@@ -92,6 +141,54 @@ export interface OrganizationMemberView {
 
 export interface OrganizationMemberListResult {
   members: OrganizationMemberView[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pageCount: number;
+  };
+}
+
+type PeopleAccessSource = 'member' | 'invite' | 'request';
+
+interface PeopleAccessOrganizationView {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface PeopleAccessRoleView {
+  id: string;
+  organizationId: string | null;
+  systemKey?: string | null;
+  name: string;
+  isSystem: boolean;
+}
+
+export interface PeopleAccessRowView {
+  id: string;
+  raw: Record<string, unknown>;
+  source: PeopleAccessSource;
+  sourceLabel: 'Member' | 'Invite' | 'Request';
+  name: string;
+  email: string;
+  organization: PeopleAccessOrganizationView;
+  role: PeopleAccessRoleView | null;
+  roleName: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  detail: string;
+}
+
+export interface PeopleAccessListResult {
+  rows: PeopleAccessRowView[];
+  summary: {
+    total: number;
+    members: number;
+    invites: number;
+    requests: number;
+  };
   pagination: {
     page: number;
     pageSize: number;
@@ -159,6 +256,148 @@ export class OrganizationMembersService {
       members: pagedMemberships.map((membership) =>
         this.toMemberView(membership),
       ),
+      pagination: {
+        page,
+        pageSize,
+        total,
+        pageCount: Math.max(Math.ceil(total / pageSize), 1),
+      },
+    };
+  }
+
+  async listPeopleAccess(
+    organizationId: string,
+    actorUserId: string,
+    query: ListPeopleAccessQueryDto = {},
+  ): Promise<PeopleAccessListResult> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const source = query.source ?? 'all';
+    const now = new Date();
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { id: true, name: true, slug: true },
+    });
+
+    if (!organization) {
+      throw new NotFoundException('Organization not found');
+    }
+
+    const actorTier = await this.resolveActorMemberVisibilityTier(
+      organizationId,
+      actorUserId,
+    );
+    const canManageMembers =
+      actorTier >= MEMBER_VISIBILITY_TIER.organizationAdmin;
+    const includeMembers = source === 'all' || source === 'member';
+    const includeInvites =
+      canManageMembers && (source === 'all' || source === 'invite');
+    const includeRequests =
+      canManageMembers &&
+      !query.roleId &&
+      (source === 'all' || source === 'request');
+
+    if (actorTier < MEMBER_VISIBILITY_TIER.manager) {
+      throw new ForbiddenException(
+        'Your current role cannot view organization people.',
+      );
+    }
+
+    const memberWhere = this.buildPeopleMemberWhere(organizationId, query);
+    const inviteWhere = this.buildPeopleInviteWhere(organizationId, query, now);
+    const requestWhere = this.buildPeopleRequestWhere(organizationId, query);
+    const memberCandidates =
+      includeMembers && actorTier < MEMBER_VISIBILITY_TIER.organizationAdmin
+        ? await this.prisma.organizationMembership.findMany({
+            where: memberWhere,
+            select: this.membershipSelect(organizationId),
+            orderBy: [{ user: { email: 'asc' } }, { id: 'asc' }],
+          })
+        : null;
+    const visibleMemberCandidates = memberCandidates
+      ? this.filterMembershipsForTier(
+          actorTier,
+          actorUserId,
+          memberCandidates,
+        )
+      : null;
+    const [memberTotal, inviteTotal, requestTotal] = await Promise.all([
+      includeMembers
+        ? visibleMemberCandidates
+          ? Promise.resolve(visibleMemberCandidates.length)
+          : this.prisma.organizationMembership.count({ where: memberWhere })
+        : Promise.resolve(0),
+      includeInvites
+        ? this.prisma.organizationInvite.count({ where: inviteWhere })
+        : Promise.resolve(0),
+      includeRequests
+        ? this.prisma.joinRequest.count({ where: requestWhere })
+        : Promise.resolve(0),
+    ]);
+    const sourcePlans = this.planPeopleAccessPage(
+      [
+        { source: 'member', total: memberTotal },
+        { source: 'invite', total: inviteTotal },
+        { source: 'request', total: requestTotal },
+      ],
+      page,
+      pageSize,
+    );
+    const [members, invites, requests] = await Promise.all([
+      sourcePlans.member.take > 0
+        ? visibleMemberCandidates
+          ? Promise.resolve(
+              visibleMemberCandidates.slice(
+                sourcePlans.member.skip,
+                sourcePlans.member.skip + sourcePlans.member.take,
+              ),
+            )
+          : this.prisma.organizationMembership.findMany({
+              where: memberWhere,
+              select: this.membershipSelect(organizationId),
+              orderBy: [{ user: { email: 'asc' } }, { id: 'asc' }],
+              skip: sourcePlans.member.skip,
+              take: sourcePlans.member.take,
+            })
+        : Promise.resolve([]),
+      sourcePlans.invite.take > 0
+        ? this.prisma.organizationInvite.findMany({
+            where: inviteWhere,
+            select: this.peopleInviteSelect(organizationId),
+            orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+            skip: sourcePlans.invite.skip,
+            take: sourcePlans.invite.take,
+          })
+        : Promise.resolve([]),
+      sourcePlans.request.take > 0
+        ? this.prisma.joinRequest.findMany({
+            where: requestWhere,
+            select: this.peopleJoinRequestSelect(),
+            orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+            skip: sourcePlans.request.skip,
+            take: sourcePlans.request.take,
+          })
+        : Promise.resolve([]),
+    ]);
+    const rows = [
+      ...members.map((membership) =>
+        this.toPeopleMemberRow(membership, organization),
+      ),
+      ...invites.map((invite) =>
+        this.toPeopleInviteRow(invite, organization, now),
+      ),
+      ...requests.map((request) => this.toPeopleRequestRow(request)),
+    ];
+    const total = memberTotal + inviteTotal + requestTotal;
+
+    return {
+      rows,
+      summary: {
+        total,
+        members: memberTotal,
+        invites: inviteTotal,
+        requests: requestTotal,
+      },
       pagination: {
         page,
         pageSize,
@@ -494,6 +733,525 @@ export class OrganizationMembersService {
     });
 
     await this.accessControlService.invalidateUserAccess(membership.userId);
+  }
+
+  private planPeopleAccessPage(
+    sources: Array<{ source: PeopleAccessSource; total: number }>,
+    page: number,
+    pageSize: number,
+  ): Record<PeopleAccessSource, { skip: number; take: number }> {
+    let offset = (page - 1) * pageSize;
+    let remaining = pageSize;
+    const plan: Record<PeopleAccessSource, { skip: number; take: number }> = {
+      invite: { skip: 0, take: 0 },
+      member: { skip: 0, take: 0 },
+      request: { skip: 0, take: 0 },
+    };
+
+    for (const source of sources) {
+      if (remaining <= 0) break;
+
+      if (offset >= source.total) {
+        offset -= source.total;
+        continue;
+      }
+
+      const skip = offset;
+      const take = Math.min(source.total - skip, remaining);
+
+      plan[source.source] = { skip, take };
+      remaining -= take;
+      offset = 0;
+    }
+
+    return plan;
+  }
+
+  private filterMembershipsForTier(
+    actorTier: MemberVisibilityTier,
+    actorUserId: string,
+    memberships: MembershipRecord[],
+  ): MembershipRecord[] {
+    if (actorTier >= MEMBER_VISIBILITY_TIER.organizationAdmin) {
+      return memberships;
+    }
+
+    return memberships.filter(
+      (membership) =>
+        membership.userId !== actorUserId &&
+        this.getMemberVisibilityTierFromRoles(membership.roles) ===
+          MEMBER_VISIBILITY_TIER.employee,
+    );
+  }
+
+  private buildPeopleMemberWhere(
+    organizationId: string,
+    query: ListPeopleAccessQueryDto,
+  ): Prisma.OrganizationMembershipWhereInput {
+    const search = query.search?.trim();
+    const statusFilter =
+      query.status === 'ACTIVE'
+        ? [OrganizationMembershipStatus.ACTIVE]
+        : query.status === 'SUSPENDED'
+          ? [OrganizationMembershipStatus.SUSPENDED]
+          : query.status && query.status !== 'all'
+            ? []
+            : [
+                OrganizationMembershipStatus.ACTIVE,
+                OrganizationMembershipStatus.SUSPENDED,
+              ];
+
+    return {
+      organizationId,
+      status: {
+        in: statusFilter,
+      },
+      ...(query.roleId
+        ? {
+            roles: {
+              some: {
+                roleId: query.roleId,
+              },
+            },
+          }
+        : {}),
+      ...(search
+        ? {
+            OR: [
+              {
+                user: {
+                  is: {
+                    email: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                user: {
+                  is: {
+                    name: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                roles: {
+                  some: {
+                    role: {
+                      is: {
+                        name: {
+                          contains: search,
+                          mode: Prisma.QueryMode.insensitive,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+  }
+
+  private buildPeopleInviteWhere(
+    organizationId: string,
+    query: ListPeopleAccessQueryDto,
+    now: Date,
+  ): Prisma.OrganizationInviteWhereInput {
+    const search = query.search?.trim();
+
+    return {
+      organizationId,
+      ...this.resolvePeopleInviteStatusWhere(query.status, now),
+      ...(query.roleId
+        ? {
+            roles: {
+              some: {
+                roleId: query.roleId,
+              },
+            },
+          }
+        : {}),
+      ...(search
+        ? {
+            OR: [
+              {
+                email: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              {
+                invitedName: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              {
+                roles: {
+                  some: {
+                    role: {
+                      is: {
+                        name: {
+                          contains: search,
+                          mode: Prisma.QueryMode.insensitive,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+  }
+
+  private buildPeopleRequestWhere(
+    organizationId: string,
+    query: ListPeopleAccessQueryDto,
+  ): Prisma.JoinRequestWhereInput {
+    const search = query.search?.trim();
+    const status =
+      query.status && query.status !== 'all'
+        ? this.toJoinRequestStatus(query.status)
+        : undefined;
+
+    if (query.status && query.status !== 'all' && !status) {
+      return {
+        organizationId,
+        id: '00000000-0000-0000-0000-000000000000',
+      };
+    }
+
+    return {
+      organizationId,
+      ...(status ? { status } : {}),
+      ...(search
+        ? {
+            OR: [
+              {
+                user: {
+                  is: {
+                    email: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                user: {
+                  is: {
+                    name: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                message: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+  }
+
+  private resolvePeopleInviteStatusWhere(
+    status: ListPeopleAccessQueryDto['status'],
+    now: Date,
+  ): Prisma.OrganizationInviteWhereInput {
+    if (!status || status === 'all') {
+      return {};
+    }
+
+    if (status === 'PENDING') {
+      return {
+        status: OrganizationInviteStatus.PENDING,
+        expiresAt: { gt: now },
+      };
+    }
+
+    if (status === 'EXPIRED') {
+      return {
+        OR: [
+          { status: OrganizationInviteStatus.EXPIRED },
+          {
+            status: OrganizationInviteStatus.PENDING,
+            expiresAt: { lte: now },
+          },
+        ],
+      };
+    }
+
+    if (status === 'ACCEPTED') {
+      return { status: OrganizationInviteStatus.ACCEPTED };
+    }
+
+    if (status === 'REVOKED') {
+      return { status: OrganizationInviteStatus.REVOKED };
+    }
+
+    return {
+      id: '00000000-0000-0000-0000-000000000000',
+    };
+  }
+
+  private toJoinRequestStatus(
+    status: ListPeopleAccessQueryDto['status'],
+  ): JoinRequestStatus | null {
+    if (status === 'PENDING') return JoinRequestStatus.PENDING;
+    if (status === 'ACCEPTED') return JoinRequestStatus.ACCEPTED;
+    if (status === 'REJECTED') return JoinRequestStatus.REJECTED;
+    if (status === 'CANCELED') return JoinRequestStatus.CANCELED;
+
+    return null;
+  }
+
+  private peopleInviteSelect(organizationId: string) {
+    return {
+      id: true,
+      organizationId: true,
+      invitedName: true,
+      email: true,
+      status: true,
+      expiresAt: true,
+      acceptedAt: true,
+      revokedAt: true,
+      revocationReason: true,
+      lastSentAt: true,
+      lastSendFailureAt: true,
+      lastSendFailureReason: true,
+      createdAt: true,
+      updatedAt: true,
+      roles: {
+        where: {
+          role: {
+            is: {
+              scope: AccessScope.ORGANIZATION,
+              isActive: true,
+              OR: [{ organizationId: null }, { organizationId }],
+            },
+          },
+        },
+        select: {
+          role: {
+            select: {
+              id: true,
+              organizationId: true,
+              systemKey: true,
+              name: true,
+              isSystem: true,
+            },
+          },
+        },
+      },
+    } as const satisfies Prisma.OrganizationInviteSelect;
+  }
+
+  private peopleJoinRequestSelect() {
+    return {
+      id: true,
+      userId: true,
+      organizationId: true,
+      message: true,
+      status: true,
+      rejectionReason: true,
+      reviewedAt: true,
+      createdAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          isVerified: true,
+          isActive: true,
+        },
+      },
+      organization: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+    } as const satisfies Prisma.JoinRequestSelect;
+  }
+
+  private toPeopleMemberRow(
+    membership: MembershipRecord,
+    organization: PeopleAccessOrganizationView,
+  ): PeopleAccessRowView {
+    const member = this.toMemberView(membership);
+    const role = member.roles[0] ?? null;
+
+    return {
+      id: `member:${member.id}`,
+      raw: member as unknown as Record<string, unknown>,
+      source: 'member',
+      sourceLabel: 'Member',
+      name: member.user.name ?? member.user.email,
+      email: member.user.email,
+      organization,
+      role,
+      roleName: role?.name ?? 'No role',
+      status: member.status,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
+      detail:
+        member.status === OrganizationMembershipStatus.SUSPENDED
+          ? 'Membership is suspended until an administrator reactivates it.'
+          : 'Current organization member.',
+    };
+  }
+
+  private toPeopleInviteRow(
+    invite: PeopleInviteRecord,
+    organization: PeopleAccessOrganizationView,
+    now: Date,
+  ): PeopleAccessRowView {
+    const status = this.resolvePeopleInviteStatus(invite, now);
+    const role = this.toPeopleRole(invite.roles[0]?.role ?? null);
+    const raw = {
+      id: invite.id,
+      organizationId: invite.organizationId,
+      name: invite.invitedName,
+      email: invite.email,
+      status,
+      expiresAt: invite.expiresAt,
+      acceptedAt: invite.acceptedAt,
+      revokedAt: invite.revokedAt,
+      revocationReason: invite.revocationReason,
+      lastSentAt: invite.lastSentAt,
+      lastSendFailureAt: invite.lastSendFailureAt,
+      lastSendFailureReason: invite.lastSendFailureReason,
+      createdAt: invite.createdAt,
+      updatedAt: invite.updatedAt,
+      roles: invite.roles.map(({ role: inviteRole }) =>
+        this.toPeopleRole(inviteRole),
+      ),
+    };
+
+    return {
+      id: `invite:${invite.id}`,
+      raw,
+      source: 'invite',
+      sourceLabel: 'Invite',
+      name: invite.invitedName ?? invite.email,
+      email: invite.email,
+      organization,
+      role,
+      roleName: role?.name ?? 'No role',
+      status,
+      createdAt: invite.createdAt,
+      updatedAt: invite.updatedAt,
+      detail: this.getInviteDetail(invite, status),
+    };
+  }
+
+  private toPeopleRequestRow(
+    request: PeopleJoinRequestRecord,
+  ): PeopleAccessRowView {
+    const raw = {
+      id: request.id,
+      userId: request.userId,
+      organizationId: request.organizationId,
+      message: request.message,
+      status: request.status,
+      rejectionReason: request.rejectionReason,
+      reviewedAt: request.reviewedAt,
+      createdAt: request.createdAt,
+      updatedAt: request.updatedAt,
+      user: request.user,
+      organization: request.organization,
+    };
+
+    return {
+      id: `request:${request.id}`,
+      raw,
+      source: 'request',
+      sourceLabel: 'Request',
+      name: request.user.name ?? request.user.email,
+      email: request.user.email,
+      organization: request.organization,
+      role: null,
+      roleName: 'Requested access',
+      status: request.status,
+      createdAt: request.createdAt,
+      updatedAt: request.reviewedAt ?? request.updatedAt,
+      detail:
+        request.rejectionReason ||
+        request.message ||
+        (request.reviewedAt
+          ? 'This access request has been reviewed.'
+          : 'Awaiting organization review.'),
+    };
+  }
+
+  private toPeopleRole(
+    role:
+      | {
+          id: string;
+          organizationId: string | null;
+          systemKey?: string | null;
+          name: string;
+          isSystem: boolean;
+        }
+      | null,
+  ): PeopleAccessRoleView | null {
+    if (!role) return null;
+
+    return {
+      id: role.id,
+      organizationId: role.organizationId,
+      systemKey: role.systemKey ?? null,
+      name: role.name,
+      isSystem: role.isSystem,
+    };
+  }
+
+  private resolvePeopleInviteStatus(
+    invite: Pick<PeopleInviteRecord, 'expiresAt' | 'status'>,
+    now: Date,
+  ): OrganizationInviteStatus {
+    if (
+      invite.status === OrganizationInviteStatus.PENDING &&
+      invite.expiresAt <= now
+    ) {
+      return OrganizationInviteStatus.EXPIRED;
+    }
+
+    return invite.status;
+  }
+
+  private getInviteDetail(
+    invite: PeopleInviteRecord,
+    status: OrganizationInviteStatus,
+  ): string {
+    if (invite.revocationReason) return invite.revocationReason;
+    if (invite.lastSendFailureReason) return invite.lastSendFailureReason;
+    if (status === OrganizationInviteStatus.REVOKED) {
+      return 'This invitation was revoked.';
+    }
+    if (status === OrganizationInviteStatus.ACCEPTED) {
+      return 'This invitation was accepted.';
+    }
+    if (status === OrganizationInviteStatus.EXPIRED) {
+      return 'This invitation has expired.';
+    }
+
+    return 'Invitation is waiting for the recipient.';
   }
 
   private async resolveApplicableRoles(

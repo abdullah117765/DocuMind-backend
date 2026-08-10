@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     RAG_INITIAL_CANDIDATE_K: int = 30
     RAG_MAX_CANDIDATE_K: int = 50
     RAG_MIN_RELEVANCE_SCORE: float = 0.2
-    RAG_RERANKER_ENABLED: bool = True
+    RAG_RERANKER_ENABLED: bool = False
     RAG_RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     RAG_RERANKER_WEIGHT: float = 0.75
     RAG_MIN_RERANKED_SCORE: float = 0.2
@@ -47,6 +47,11 @@ class Settings(BaseSettings):
 
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3.5-flash"
+    GEMINI_REQUEST_TIMEOUT_MS: int = 20_000
+    GEMINI_TOTAL_TIMEOUT_MS: int = 25_000
+    GEMINI_MAX_RETRIES: int = 2
+    GEMINI_RETRY_INITIAL_BACKOFF_MS: int = 1_000
+    GEMINI_RETRY_MAX_BACKOFF_MS: int = 2_000
 
 
 @lru_cache

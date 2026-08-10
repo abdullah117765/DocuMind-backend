@@ -10,6 +10,10 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+ENV HF_HOME=/models/huggingface \
+    SENTENCE_TRANSFORMERS_HOME=/models/sentence-transformers \
+    TRANSFORMERS_CACHE=/models/huggingface
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

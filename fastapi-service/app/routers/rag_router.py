@@ -1,6 +1,6 @@
 import time
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.middleware.hmac_middleware import require_hmac
 from app.models.rag import (
@@ -17,11 +17,32 @@ from app.services.ingestion_service import IngestionService
 from app.services.llm_service import LlmService
 from app.services.search_service import SearchService
 
-router = APIRouter(prefix="/rag", tags=["RAG"], dependencies=[Depends(require_hmac)])
 
-ingestion_service = IngestionService()
-search_service = SearchService()
-llm_service = LlmService()
+def require_rag_ready(request: Request) -> None:
+    if not bool(getattr(request.app.state, "rag_ready", False)):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Document AI service is warming up. Retry shortly.",
+        )
+
+
+router = APIRouter(
+    prefix="/rag",
+    tags=["RAG"],
+    dependencies=[Depends(require_hmac), Depends(require_rag_ready)],
+)
+
+
+def _ingestion_service(request: Request) -> IngestionService:
+    return request.app.state.ingestion_service
+
+
+def _search_service(request: Request) -> SearchService:
+    return request.app.state.search_service
+
+
+def _llm_service(request: Request) -> LlmService:
+    return request.app.state.llm_service
 
 
 @router.post(
@@ -29,8 +50,11 @@ llm_service = LlmService()
     response_model=IngestDocumentResponse,
     status_code=status.HTTP_200_OK,
 )
-async def ingest_document(request: IngestDocumentRequest) -> IngestDocumentResponse:
-    return ingestion_service.ingest(request)
+def ingest_document(
+    payload: IngestDocumentRequest,
+    request: Request,
+) -> IngestDocumentResponse:
+    return _ingestion_service(request).ingest(payload)
 
 
 @router.post(
@@ -38,8 +62,8 @@ async def ingest_document(request: IngestDocumentRequest) -> IngestDocumentRespo
     response_model=RagSearchResponse,
     status_code=status.HTTP_200_OK,
 )
-async def search_documents(request: RagQueryRequest) -> RagSearchResponse:
-    return search_service.search(request)
+def search_documents(payload: RagQueryRequest, request: Request) -> RagSearchResponse:
+    return _search_service(request).search(payload)
 
 
 @router.post(
@@ -47,9 +71,11 @@ async def search_documents(request: RagQueryRequest) -> RagSearchResponse:
     response_model=RagAskResponse,
     status_code=status.HTTP_200_OK,
 )
-async def ask_documents(request: RagQueryRequest) -> RagAskResponse:
+def ask_documents(payload: RagQueryRequest, request: Request) -> RagAskResponse:
     started = time.perf_counter()
-    search_response = search_service.search(request)
+    search_service = _search_service(request)
+    llm_service = _llm_service(request)
+    search_response = search_service.search(payload)
 
     if not search_response.results:
         return RagAskResponse(
@@ -62,7 +88,7 @@ async def ask_documents(request: RagQueryRequest) -> RagAskResponse:
         )
 
     answer, model, llm_available = llm_service.answer(
-        request.query,
+        payload.query,
         search_response.results,
     )
     sources = [
@@ -90,10 +116,13 @@ async def ask_documents(request: RagQueryRequest) -> RagAskResponse:
     response_model=list[IngestDocumentResponse],
     status_code=status.HTTP_200_OK,
 )
-async def reindex_documents(
-    request: list[IngestDocumentRequest],
+def reindex_documents(
+    payload: list[IngestDocumentRequest],
+    request: Request,
 ) -> list[IngestDocumentResponse]:
-    return [ingestion_service.ingest(document) for document in request]
+    ingestion_service = _ingestion_service(request)
+
+    return [ingestion_service.ingest(document) for document in payload]
 
 
 @router.delete(
@@ -101,11 +130,12 @@ async def reindex_documents(
     response_model=RagDeleteDocumentResponse,
     status_code=status.HTTP_200_OK,
 )
-async def delete_document_vectors(
+def delete_document_vectors(
     organization_id: str,
     document_id: str,
+    request: Request,
 ) -> RagDeleteDocumentResponse:
-    ingestion_service.delete_document(organization_id, document_id)
+    _ingestion_service(request).delete_document(organization_id, document_id)
     return RagDeleteDocumentResponse(status="success", document_id=document_id)
 
 
@@ -113,8 +143,8 @@ async def delete_document_vectors(
     "/organizations/{organization_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def delete_organization_vectors(organization_id: str) -> None:
-    ingestion_service.delete_organization(organization_id)
+def delete_organization_vectors(organization_id: str, request: Request) -> None:
+    _ingestion_service(request).delete_organization(organization_id)
 
 
 @router.get(
@@ -122,8 +152,8 @@ async def delete_organization_vectors(organization_id: str) -> None:
     response_model=RagStatsResponse,
     status_code=status.HTTP_200_OK,
 )
-async def get_stats(organization_id: str) -> RagStatsResponse:
+def get_stats(organization_id: str, request: Request) -> RagStatsResponse:
     return RagStatsResponse(
         organization_id=organization_id,
-        vectors_count=ingestion_service.count_vectors(organization_id),
+        vectors_count=_ingestion_service(request).count_vectors(organization_id),
     )

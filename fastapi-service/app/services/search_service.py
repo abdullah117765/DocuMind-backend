@@ -19,10 +19,16 @@ logger = logging.getLogger(__name__)
 
 
 class SearchService:
-    def __init__(self) -> None:
-        self.embedding_service = EmbeddingService()
-        self.qdrant_service = QdrantService()
-        self.reranker_service = RerankerService()
+    def __init__(
+        self,
+        *,
+        embedding_service: EmbeddingService | None = None,
+        qdrant_service: QdrantService | None = None,
+        reranker_service: RerankerService | None = None,
+    ) -> None:
+        self.embedding_service = embedding_service or EmbeddingService()
+        self.qdrant_service = qdrant_service or QdrantService()
+        self.reranker_service = reranker_service or RerankerService()
 
     def search(self, request: RagQueryRequest) -> RagSearchResponse:
         started = time.perf_counter()

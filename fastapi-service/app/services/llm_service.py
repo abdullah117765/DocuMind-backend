@@ -1,5 +1,6 @@
 import logging
 import time
+from functools import cached_property
 
 from app.config.settings import get_settings
 from app.models.rag import RagSearchResult
@@ -9,6 +10,18 @@ logger = logging.getLogger(__name__)
 
 
 class LlmService:
+    @cached_property
+    def client(self):
+        from google import genai
+        from google.genai import types
+
+        settings = get_settings()
+
+        return genai.Client(
+            api_key=settings.GEMINI_API_KEY,
+            http_options=types.HttpOptions(timeout=settings.GEMINI_REQUEST_TIMEOUT_MS),
+        )
+
     @property
     def is_available(self) -> bool:
         return bool(get_settings().GEMINI_API_KEY.strip())
@@ -23,39 +36,162 @@ class LlmService:
                 False,
             )
 
-        try:
-            from google import genai
+        started = time.perf_counter()
+        deadline = time.monotonic() + (settings.GEMINI_TOTAL_TIMEOUT_MS / 1000)
+        max_attempts = max(settings.GEMINI_MAX_RETRIES, 0) + 1
+        prompt = self._build_prompt(query, results)
+        last_error: Exception | None = None
 
-            started = time.perf_counter()
-            logger.info(
-                "RAG LLM request started model=%s context_chunks=%s",
-                settings.GEMINI_MODEL,
-                len(results),
+        logger.info(
+            "RAG LLM request started model=%s context_chunks=%s max_attempts=%s total_timeout_ms=%s",
+            settings.GEMINI_MODEL,
+            len(results),
+            max_attempts,
+            settings.GEMINI_TOTAL_TIMEOUT_MS,
+        )
+
+        for attempt in range(1, max_attempts + 1):
+            remaining_ms = int(max((deadline - time.monotonic()) * 1000, 0))
+
+            if remaining_ms <= 0:
+                break
+
+            request_timeout_ms = min(
+                max(settings.GEMINI_REQUEST_TIMEOUT_MS, 1),
+                remaining_ms,
             )
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            prompt = self._build_prompt(query, results)
-            response = client.models.generate_content(
-                model=settings.GEMINI_MODEL,
-                contents=prompt,
-            )
-            logger.info(
-                "RAG LLM request completed model=%s elapsed_ms=%s",
+
+            try:
+                response = self.client.models.generate_content(
+                    model=settings.GEMINI_MODEL,
+                    contents=prompt,
+                    config={"http_options": {"timeout": request_timeout_ms}},
+                )
+                logger.info(
+                    "RAG LLM request completed model=%s attempt=%s elapsed_ms=%s",
+                    settings.GEMINI_MODEL,
+                    attempt,
+                    int((time.perf_counter() - started) * 1000),
+                )
+
+                return (
+                    response.text or "No answer was generated.",
+                    settings.GEMINI_MODEL,
+                    True,
+                )
+            except Exception as error:
+                last_error = error
+                retryable = self._is_retryable_error(error)
+
+                if not retryable or attempt >= max_attempts:
+                    logger.warning(
+                        "RAG LLM request failed model=%s attempt=%s retryable=%s elapsed_ms=%s error=%s",
+                        settings.GEMINI_MODEL,
+                        attempt,
+                        retryable,
+                        int((time.perf_counter() - started) * 1000),
+                        self._safe_error_message(error),
+                    )
+                    break
+
+                delay_ms = self._retry_delay_ms(settings, attempt)
+                remaining_after_attempt_ms = int(
+                    max((deadline - time.monotonic()) * 1000, 0)
+                )
+
+                if delay_ms >= remaining_after_attempt_ms:
+                    logger.warning(
+                        "RAG LLM retry skipped model=%s attempt=%s remaining_ms=%s error=%s",
+                        settings.GEMINI_MODEL,
+                        attempt,
+                        remaining_after_attempt_ms,
+                        self._safe_error_message(error),
+                    )
+                    break
+
+                logger.warning(
+                    "RAG LLM retry scheduled model=%s attempt=%s next_delay_ms=%s error=%s",
+                    settings.GEMINI_MODEL,
+                    attempt,
+                    delay_ms,
+                    self._safe_error_message(error),
+                )
+                time.sleep(delay_ms / 1000)
+
+        if last_error:
+            logger.warning(
+                "RAG LLM request exhausted model=%s elapsed_ms=%s final_error=%s",
                 settings.GEMINI_MODEL,
                 int((time.perf_counter() - started) * 1000),
+                self._safe_error_message(last_error),
             )
 
-            return (
-                response.text or "No answer was generated.",
-                settings.GEMINI_MODEL,
-                True,
-            )
-        except Exception as error:
-            logger.exception("RAG LLM request failed model=%s", settings.GEMINI_MODEL)
-            return (
-                "AI answer generation is temporarily unavailable. Search results are available below.",
-                settings.GEMINI_MODEL,
-                False,
-            )
+        return (
+            "AI answer generation is temporarily unavailable. Search results are available below.",
+            settings.GEMINI_MODEL,
+            False,
+        )
+
+    def _retry_delay_ms(self, settings: object, attempt: int) -> int:
+        initial = max(int(getattr(settings, "GEMINI_RETRY_INITIAL_BACKOFF_MS")), 0)
+        maximum = max(int(getattr(settings, "GEMINI_RETRY_MAX_BACKOFF_MS")), initial)
+
+        return min(initial * (2 ** (attempt - 1)), maximum)
+
+    def _is_retryable_error(self, error: Exception) -> bool:
+        status_code = self._status_code(error)
+
+        if status_code in {429, 500, 502, 503, 504}:
+            return True
+
+        if status_code in {400, 401, 403, 404}:
+            return False
+
+        message = str(error).lower()
+        retryable_markers = (
+            "429",
+            "resource_exhausted",
+            "rate limit",
+            "too many requests",
+            "timeout",
+            "timed out",
+            "deadline",
+            "temporarily unavailable",
+            "service unavailable",
+            "internal",
+            "502",
+            "503",
+            "504",
+        )
+        non_retryable_markers = (
+            "api key not valid",
+            "invalid api key",
+            "permission denied",
+            "unauthenticated",
+            "unsupported model",
+            "model not found",
+            "invalid argument",
+        )
+
+        if any(marker in message for marker in non_retryable_markers):
+            return False
+
+        return any(marker in message for marker in retryable_markers)
+
+    def _status_code(self, error: Exception) -> int | None:
+        for attribute in ("status_code", "code"):
+            value = getattr(error, attribute, None)
+
+            try:
+                if value is not None:
+                    return int(value)
+            except (TypeError, ValueError):
+                continue
+
+        return None
+
+    def _safe_error_message(self, error: Exception) -> str:
+        return str(error).replace("\n", " ")[:500]
 
     def _build_prompt(self, query: str, results: list[RagSearchResult]) -> str:
         excerpts = []

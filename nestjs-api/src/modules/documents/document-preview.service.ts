@@ -1,5 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import AdmZip from 'adm-zip';
+import { execFileSync } from 'node:child_process';
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { Prisma } from '../../generated/prisma/client';
 import {
   DOCUMENT_RENDERABLE_EXTENSIONS,
@@ -143,6 +153,63 @@ function getPptxText(buffer: Buffer): string {
     .join('\n\n');
 }
 
+function getLibreOfficeCandidates(): string[] {
+  return [
+    process.env.LIBREOFFICE_BINARY,
+    'soffice',
+    'libreoffice',
+    'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
+    'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe',
+  ]
+    .filter((candidate): candidate is string => Boolean(candidate?.trim()))
+    .map((candidate) => candidate.trim().replace(/^"|"$/g, ''));
+}
+
+function convertLegacyOfficeDocument(
+  buffer: Buffer,
+  sourceExtension: string,
+  targetExtension: 'docx' | 'pptx',
+): Buffer | null {
+  const tempDir = mkdtempSync(join(tmpdir(), 'document-preview-'));
+  const sourcePath = join(tempDir, `input.${sourceExtension}`);
+  const convertedPath = join(tempDir, `input.${targetExtension}`);
+
+  try {
+    writeFileSync(sourcePath, buffer);
+
+    for (const binary of getLibreOfficeCandidates()) {
+      try {
+        execFileSync(
+          binary,
+          [
+            '--headless',
+            '--convert-to',
+            targetExtension,
+            '--outdir',
+            tempDir,
+            sourcePath,
+          ],
+          {
+            stdio: 'pipe',
+            timeout: 45_000,
+            windowsHide: true,
+          },
+        );
+
+        if (existsSync(convertedPath)) {
+          return readFileSync(convertedPath);
+        }
+      } catch {
+        // Try the next common LibreOffice binary location.
+      }
+    }
+
+    return null;
+  } finally {
+    rmSync(tempDir, { force: true, recursive: true });
+  }
+}
+
 function parseSharedStrings(zip: AdmZip): string[] {
   const sharedStringsXml = readZipEntryText(zip, 'xl/sharedStrings.xml');
 
@@ -237,7 +304,7 @@ export class DocumentPreviewService {
         kind: 'binary',
         previewAvailable: true,
         mimeType: file.mimeType,
-        message: 'Open the content endpoint inline for preview.',
+        message: 'Open the file in a new tab to preview it.',
       };
     }
 
@@ -302,14 +369,36 @@ export class DocumentPreviewService {
       };
     }
 
-    if (['doc', 'ppt'].includes(file.extension)) {
-      return {
-        kind: 'legacy-office',
-        previewAvailable: false,
-        mimeType: file.mimeType,
-        message:
-          'Legacy DOC/PPT preview requires a conversion worker such as LibreOffice. The file is stored safely and can still be downloaded.',
-      };
+    if (file.extension === 'doc') {
+      return this.buildOfficeTextPreview(file, () => {
+        const converted = convertLegacyOfficeDocument(
+          file.buffer,
+          file.extension,
+          'docx',
+        );
+
+        if (!converted) {
+          throw new Error('Preview conversion failed.');
+        }
+
+        return getDocxText(converted);
+      });
+    }
+
+    if (file.extension === 'ppt') {
+      return this.buildOfficeTextPreview(file, () => {
+        const converted = convertLegacyOfficeDocument(
+          file.buffer,
+          file.extension,
+          'pptx',
+        );
+
+        if (!converted) {
+          throw new Error('Preview conversion failed.');
+        }
+
+        return getPptxText(converted);
+      });
     }
 
     return {
@@ -331,15 +420,16 @@ export class DocumentPreviewService {
         previewAvailable: Boolean(textPreview.content),
         ...textPreview,
         message: textPreview.content
-          ? 'Text preview extracted from the Office document.'
-          : 'No readable text was found in this Office document.',
+          ? 'Preview is ready.'
+          : 'No readable text was found in this file.',
       };
     } catch {
       return {
         kind: 'office-text',
         previewAvailable: false,
         mimeType: file.mimeType,
-        message: 'Office preview could not be extracted from this file.',
+        message:
+          'We could not prepare a preview for this file. Download it to view the full document.',
       };
     }
   }
