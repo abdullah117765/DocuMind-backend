@@ -13,6 +13,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { AccessControlService } from './access-control.service';
 import { CreateRoleDto } from './dto/create-role.dto';
+import { ListRolesQueryDto } from './dto/list-roles-query.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import {
   LEGACY_PERMISSIONS,
@@ -77,6 +78,16 @@ export interface RoleView {
   permissions: PermissionView[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface RoleListResult {
+  roles: RoleView[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pageCount: number;
+  };
 }
 
 function cleanRoleName(name: string): string {
@@ -151,26 +162,39 @@ export class RoleManagementService {
   async listRoles(
     organizationId: string,
     actorUserId?: string,
-  ): Promise<RoleView[]> {
-    const roles = await this.prisma.role.findMany({
-      where: {
-        scope: AccessScope.ORGANIZATION,
-        isActive: true,
-        OR: [{ organizationId: null }, { organizationId }],
-      },
-      select: this.roleSelect(organizationId),
-      orderBy: [{ isSystem: 'desc' }, { name: 'asc' }, { id: 'asc' }],
-    });
+    query: ListRolesQueryDto = {},
+  ): Promise<RoleListResult> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const where = this.buildRoleWhere(organizationId, query);
+    const [total, roles] = await Promise.all([
+      this.prisma.role.count({ where }),
+      this.prisma.role.findMany({
+        where,
+        select: this.roleSelect(organizationId),
+        orderBy: [{ isSystem: 'desc' }, { name: 'asc' }, { id: 'asc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ]);
     const actorIsSuperAdmin = actorUserId
       ? await this.envSuperAdminService.isConfiguredUserId(actorUserId)
       : false;
 
-    return roles.map((role) =>
-      this.toRoleView(
-        role,
-        actorIsSuperAdmin || this.isAssignableByOrganizationAdmin(role),
+    return {
+      roles: roles.map((role) =>
+        this.toRoleView(
+          role,
+          actorIsSuperAdmin || this.isAssignableByOrganizationAdmin(role),
+        ),
       ),
-    );
+      pagination: {
+        page,
+        pageSize,
+        total,
+        pageCount: Math.max(Math.ceil(total / pageSize), 1),
+      },
+    };
   }
 
   async getRole(organizationId: string, roleId: string): Promise<RoleView> {
@@ -669,6 +693,70 @@ export class RoleManagementService {
         },
       },
     } as const satisfies Prisma.RoleSelect;
+  }
+
+  private buildRoleWhere(
+    organizationId: string,
+    query: ListRolesQueryDto,
+  ): Prisma.RoleWhereInput {
+    const search = query.search?.trim();
+
+    return {
+      scope: AccessScope.ORGANIZATION,
+      isActive: true,
+      OR: [{ organizationId: null }, { organizationId }],
+      ...(query.type === 'system'
+        ? { isSystem: true }
+        : query.type === 'custom'
+          ? { isSystem: false }
+          : {}),
+      ...(search
+        ? {
+            AND: [
+              {
+                OR: [
+                  {
+                    name: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                  {
+                    description: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                  {
+                    permissions: {
+                      some: {
+                        permission: {
+                          is: {
+                            OR: [
+                              {
+                                name: {
+                                  contains: search,
+                                  mode: Prisma.QueryMode.insensitive,
+                                },
+                              },
+                              {
+                                code: {
+                                  contains: search,
+                                  mode: Prisma.QueryMode.insensitive,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          }
+        : {}),
+    };
   }
 
   private isAssignableByOrganizationAdmin(role: RoleRecord): boolean {

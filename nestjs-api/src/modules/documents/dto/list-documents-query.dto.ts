@@ -33,6 +33,27 @@ export class ListDocumentsQueryDto {
   @MaxLength(100, { message: 'Search must not exceed 100 characters' })
   search?: string;
 
+  @ApiPropertyOptional({
+    description: 'Filter documents updated within a recent window',
+    enum: ['24h', '7d', '30d'],
+  })
+  @IsOptional()
+  @IsIn(['24h', '7d', '30d'], {
+    message: 'Updated range must be 24h, 7d, or 30d',
+  })
+  updatedRange?: '24h' | '7d' | '30d';
+
+  @ApiPropertyOptional({
+    description: 'Sort documents by last updated time',
+    enum: ['newest', 'oldest'],
+    default: 'newest',
+  })
+  @IsOptional()
+  @IsIn(['newest', 'oldest'], {
+    message: 'Sort must be newest or oldest',
+  })
+  sort?: 'newest' | 'oldest';
+
   @ApiPropertyOptional({ default: 1, minimum: 1 })
   @IsOptional()
   @Type(() => Number)

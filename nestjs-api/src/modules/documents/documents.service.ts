@@ -4,12 +4,30 @@ import {
   ForbiddenException,
   GoneException,
   Injectable,
+  Logger,
+  MessageEvent,
   NotFoundException,
+  OnModuleDestroy,
+  OnModuleInit,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import {
+  catchError,
+  defer,
+  from,
+  interval,
+  map,
+  Observable,
+  of,
+  startWith,
+  switchMap,
+  takeWhile,
+} from 'rxjs';
+import {
   AccessScope,
   DocumentAccessLevel,
+  DocumentRagIndexStatus,
   DocumentStagedFileStatus,
   DocumentStatus,
   DocumentUploadSessionStatus,
@@ -25,10 +43,7 @@ import {
 import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { PrismaService } from '../prisma/prisma.service';
-import type {
-  ExtractedArchiveFile,
-  ZipManifestView,
-} from './document-archive.service';
+import type { ZipManifestView } from './document-archive.service';
 import { DocumentArchiveService } from './document-archive.service';
 import { DocumentPreviewService } from './document-preview.service';
 import {
@@ -39,8 +54,24 @@ import {
   DocumentValidationService,
   ValidatedDocumentBuffer,
 } from './document-validation.service';
+import {
+  DocumentUploadJobPatch,
+  DocumentUploadJobsService,
+  DocumentUploadJobView,
+} from './document-upload-jobs.service';
 import { ListDocumentsQueryDto } from './dto/list-documents-query.dto';
 import { ListPlatformDocumentsQueryDto } from './dto/list-platform-documents-query.dto';
+import {
+  RagDocumentScope,
+  RagQueryDto,
+  RagReindexDto,
+} from './dto/rag-query.dto';
+import {
+  RagAskResponse,
+  RagIngestPayload,
+  RagOrchestratorService,
+  RagSearchResponse,
+} from './rag-orchestrator.service';
 
 const documentSelect = {
   id: true,
@@ -266,6 +297,23 @@ export interface DocumentView {
   accessGrants: DocumentAccessGrantView[];
 }
 
+export interface RagDocumentStatusView {
+  documentId: string;
+  status: DocumentRagIndexStatus | 'NOT_INDEXED';
+  chunksCount: number;
+  errorMessage: string | null;
+  indexedAt: Date | null;
+  updatedAt: Date | null;
+}
+
+export interface RagSearchView extends RagSearchResponse {
+  allowedDocumentIds: string[];
+}
+
+export interface RagAskView extends RagAskResponse {
+  allowedDocumentIds: string[];
+}
+
 export interface DocumentVersionView {
   id: string;
   documentId: string;
@@ -393,6 +441,12 @@ const DOCUMENT_ROLE_TIER = {
 type DocumentRoleTier =
   (typeof DOCUMENT_ROLE_TIER)[keyof typeof DOCUMENT_ROLE_TIER];
 
+const UPDATED_RANGE_DAYS = {
+  '24h': 1,
+  '7d': 7,
+  '30d': 30,
+} as const;
+
 interface DocumentRoleAssignmentRecord {
   role: {
     systemKey: string | null;
@@ -405,8 +459,17 @@ interface DocumentRoleAssignmentRecord {
   };
 }
 
+type UploadProgressReporter = (patch: DocumentUploadJobPatch) => Promise<void>;
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 @Injectable()
-export class DocumentsService {
+export class DocumentsService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(DocumentsService.name);
+  private uploadWorkerActive = false;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: DocumentStorageService,
@@ -415,7 +478,72 @@ export class DocumentsService {
     private readonly archiveService: DocumentArchiveService,
     private readonly accessControlService: AccessControlService,
     private readonly envSuperAdminService: EnvSuperAdminService,
+    private readonly ragOrchestrator: RagOrchestratorService,
+    private readonly uploadJobsService: DocumentUploadJobsService,
   ) {}
+
+  onModuleInit(): void {
+    this.uploadWorkerActive = true;
+    void this.processUploadJobs();
+  }
+
+  onModuleDestroy(): void {
+    this.uploadWorkerActive = false;
+  }
+
+  private async processUploadJobs(): Promise<void> {
+    while (this.uploadWorkerActive) {
+      try {
+        const job = await this.uploadJobsService.reserveNextJob(5);
+
+        if (!job) {
+          continue;
+        }
+
+        await this.processUploadJob(job);
+      } catch (error: unknown) {
+        if (this.uploadWorkerActive) {
+          this.logger.error(
+            error instanceof Error
+              ? (error.stack ?? error.message)
+              : 'Upload job worker failed unexpectedly.',
+          );
+          await delay(1000);
+        }
+      }
+    }
+  }
+
+  private async processUploadJob(job: DocumentUploadJobView): Promise<void> {
+    await this.uploadJobsService.updateJob(job.id, {
+      status: 'PROCESSING',
+      stage: 'validating',
+      progress: 2,
+      message: 'Upload job started.',
+      startedAt: new Date().toISOString(),
+    });
+
+    try {
+      const result = await this.commitUploadSessionNow(
+        job.organizationId,
+        job.sessionId,
+        job.createdByUserId,
+        (patch) =>
+          this.uploadJobsService.updateJob(job.id, patch).then(() => undefined),
+      );
+
+      await this.uploadJobsService.completeJob(job.id, {
+        documents: result.documents.map((document) => ({
+          id: document.id,
+          name: document.name,
+          originalFilename: document.originalFilename,
+        })),
+        warnings: result.warnings,
+      });
+    } catch (error: unknown) {
+      await this.uploadJobsService.failJob(job.id, error);
+    }
+  }
 
   getZipManifest(archive: Express.Multer.File): ZipManifestView {
     return this.archiveService.getManifest(archive);
@@ -567,12 +695,43 @@ export class DocumentsService {
     organizationId: string,
     sessionId: string,
     principal: AuthenticatedPrincipal,
-  ): Promise<CommitUploadSessionResult> {
-    const session = await this.assertPendingOwnedUploadSession(
+  ): Promise<DocumentUploadJobView> {
+    const existingJob = await this.uploadJobsService.getJobForSession(
+      organizationId,
+      sessionId,
+    );
+
+    if (existingJob) {
+      if (existingJob.createdByUserId !== principal.userId) {
+        throw new NotFoundException('Upload job not found.');
+      }
+
+      if (this.uploadJobsService.isStaleProcessingJob(existingJob)) {
+        return this.uploadJobsService.requeueJob(existingJob);
+      }
+
+      return existingJob;
+    }
+
+    const session = await this.findOwnedUploadSession(
       organizationId,
       sessionId,
       principal.userId,
     );
+
+    if (session.status !== DocumentUploadSessionStatus.PENDING) {
+      throw new ConflictException('This upload session is not pending.');
+    }
+
+    if (session.expiresAt.getTime() <= Date.now()) {
+      await this.prisma.documentUploadSession.update({
+        where: { id: session.id },
+        data: { status: DocumentUploadSessionStatus.EXPIRED },
+      });
+
+      throw new GoneException('This upload session has expired.');
+    }
+
     const readyFiles = session.files.filter(
       (file) => file.status === DocumentStagedFileStatus.READY,
     );
@@ -581,12 +740,174 @@ export class DocumentsService {
       throw new ConflictException('There are no staged files to commit.');
     }
 
+    await this.prisma.documentUploadSession.update({
+      where: { id: session.id },
+      data: {
+        expiresAt: new Date(
+          Date.now() + this.uploadJobsService.getTtlSeconds() * 1000,
+        ),
+      },
+    });
+
+    return this.uploadJobsService.createOrGetJob({
+      organizationId,
+      sessionId,
+      createdByUserId: principal.userId,
+      totalFiles: readyFiles.length,
+    });
+  }
+
+  streamUploadJobEvents(
+    organizationId: string,
+    jobId: string,
+    principal: AuthenticatedPrincipal,
+  ): Observable<MessageEvent> {
+    return defer(async () => {
+      await this.resolveOrganizationAccessOrThrow(
+        principal.userId,
+        organizationId,
+      );
+
+      const job = await this.uploadJobsService.getAuthorizedJob({
+        organizationId,
+        jobId,
+        userId: principal.userId,
+      });
+
+      if (!job) {
+        throw new NotFoundException('Upload job not found.');
+      }
+
+      return job;
+    }).pipe(
+      switchMap((job) =>
+        interval(1000).pipe(
+          startWith(0),
+          switchMap(() =>
+            from(
+              this.uploadJobsService.getAuthorizedJob({
+                organizationId,
+                jobId,
+                userId: principal.userId,
+              }),
+            ),
+          ),
+          map((currentJob) => {
+            if (!currentJob) {
+              return {
+                data: {
+                  ...job,
+                  status: 'FAILED',
+                  stage: 'failed',
+                  error:
+                    'Upload job state expired. Please refresh and try again.',
+                  message: 'Upload job state expired.',
+                },
+              } satisfies MessageEvent;
+            }
+
+            return { data: currentJob } satisfies MessageEvent;
+          }),
+          takeWhile(
+            (event) =>
+              !this.uploadJobsService.isTerminalStatus(
+                (event.data as DocumentUploadJobView).status,
+              ),
+            true,
+          ),
+          catchError((error: unknown) =>
+            of({
+              data: {
+                ...job,
+                status: 'FAILED',
+                stage: 'failed',
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : 'Unable to stream upload progress.',
+                message: 'Unable to stream upload progress.',
+              },
+            } satisfies MessageEvent),
+          ),
+        ),
+      ),
+      catchError((error: unknown) =>
+        of({
+          data: {
+            id: jobId,
+            organizationId,
+            sessionId: '',
+            createdByUserId: principal.userId,
+            status: 'FAILED',
+            stage: 'failed',
+            progress: 0,
+            message: 'Unable to open upload progress stream.',
+            totalFiles: 0,
+            processedFiles: 0,
+            currentFileName: null,
+            documents: [],
+            warnings: [],
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Unable to stream upload progress.',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            startedAt: null,
+            finishedAt: new Date().toISOString(),
+            expiresAt: new Date().toISOString(),
+          },
+        } satisfies MessageEvent),
+      ),
+    );
+  }
+
+  private async commitUploadSessionNow(
+    organizationId: string,
+    sessionId: string,
+    userId: string,
+    reportProgress?: UploadProgressReporter,
+  ): Promise<CommitUploadSessionResult> {
+    const session = await this.findOwnedUploadSession(
+      organizationId,
+      sessionId,
+      userId,
+    );
+
+    if (session.status !== DocumentUploadSessionStatus.PENDING) {
+      throw new ConflictException('This upload session is not pending.');
+    }
+
     const documents: DocumentView[] = [];
+    const committedDocumentRecords: DocumentRecord[] = [];
     const warnings: CommitUploadSessionResult['warnings'] = [];
     const newObjectReferences: StoredObjectReference[] = [];
+    const readyFiles = session.files.filter(
+      (file) => file.status === DocumentStagedFileStatus.READY,
+    );
+
+    if (readyFiles.length === 0) {
+      throw new ConflictException('There are no staged files to commit.');
+    }
+
+    await reportProgress?.({
+      status: 'PROCESSING',
+      stage: 'validating',
+      progress: 5,
+      message: `Preparing ${readyFiles.length} staged file(s).`,
+      totalFiles: readyFiles.length,
+    });
 
     try {
-      for (const stagedFile of readyFiles) {
+      for (const [index, stagedFile] of readyFiles.entries()) {
+        await reportProgress?.({
+          stage: 'copying',
+          progress: 10 + Math.floor((index / readyFiles.length) * 65),
+          message: `Copying ${stagedFile.originalFilename} into permanent storage.`,
+          processedFiles: index,
+          currentFileName: stagedFile.originalFilename,
+        });
+
         const duplicateDocuments = await this.prisma.document.findMany({
           where: {
             organizationId,
@@ -642,7 +963,7 @@ export class DocumentsService {
             checksumSha256: stagedFile.checksumSha256,
             storageBucket: storedObject.bucket,
             storageKey: storedObject.key,
-            createdByUserId: principal.userId,
+            createdByUserId: userId,
             versions: {
               create: {
                 id: versionId,
@@ -658,41 +979,70 @@ export class DocumentsService {
                 storageKey: storedObject.key,
                 metadata: stagedFile.metadata as Prisma.InputJsonValue,
                 preview: stagedFile.preview as Prisma.InputJsonValue,
-                createdByUserId: principal.userId,
+                createdByUserId: userId,
               },
             },
           },
           select: documentSelect,
         });
 
+        committedDocumentRecords.push(document);
         documents.push(this.toDocumentView(document));
+        await reportProgress?.({
+          stage: 'saving',
+          progress: 10 + Math.floor(((index + 1) / readyFiles.length) * 75),
+          message: `${stagedFile.originalFilename} saved.`,
+          processedFiles: index + 1,
+          currentFileName: stagedFile.originalFilename,
+        });
       }
+
+      await reportProgress?.({
+        stage: 'cleanup',
+        progress: 90,
+        message: 'Finalizing upload session and cleaning staged objects.',
+        processedFiles: readyFiles.length,
+        currentFileName: null,
+      });
+
+      await this.prisma.$transaction([
+        this.prisma.documentUploadStagedFile.updateMany({
+          where: {
+            uploadSessionId: session.id,
+            status: DocumentStagedFileStatus.READY,
+          },
+          data: {
+            status: DocumentStagedFileStatus.COMMITTED,
+          },
+        }),
+        this.prisma.documentUploadSession.update({
+          where: { id: session.id },
+          data: {
+            status: DocumentUploadSessionStatus.COMMITTED,
+            committedAt: new Date(),
+          },
+        }),
+      ]);
     } catch (error: unknown) {
-      await this.storageService
-        .removeObjects(newObjectReferences)
-        .catch(() => undefined);
+      await Promise.all([
+        this.storageService
+          .removeObjects(newObjectReferences)
+          .catch(() => undefined),
+        committedDocumentRecords.length
+          ? this.prisma.document
+              .deleteMany({
+                where: {
+                  id: {
+                    in: committedDocumentRecords.map((document) => document.id),
+                  },
+                },
+              })
+              .catch(() => undefined)
+          : Promise.resolve(),
+      ]);
 
       throw error;
     }
-
-    await this.prisma.$transaction([
-      this.prisma.documentUploadStagedFile.updateMany({
-        where: {
-          uploadSessionId: session.id,
-          status: DocumentStagedFileStatus.READY,
-        },
-        data: {
-          status: DocumentStagedFileStatus.COMMITTED,
-        },
-      }),
-      this.prisma.documentUploadSession.update({
-        where: { id: session.id },
-        data: {
-          status: DocumentUploadSessionStatus.COMMITTED,
-          committedAt: new Date(),
-        },
-      }),
-    ]);
 
     await this.storageService
       .removeObjects(
@@ -702,6 +1052,10 @@ export class DocumentsService {
         })),
       )
       .catch(() => undefined);
+
+    for (const document of committedDocumentRecords) {
+      void this.scheduleRagIngestion(document);
+    }
 
     return {
       documents,
@@ -726,12 +1080,13 @@ export class DocumentsService {
       access,
       query,
     );
+    const orderBy = this.resolveDocumentOrderBy(query.sort);
     const [total, documents] = await Promise.all([
       this.prisma.document.count({ where }),
       this.prisma.document.findMany({
         where,
         select: documentSelect,
-        orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+        orderBy,
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
@@ -748,18 +1103,182 @@ export class DocumentsService {
     };
   }
 
+  async searchRagDocuments(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagQueryDto,
+  ): Promise<RagSearchView> {
+    this.assertRagConfigured();
+    const documents = await this.resolveReadableRagDocumentRecords(
+      organizationId,
+      principal,
+      dto,
+    );
+    const allowedDocumentIds = documents.map((document) => document.id);
+
+    const response = await this.executeRagRequest(() =>
+      this.ragOrchestrator.search({
+        organization_id: organizationId,
+        query: dto.query,
+        allowed_document_ids: allowedDocumentIds,
+        search_type: dto.searchType ?? 'hybrid',
+      }),
+    );
+
+    return {
+      ...response,
+      allowedDocumentIds,
+    };
+  }
+
+  async askRagDocuments(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagQueryDto,
+  ): Promise<RagAskView> {
+    this.assertRagConfigured();
+    const documents = await this.resolveReadableRagDocumentRecords(
+      organizationId,
+      principal,
+      dto,
+    );
+    const allowedDocumentIds = documents.map((document) => document.id);
+
+    const response = await this.executeRagRequest(() =>
+      this.ragOrchestrator.ask({
+        organization_id: organizationId,
+        query: dto.query,
+        allowed_document_ids: allowedDocumentIds,
+        search_type: dto.searchType ?? 'hybrid',
+      }),
+    );
+
+    return {
+      ...response,
+      allowedDocumentIds,
+    };
+  }
+
+  async listRagStatuses(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagReindexDto = {},
+  ): Promise<RagDocumentStatusView[]> {
+    const documents = await this.resolveReadableRagDocumentRecords(
+      organizationId,
+      principal,
+      {
+        documentIds: dto.documentIds,
+        query: 'status',
+        scope:
+          dto.documentIds && dto.documentIds.length > 0
+            ? RagDocumentScope.SELECTED
+            : RagDocumentScope.ALL,
+      },
+    );
+    const indexes = await this.prisma.documentRagIndex.findMany({
+      where: {
+        documentId: {
+          in: documents.map((document) => document.id),
+        },
+      },
+    });
+    const byDocumentId = new Map(
+      indexes.map((index) => [index.documentId, index]),
+    );
+
+    return documents.map((document) => {
+      const index = byDocumentId.get(document.id);
+
+      return {
+        documentId: document.id,
+        status: index?.status ?? 'NOT_INDEXED',
+        chunksCount: index?.chunksCount ?? 0,
+        errorMessage: index?.errorMessage ?? null,
+        indexedAt: index?.indexedAt ?? null,
+        updatedAt: index?.updatedAt ?? null,
+      };
+    });
+  }
+
+  async reindexRagDocuments(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagReindexDto,
+  ): Promise<RagDocumentStatusView[]> {
+    this.assertRagConfigured();
+    const access = await this.resolveOrganizationAccessOrThrow(
+      principal.userId,
+      organizationId,
+    );
+    const actorTier = await this.resolveActorDocumentTier(
+      organizationId,
+      principal.userId,
+      access,
+    );
+
+    if (actorTier < DOCUMENT_ROLE_TIER.organizationAdmin) {
+      throw new ForbiddenException(
+        'Only an Organization Admin can reindex organization documents.',
+      );
+    }
+
+    const documents = await this.resolveReadableRagDocumentRecords(
+      organizationId,
+      principal,
+      {
+        documentIds: dto.documentIds,
+        query: 'reindex',
+        scope:
+          dto.documentIds && dto.documentIds.length > 0
+            ? RagDocumentScope.SELECTED
+            : RagDocumentScope.ALL,
+      },
+    );
+    const payloads = documents.map((document) =>
+      this.toRagIngestPayload(document),
+    );
+
+    await Promise.all(
+      documents.map((document) =>
+        this.markRagIndexPending(document).catch(() => undefined),
+      ),
+    );
+    const results = await this.executeRagRequest(() =>
+      this.ragOrchestrator.reindex(payloads),
+    );
+
+    if (results) {
+      await Promise.all(
+        results.map((result) =>
+          this.applyRagIngestResult(
+            result.document_id,
+            result.status,
+            result.chunks_created,
+            result.error_message ?? null,
+          ),
+        ),
+      );
+    }
+
+    return this.listRagStatuses(organizationId, principal, {
+      documentIds: documents.map((document) => document.id),
+    });
+  }
+
   async listPlatformDocuments(
     query: ListPlatformDocumentsQueryDto,
   ): Promise<DocumentListResult> {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
     const where = this.buildPlatformDocumentWhere(query);
+    const orderBy = this.resolveDocumentOrderBy(query.sort);
     const [total, documents] = await Promise.all([
       this.prisma.document.count({ where }),
       this.prisma.document.findMany({
         where,
         select: documentSelect,
-        orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+        orderBy,
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
@@ -828,7 +1347,7 @@ export class DocumentsService {
     return {
       ...(latestVersion.preview as Record<string, unknown>),
       contentPath: `/organizations/${organizationId}/documents/${documentId}/content`,
-    } as Prisma.JsonValue;
+    };
   }
 
   async getDocumentContent(
@@ -996,6 +1515,8 @@ export class DocumentsService {
           });
         },
       );
+
+      void this.scheduleRagIngestion(updatedDocument);
 
       return this.toDocumentView(updatedDocument);
     } catch (error: unknown) {
@@ -1329,7 +1850,205 @@ export class DocumentsService {
       select: documentSelect,
     });
 
+    void this.ragOrchestrator.deleteDocument(
+      updatedDocument.organizationId,
+      updatedDocument.id,
+    );
+
     return this.toDocumentView(updatedDocument);
+  }
+
+  private assertRagConfigured(): void {
+    if (!this.ragOrchestrator.isConfigured()) {
+      throw new ServiceUnavailableException(
+        'RAG service is not configured. Set RAG_SERVICE_URL and RAG_HMAC_SECRET.',
+      );
+    }
+  }
+
+  private async executeRagRequest<T>(request: () => Promise<T>): Promise<T> {
+    try {
+      return await request();
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Document AI request failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      throw new ServiceUnavailableException(
+        'Document AI service is currently unavailable. Start the FastAPI RAG service and verify RAG_SERVICE_URL and RAG_HMAC_SECRET.',
+      );
+    }
+  }
+
+  private async resolveReadableRagDocumentRecords(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagQueryDto,
+  ): Promise<DocumentRecord[]> {
+    const scope = dto.scope ?? RagDocumentScope.ALL;
+    const access = await this.resolveOrganizationAccessOrThrow(
+      principal.userId,
+      organizationId,
+    );
+
+    if (scope === RagDocumentScope.SELECTED) {
+      const documentIds = [...new Set(dto.documentIds ?? [])];
+
+      if (documentIds.length === 0) {
+        throw new BadRequestException('Select at least one document.');
+      }
+
+      const documents = await this.prisma.document.findMany({
+        where: {
+          id: { in: documentIds },
+          organizationId,
+          status: DocumentStatus.ACTIVE,
+        },
+        select: documentSelect,
+      });
+      const byId = new Map(
+        documents.map((document) => [document.id, document]),
+      );
+
+      if (documents.length !== documentIds.length) {
+        throw new NotFoundException('Document not found.');
+      }
+
+      for (const document of documents) {
+        if (
+          !(await this.canReadDocument(
+            organizationId,
+            document,
+            access,
+            principal.userId,
+          ))
+        ) {
+          throw new NotFoundException('Document not found.');
+        }
+      }
+
+      return documentIds
+        .map((documentId) => byId.get(documentId))
+        .filter((document): document is DocumentRecord => Boolean(document));
+    }
+
+    const where = await this.buildOrganizationDocumentWhere(
+      organizationId,
+      principal.userId,
+      access,
+      {},
+    );
+
+    return this.prisma.document.findMany({
+      where,
+      select: documentSelect,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+    });
+  }
+
+  private async scheduleRagIngestion(document: DocumentRecord): Promise<void> {
+    await this.markRagIndexPending(document).catch(() => undefined);
+
+    if (!this.ragOrchestrator.isConfigured()) {
+      return;
+    }
+
+    await this.prisma.documentRagIndex
+      .update({
+        where: { documentId: document.id },
+        data: {
+          status: DocumentRagIndexStatus.INDEXING,
+          errorMessage: null,
+        },
+      })
+      .catch(() => undefined);
+
+    try {
+      const result = await this.ragOrchestrator.ingest(
+        this.toRagIngestPayload(document),
+      );
+
+      if (!result) return;
+
+      await this.applyRagIngestResult(
+        result.document_id,
+        result.status,
+        result.chunks_created,
+        result.error_message ?? null,
+      );
+    } catch (error: unknown) {
+      await this.applyRagIngestResult(
+        document.id,
+        DocumentRagIndexStatus.FAILED,
+        0,
+        String(error).slice(0, 1000),
+      ).catch(() => undefined);
+    }
+  }
+
+  private async markRagIndexPending(document: DocumentRecord): Promise<void> {
+    const latestVersion = document.versions[0] ?? null;
+
+    await this.prisma.documentRagIndex.upsert({
+      where: { documentId: document.id },
+      update: {
+        organizationId: document.organizationId,
+        versionId: latestVersion?.id ?? null,
+        versionNumber: latestVersion?.versionNumber ?? 1,
+        status: DocumentRagIndexStatus.PENDING,
+        chunksCount: 0,
+        embeddingModel: this.ragOrchestrator.getEmbeddingModel(),
+        errorMessage: null,
+        indexedAt: null,
+      },
+      create: {
+        documentId: document.id,
+        organizationId: document.organizationId,
+        versionId: latestVersion?.id ?? null,
+        versionNumber: latestVersion?.versionNumber ?? 1,
+        status: DocumentRagIndexStatus.PENDING,
+        chunksCount: 0,
+        embeddingModel: this.ragOrchestrator.getEmbeddingModel(),
+      },
+    });
+  }
+
+  private async applyRagIngestResult(
+    documentId: string,
+    status: DocumentRagIndexStatus | keyof typeof DocumentRagIndexStatus,
+    chunksCount: number,
+    errorMessage: string | null,
+  ): Promise<void> {
+    await this.prisma.documentRagIndex.update({
+      where: { documentId },
+      data: {
+        status,
+        chunksCount,
+        errorMessage,
+        indexedAt:
+          status === DocumentRagIndexStatus.INDEXED ||
+          status === DocumentRagIndexStatus.NO_CONTENT
+            ? new Date()
+            : null,
+      },
+    });
+  }
+
+  private toRagIngestPayload(document: DocumentRecord): RagIngestPayload {
+    const latestVersion = document.versions[0] ?? null;
+
+    return {
+      document_id: document.id,
+      organization_id: document.organizationId,
+      version_id: latestVersion?.id ?? null,
+      version_number: latestVersion?.versionNumber ?? 1,
+      document_name: document.name,
+      file_type: document.extension,
+      storage_bucket: document.storageBucket,
+      storage_key: document.storageKey,
+      uploaded_by_id: document.createdByUserId,
+    };
   }
 
   private async stageValidatedFiles(
@@ -1478,6 +2197,7 @@ export class DocumentsService {
     query: ListDocumentsQueryDto,
   ): Promise<Prisma.DocumentWhereInput> {
     const search = query.search?.trim();
+    const updatedAt = this.resolveUpdatedAtFilter(query.updatedRange);
     const actorTier = await this.resolveActorDocumentTier(
       organizationId,
       userId,
@@ -1541,6 +2261,10 @@ export class DocumentsService {
       });
     }
 
+    if (updatedAt) {
+      filters.push({ updatedAt });
+    }
+
     return { AND: filters };
   }
 
@@ -1548,12 +2272,14 @@ export class DocumentsService {
     query: ListPlatformDocumentsQueryDto,
   ): Prisma.DocumentWhereInput {
     const search = query.search?.trim();
+    const updatedAt = this.resolveUpdatedAtFilter(query.updatedRange);
 
     return {
       ...(query.organizationId ? { organizationId: query.organizationId } : {}),
       ...(query.status
         ? { status: query.status }
         : { status: { not: DocumentStatus.PURGED } }),
+      ...(updatedAt ? { updatedAt } : {}),
       ...(search
         ? {
             OR: [
@@ -1600,6 +2326,26 @@ export class DocumentsService {
           }
         : {}),
     };
+  }
+
+  private resolveUpdatedAtFilter(
+    updatedRange?: keyof typeof UPDATED_RANGE_DAYS,
+  ): Prisma.DateTimeFilter | undefined {
+    if (!updatedRange) {
+      return undefined;
+    }
+
+    const days = UPDATED_RANGE_DAYS[updatedRange];
+
+    return {
+      gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
+    };
+  }
+
+  private resolveDocumentOrderBy(
+    sort?: 'newest' | 'oldest',
+  ): Prisma.DocumentOrderByWithRelationInput[] {
+    return [{ updatedAt: sort === 'oldest' ? 'asc' : 'desc' }, { id: 'asc' }];
   }
 
   private async findReadableOrganizationDocument(

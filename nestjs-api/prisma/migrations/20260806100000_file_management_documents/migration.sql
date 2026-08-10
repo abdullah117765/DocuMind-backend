@@ -130,7 +130,7 @@ CREATE INDEX "document_access_user_id_revoked_at_idx"
   ON "document_access"("user_id", "revoked_at");
 CREATE INDEX "document_upload_sessions_organization_id_status_created_at_idx"
   ON "document_upload_sessions"("organization_id", "status", "created_at");
-CREATE INDEX "document_upload_sessions_created_by_user_id_status_created_at_idx"
+CREATE INDEX "document_upload_sessions_created_by_user_id_status_created__idx"
   ON "document_upload_sessions"("created_by_user_id", "status", "created_at");
 CREATE INDEX "document_upload_staged_files_upload_session_id_status_idx"
   ON "document_upload_staged_files"("upload_session_id", "status");

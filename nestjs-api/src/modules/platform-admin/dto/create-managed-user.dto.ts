@@ -27,7 +27,9 @@ export class CreateManagedUserDto {
     minLength: 2,
     maxLength: 150,
   })
-  @Transform(({ value }: TransformFnParams): unknown => normalizePersonName(value))
+  @Transform(({ value }: TransformFnParams): unknown =>
+    normalizePersonName(value),
+  )
   @IsString({ message: 'Name must be a string' })
   @IsNotEmpty({ message: 'Name is required' })
   @MinLength(2, { message: 'Name must be at least 2 characters long' })

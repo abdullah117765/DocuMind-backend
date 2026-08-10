@@ -360,6 +360,7 @@ export type DocumentWhereInput = {
   purgedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   versions?: Prisma.DocumentVersionListRelationFilter
   accessGrants?: Prisma.DocumentAccessListRelationFilter
+  ragIndex?: Prisma.XOR<Prisma.DocumentRagIndexNullableScalarRelationFilter, Prisma.DocumentRagIndexWhereInput> | null
 }
 
 export type DocumentOrderByWithRelationInput = {
@@ -393,6 +394,7 @@ export type DocumentOrderByWithRelationInput = {
   purgedBy?: Prisma.UserOrderByWithRelationInput
   versions?: Prisma.DocumentVersionOrderByRelationAggregateInput
   accessGrants?: Prisma.DocumentAccessOrderByRelationAggregateInput
+  ragIndex?: Prisma.DocumentRagIndexOrderByWithRelationInput
 }
 
 export type DocumentWhereUniqueInput = Prisma.AtLeast<{
@@ -429,6 +431,7 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   purgedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   versions?: Prisma.DocumentVersionListRelationFilter
   accessGrants?: Prisma.DocumentAccessListRelationFilter
+  ragIndex?: Prisma.XOR<Prisma.DocumentRagIndexNullableScalarRelationFilter, Prisma.DocumentRagIndexWhereInput> | null
 }, "id">
 
 export type DocumentOrderByWithAggregationInput = {
@@ -514,6 +517,7 @@ export type DocumentCreateInput = {
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateInput = {
@@ -541,6 +545,7 @@ export type DocumentUncheckedCreateInput = {
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUpdateInput = {
@@ -568,6 +573,7 @@ export type DocumentUpdateInput = {
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateInput = {
@@ -595,6 +601,7 @@ export type DocumentUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentCreateManyInput = {
@@ -1020,6 +1027,20 @@ export type EnumDocumentStatusFieldUpdateOperationsInput = {
   set?: $Enums.DocumentStatus
 }
 
+export type DocumentCreateNestedOneWithoutRagIndexInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutRagIndexInput, Prisma.DocumentUncheckedCreateWithoutRagIndexInput>
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutRagIndexInput
+  connect?: Prisma.DocumentWhereUniqueInput
+}
+
+export type DocumentUpdateOneRequiredWithoutRagIndexNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutRagIndexInput, Prisma.DocumentUncheckedCreateWithoutRagIndexInput>
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutRagIndexInput
+  upsert?: Prisma.DocumentUpsertWithoutRagIndexInput
+  connect?: Prisma.DocumentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentUpdateToOneWithWhereWithoutRagIndexInput, Prisma.DocumentUpdateWithoutRagIndexInput>, Prisma.DocumentUncheckedUpdateWithoutRagIndexInput>
+}
+
 export type DocumentCreateNestedOneWithoutVersionsInput = {
   create?: Prisma.XOR<Prisma.DocumentCreateWithoutVersionsInput, Prisma.DocumentUncheckedCreateWithoutVersionsInput>
   connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutVersionsInput
@@ -1072,6 +1093,7 @@ export type DocumentCreateWithoutCreatedByInput = {
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutCreatedByInput = {
@@ -1098,6 +1120,7 @@ export type DocumentUncheckedCreateWithoutCreatedByInput = {
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutCreatedByInput = {
@@ -1134,6 +1157,7 @@ export type DocumentCreateWithoutUserDeletedByInput = {
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutUserDeletedByInput = {
@@ -1160,6 +1184,7 @@ export type DocumentUncheckedCreateWithoutUserDeletedByInput = {
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutUserDeletedByInput = {
@@ -1196,6 +1221,7 @@ export type DocumentCreateWithoutOrgDeletedByInput = {
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutOrgDeletedByInput = {
@@ -1222,6 +1248,7 @@ export type DocumentUncheckedCreateWithoutOrgDeletedByInput = {
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutOrgDeletedByInput = {
@@ -1258,6 +1285,7 @@ export type DocumentCreateWithoutRestoredByInput = {
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutRestoredByInput = {
@@ -1284,6 +1312,7 @@ export type DocumentUncheckedCreateWithoutRestoredByInput = {
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutRestoredByInput = {
@@ -1320,6 +1349,7 @@ export type DocumentCreateWithoutPurgedByInput = {
   restoredBy?: Prisma.UserCreateNestedOneWithoutDocumentRestorationsInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutPurgedByInput = {
@@ -1346,6 +1376,7 @@ export type DocumentUncheckedCreateWithoutPurgedByInput = {
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutPurgedByInput = {
@@ -1490,6 +1521,7 @@ export type DocumentCreateWithoutOrganizationInput = {
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutOrganizationInput = {
@@ -1516,6 +1548,7 @@ export type DocumentUncheckedCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutOrganizationInput = {
@@ -1544,6 +1577,130 @@ export type DocumentUpdateManyWithWhereWithoutOrganizationInput = {
   data: Prisma.XOR<Prisma.DocumentUpdateManyMutationInput, Prisma.DocumentUncheckedUpdateManyWithoutOrganizationInput>
 }
 
+export type DocumentCreateWithoutRagIndexInput = {
+  id?: string
+  name: string
+  originalFilename: string
+  extension: string
+  mimeType: string
+  sizeBytes: number
+  checksumSha256: string
+  storageBucket: string
+  storageKey: string
+  status?: $Enums.DocumentStatus
+  userDeletedAt?: Date | string | null
+  orgDeletedAt?: Date | string | null
+  restoredAt?: Date | string | null
+  purgedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutDocumentsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutDocumentsCreatedInput
+  userDeletedBy?: Prisma.UserCreateNestedOneWithoutDocumentUserDeletionsInput
+  orgDeletedBy?: Prisma.UserCreateNestedOneWithoutDocumentOrgDeletionsInput
+  restoredBy?: Prisma.UserCreateNestedOneWithoutDocumentRestorationsInput
+  purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
+  versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
+  accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentUncheckedCreateWithoutRagIndexInput = {
+  id?: string
+  organizationId: string
+  name: string
+  originalFilename: string
+  extension: string
+  mimeType: string
+  sizeBytes: number
+  checksumSha256: string
+  storageBucket: string
+  storageKey: string
+  status?: $Enums.DocumentStatus
+  createdByUserId: string
+  userDeletedByUserId?: string | null
+  userDeletedAt?: Date | string | null
+  orgDeletedByUserId?: string | null
+  orgDeletedAt?: Date | string | null
+  restoredByUserId?: string | null
+  restoredAt?: Date | string | null
+  purgedByUserId?: string | null
+  purgedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
+  accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentCreateOrConnectWithoutRagIndexInput = {
+  where: Prisma.DocumentWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutRagIndexInput, Prisma.DocumentUncheckedCreateWithoutRagIndexInput>
+}
+
+export type DocumentUpsertWithoutRagIndexInput = {
+  update: Prisma.XOR<Prisma.DocumentUpdateWithoutRagIndexInput, Prisma.DocumentUncheckedUpdateWithoutRagIndexInput>
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutRagIndexInput, Prisma.DocumentUncheckedCreateWithoutRagIndexInput>
+  where?: Prisma.DocumentWhereInput
+}
+
+export type DocumentUpdateToOneWithWhereWithoutRagIndexInput = {
+  where?: Prisma.DocumentWhereInput
+  data: Prisma.XOR<Prisma.DocumentUpdateWithoutRagIndexInput, Prisma.DocumentUncheckedUpdateWithoutRagIndexInput>
+}
+
+export type DocumentUpdateWithoutRagIndexInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  originalFilename?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  checksumSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  userDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  orgDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  restoredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  purgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutDocumentsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutDocumentsCreatedNestedInput
+  userDeletedBy?: Prisma.UserUpdateOneWithoutDocumentUserDeletionsNestedInput
+  orgDeletedBy?: Prisma.UserUpdateOneWithoutDocumentOrgDeletionsNestedInput
+  restoredBy?: Prisma.UserUpdateOneWithoutDocumentRestorationsNestedInput
+  purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
+  versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
+  accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+}
+
+export type DocumentUncheckedUpdateWithoutRagIndexInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  originalFilename?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  checksumSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  userDeletedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  orgDeletedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  restoredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  restoredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  purgedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
+  accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+}
+
 export type DocumentCreateWithoutVersionsInput = {
   id?: string
   name: string
@@ -1568,6 +1725,7 @@ export type DocumentCreateWithoutVersionsInput = {
   restoredBy?: Prisma.UserCreateNestedOneWithoutDocumentRestorationsInput
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutVersionsInput = {
@@ -1594,6 +1752,7 @@ export type DocumentUncheckedCreateWithoutVersionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutVersionsInput = {
@@ -1636,6 +1795,7 @@ export type DocumentUpdateWithoutVersionsInput = {
   restoredBy?: Prisma.UserUpdateOneWithoutDocumentRestorationsNestedInput
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutVersionsInput = {
@@ -1662,6 +1822,7 @@ export type DocumentUncheckedUpdateWithoutVersionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentCreateWithoutAccessGrantsInput = {
@@ -1688,6 +1849,7 @@ export type DocumentCreateWithoutAccessGrantsInput = {
   restoredBy?: Prisma.UserCreateNestedOneWithoutDocumentRestorationsInput
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutAccessGrantsInput = {
@@ -1714,6 +1876,7 @@ export type DocumentUncheckedCreateWithoutAccessGrantsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutAccessGrantsInput = {
@@ -1756,6 +1919,7 @@ export type DocumentUpdateWithoutAccessGrantsInput = {
   restoredBy?: Prisma.UserUpdateOneWithoutDocumentRestorationsNestedInput
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutAccessGrantsInput = {
@@ -1782,6 +1946,7 @@ export type DocumentUncheckedUpdateWithoutAccessGrantsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentCreateManyCreatedByInput = {
@@ -1928,6 +2093,7 @@ export type DocumentUpdateWithoutCreatedByInput = {
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutCreatedByInput = {
@@ -1954,6 +2120,7 @@ export type DocumentUncheckedUpdateWithoutCreatedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutCreatedByInput = {
@@ -2004,6 +2171,7 @@ export type DocumentUpdateWithoutUserDeletedByInput = {
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutUserDeletedByInput = {
@@ -2030,6 +2198,7 @@ export type DocumentUncheckedUpdateWithoutUserDeletedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutUserDeletedByInput = {
@@ -2080,6 +2249,7 @@ export type DocumentUpdateWithoutOrgDeletedByInput = {
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutOrgDeletedByInput = {
@@ -2106,6 +2276,7 @@ export type DocumentUncheckedUpdateWithoutOrgDeletedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutOrgDeletedByInput = {
@@ -2156,6 +2327,7 @@ export type DocumentUpdateWithoutRestoredByInput = {
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutRestoredByInput = {
@@ -2182,6 +2354,7 @@ export type DocumentUncheckedUpdateWithoutRestoredByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutRestoredByInput = {
@@ -2232,6 +2405,7 @@ export type DocumentUpdateWithoutPurgedByInput = {
   restoredBy?: Prisma.UserUpdateOneWithoutDocumentRestorationsNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutPurgedByInput = {
@@ -2258,6 +2432,7 @@ export type DocumentUncheckedUpdateWithoutPurgedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutPurgedByInput = {
@@ -2332,6 +2507,7 @@ export type DocumentUpdateWithoutOrganizationInput = {
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutOrganizationInput = {
@@ -2358,6 +2534,7 @@ export type DocumentUncheckedUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutOrganizationInput = {
@@ -2455,6 +2632,7 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   purgedBy?: boolean | Prisma.Document$purgedByArgs<ExtArgs>
   versions?: boolean | Prisma.Document$versionsArgs<ExtArgs>
   accessGrants?: boolean | Prisma.Document$accessGrantsArgs<ExtArgs>
+  ragIndex?: boolean | Prisma.Document$ragIndexArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["document"]>
 
@@ -2555,6 +2733,7 @@ export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   purgedBy?: boolean | Prisma.Document$purgedByArgs<ExtArgs>
   versions?: boolean | Prisma.Document$versionsArgs<ExtArgs>
   accessGrants?: boolean | Prisma.Document$accessGrantsArgs<ExtArgs>
+  ragIndex?: boolean | Prisma.Document$ragIndexArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocumentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2585,6 +2764,7 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     purgedBy: Prisma.$UserPayload<ExtArgs> | null
     versions: Prisma.$DocumentVersionPayload<ExtArgs>[]
     accessGrants: Prisma.$DocumentAccessPayload<ExtArgs>[]
+    ragIndex: Prisma.$DocumentRagIndexPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3011,6 +3191,7 @@ export interface Prisma__DocumentClient<T, Null = never, ExtArgs extends runtime
   purgedBy<T extends Prisma.Document$purgedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$purgedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   versions<T extends Prisma.Document$versionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$versionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accessGrants<T extends Prisma.Document$accessGrantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$accessGrantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ragIndex<T extends Prisma.Document$ragIndexArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$ragIndexArgs<ExtArgs>>): Prisma.Prisma__DocumentRagIndexClient<runtime.Types.Result.GetResult<Prisma.$DocumentRagIndexPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3584,6 +3765,25 @@ export type Document$accessGrantsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.DocumentAccessScalarFieldEnum | Prisma.DocumentAccessScalarFieldEnum[]
+}
+
+/**
+ * Document.ragIndex
+ */
+export type Document$ragIndexArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentRagIndex
+   */
+  select?: Prisma.DocumentRagIndexSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentRagIndex
+   */
+  omit?: Prisma.DocumentRagIndexOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentRagIndexInclude<ExtArgs> | null
+  where?: Prisma.DocumentRagIndexWhereInput
 }
 
 /**

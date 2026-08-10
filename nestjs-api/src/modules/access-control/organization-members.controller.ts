@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -35,18 +36,21 @@ import { CsrfGuard } from '../../common/guards/csrf.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { ORGANIZATION_PERMISSIONS } from './rbac.constants';
 import { AddOrganizationMemberDto } from './dto/add-organization-member.dto';
+import { ListMembersQueryDto } from './dto/list-members-query.dto';
 import { OrganizationIdDto } from './dto/organization-id.dto';
 import { OrganizationMemberParamsDto } from './dto/organization-member-params.dto';
 import { ReplaceMemberRolesDto } from './dto/replace-member-roles.dto';
 import { UpdateMemberStatusDto } from './dto/update-member-status.dto';
 import {
   OrganizationMembersService,
+  OrganizationMemberListResult,
   OrganizationMemberView,
 } from './organization-members.service';
 
 interface MemberListResult {
   data: {
     members: OrganizationMemberView[];
+    pagination: OrganizationMemberListResult['pagination'];
   };
 }
 
@@ -106,14 +110,19 @@ export class OrganizationMembersController {
   @ApiOkResponse({ description: 'Active and suspended organization members' })
   async listMembers(
     @Param() params: OrganizationIdDto,
+    @Query() query: ListMembersQueryDto,
     @CurrentUser() principal: AuthenticatedPrincipal,
   ): Promise<MemberListResult> {
+    const result = await this.organizationMembersService.listMembers(
+      params.organizationId,
+      principal.userId,
+      query,
+    );
+
     return {
       data: {
-        members: await this.organizationMembersService.listMembers(
-          params.organizationId,
-          principal.userId,
-        ),
+        members: result.members,
+        pagination: result.pagination,
       },
     };
   }

@@ -158,7 +158,7 @@ describe('OrganizationMembersService', () => {
 
     const result = await service.listMembers(organizationId);
 
-    expect(result).toEqual([
+    expect(result.members).toEqual([
       expect.objectContaining({
         id: membershipId,
         status: OrganizationMembershipStatus.ACTIVE,
@@ -176,6 +176,12 @@ describe('OrganizationMembersService', () => {
         status: OrganizationMembershipStatus.SUSPENDED,
       }),
     ]);
+    expect(result.pagination).toEqual({
+      page: 1,
+      pageCount: 1,
+      pageSize: 20,
+      total: 2,
+    });
   });
 
   it('does not expose removed or cross-organization memberships', async () => {

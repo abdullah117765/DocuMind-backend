@@ -113,6 +113,11 @@ export type AuditLog = Prisma.AuditLogModel
  */
 export type Document = Prisma.DocumentModel
 /**
+ * Model DocumentRagIndex
+ * 
+ */
+export type DocumentRagIndex = Prisma.DocumentRagIndexModel
+/**
  * Model DocumentVersion
  * 
  */

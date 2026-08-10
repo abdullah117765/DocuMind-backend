@@ -5,6 +5,7 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
+import { RagOrchestratorService } from '../documents/rag-orchestrator.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganizationsService } from './organizations.service';
 
@@ -26,6 +27,7 @@ describe('OrganizationsService', () => {
     },
   };
   const organizationFindMany = jest.fn();
+  const organizationCount = jest.fn();
   const organizationFindUnique = jest.fn();
   const organizationCreate = jest.fn();
   const organizationUpdate = jest.fn();
@@ -43,6 +45,7 @@ describe('OrganizationsService', () => {
   );
   const prisma = {
     organization: {
+      count: organizationCount,
       findMany: organizationFindMany,
       findUnique: organizationFindUnique,
       update: organizationUpdate,
@@ -54,10 +57,19 @@ describe('OrganizationsService', () => {
   const accessControlService = {
     invalidateOrganizationAccess,
   } as unknown as AccessControlService;
-  const service = new OrganizationsService(prisma, accessControlService);
+  const deleteOrganizationVectors = jest.fn();
+  const ragOrchestrator = {
+    deleteOrganization: deleteOrganizationVectors,
+  } as unknown as RagOrchestratorService;
+  const service = new OrganizationsService(
+    prisma,
+    accessControlService,
+    ragOrchestrator,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
+    organizationCount.mockResolvedValue(1);
     organizationFindMany.mockResolvedValue([organizationRecord]);
     organizationFindUnique.mockResolvedValue(null);
     organizationCreate.mockResolvedValue({ id: organizationId });
@@ -65,23 +77,34 @@ describe('OrganizationsService', () => {
     organizationDelete.mockResolvedValue(organizationRecord);
     organizationFindUniqueOrThrow.mockResolvedValue(organizationRecord);
     invalidateOrganizationAccess.mockResolvedValue(undefined);
+    deleteOrganizationVectors.mockResolvedValue(undefined);
   });
 
   it('lists platform organization views', async () => {
-    await expect(service.listOrganizations()).resolves.toEqual([
-      {
-        id: organizationId,
-        name: 'Acme Finance',
-        slug: 'acme-finance',
-        createdByUserId: actorUserId,
-        status: OrganizationStatus.ACTIVE,
-        allowJoinRequests: true,
-        createdAt: now,
-        updatedAt: now,
-        memberCount: 0,
+    await expect(service.listOrganizations()).resolves.toEqual({
+      organizations: [
+        {
+          id: organizationId,
+          name: 'Acme Finance',
+          slug: 'acme-finance',
+          createdByUserId: actorUserId,
+          status: OrganizationStatus.ACTIVE,
+          allowJoinRequests: true,
+          createdAt: now,
+          updatedAt: now,
+          memberCount: 0,
+        },
+      ],
+      pagination: {
+        page: 1,
+        pageCount: 1,
+        pageSize: 20,
+        total: 1,
       },
-    ]);
+    });
+    expect(organizationCount).toHaveBeenCalledWith({ where: {} });
     expect(organizationFindMany).toHaveBeenCalledWith({
+      where: {},
       select: {
         id: true,
         name: true,
@@ -104,6 +127,8 @@ describe('OrganizationsService', () => {
         },
       },
       orderBy: [{ name: 'asc' }, { id: 'asc' }],
+      skip: 0,
+      take: 20,
     });
   });
 
@@ -170,4 +195,15 @@ describe('OrganizationsService', () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
+  it('deletes an organization and cleans up its RAG vectors', async () => {
+    await expect(
+      service.deleteOrganization(organizationId),
+    ).resolves.toBeUndefined();
+
+    expect(organizationDelete).toHaveBeenCalledWith({
+      where: { id: organizationId },
+    });
+    expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
+    expect(deleteOrganizationVectors).toHaveBeenCalledWith(organizationId);
+  });
 });

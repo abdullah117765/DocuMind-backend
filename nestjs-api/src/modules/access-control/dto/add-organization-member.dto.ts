@@ -28,8 +28,7 @@ export class AddOrganizationMemberDto {
   email!: string;
 
   @ApiPropertyOptional({
-    description:
-      'Initial organization role ID. Exactly one role is required.',
+    description: 'Initial organization role ID. Exactly one role is required.',
     type: [String],
     example: ['b429b596-1865-4ace-bd6d-9ca3b52da710'],
     minItems: 1,

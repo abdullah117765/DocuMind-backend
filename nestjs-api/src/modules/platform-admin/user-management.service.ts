@@ -5,10 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { hash } from 'bcrypt';
-import {
-  AccessScope,
-  Prisma,
-} from '../../generated/prisma/client';
+import { AccessScope, Prisma } from '../../generated/prisma/client';
 import { normalizeEmail } from '../../common/validation/email.validation';
 import { AccessControlService } from '../access-control/access-control.service';
 import { EnvSuperAdminService } from '../auth/env-super-admin.service';
@@ -328,7 +325,20 @@ export class UserManagementService {
         ? { isActive: query.status === 'active' }
         : {}),
       ...(this.envSuperAdminService.getConfiguredEmail()
-        ? { email: { not: this.envSuperAdminService.getConfiguredEmail() as string } }
+        ? {
+            email: {
+              not: this.envSuperAdminService.getConfiguredEmail() as string,
+            },
+          }
+        : {}),
+      ...(query.organizationId
+        ? {
+            organizationMemberships: {
+              some: {
+                organizationId: query.organizationId,
+              },
+            },
+          }
         : {}),
       ...(search
         ? {

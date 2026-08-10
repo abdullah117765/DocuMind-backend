@@ -50,19 +50,20 @@ describe('Epic 2 security metadata', () => {
   ])(
     'requires JWT and dynamic permission guards on %p',
     (controller, permissionCodes) => {
-    expect(getGuards(controller)).toEqual([JwtAuthGuard, PermissionsGuard]);
-    expect(
-      Reflect.getMetadata(
-        PERMISSION_REQUIREMENT_METADATA,
-        controller,
-      ) as PermissionRequirement,
-    ).toEqual({
-      scope: AccessScope.ORGANIZATION,
-      permissionCodes,
-      match: PermissionMatch.ALL,
-      organizationIdParam: 'organizationId',
-    });
-  });
+      expect(getGuards(controller)).toEqual([JwtAuthGuard, PermissionsGuard]);
+      expect(
+        Reflect.getMetadata(
+          PERMISSION_REQUIREMENT_METADATA,
+          controller,
+        ) as PermissionRequirement,
+      ).toEqual({
+        scope: AccessScope.ORGANIZATION,
+        permissionCodes,
+        match: PermissionMatch.ALL,
+        organizationIdParam: 'organizationId',
+      });
+    },
+  );
 
   it('requires Super Admin role to create tenant organizations', () => {
     expect(getGuards(OrganizationsController)).toEqual([
@@ -96,11 +97,14 @@ describe('Epic 2 security metadata', () => {
     expect(getGuards(getHandler(controller, methodName))).toContain(CsrfGuard);
   });
 
-  it.each([
-    [InviteAcceptanceController, 'acceptInvite'],
-  ])('requires CSRF protection on %p.%s', (controller, methodName) => {
-    expect(getGuards(getHandler(controller, methodName))).toContain(CsrfGuard);
-  });
+  it.each([[InviteAcceptanceController, 'acceptInvite']])(
+    'requires CSRF protection on %p.%s',
+    (controller, methodName) => {
+      expect(getGuards(getHandler(controller, methodName))).toContain(
+        CsrfGuard,
+      );
+    },
+  );
 
   it.each([
     [RoleManagementController, 'listPermissions'],
@@ -121,43 +125,49 @@ describe('Epic 2 security metadata', () => {
   it.each([
     [OrganizationsController, 'updatePlatformOrganization'],
     [OrganizationsController, 'deleteOrganization'],
-  ])('requires Super Admin role for platform mutation %p.%s', (controller, methodName) => {
-    const handler = getHandler(controller, methodName);
-    const effectiveGuards = [...getGuards(controller), ...getGuards(handler)];
+  ])(
+    'requires Super Admin role for platform mutation %p.%s',
+    (controller, methodName) => {
+      const handler = getHandler(controller, methodName);
+      const effectiveGuards = [...getGuards(controller), ...getGuards(handler)];
 
-    expect(effectiveGuards).toEqual(
-      expect.arrayContaining([
-        JwtAuthGuard,
-        PlatformSuperAdminGuard,
-        CsrfGuard,
-      ]),
-    );
-    expect(
-      Reflect.getMetadata(PERMISSION_REQUIREMENT_METADATA, handler),
-    ).toBeUndefined();
-  });
+      expect(effectiveGuards).toEqual(
+        expect.arrayContaining([
+          JwtAuthGuard,
+          PlatformSuperAdminGuard,
+          CsrfGuard,
+        ]),
+      );
+      expect(
+        Reflect.getMetadata(PERMISSION_REQUIREMENT_METADATA, handler),
+      ).toBeUndefined();
+    },
+  );
 
   it.each([
     [OrganizationSettingsController, 'getOrganizationSettings'],
     [OrganizationSettingsController, 'updateOrganizationSettings'],
-  ])('requires organization settings permission on %p.%s', (controller, methodName) => {
-    const handler = getHandler(controller, methodName);
+  ])(
+    'requires organization settings permission on %p.%s',
+    (controller, methodName) => {
+      const handler = getHandler(controller, methodName);
 
-    expect(getGuards(handler)).toEqual(
-      expect.arrayContaining([JwtAuthGuard, PermissionsGuard]),
-    );
-    expect(
-      Reflect.getMetadata(
-        PERMISSION_REQUIREMENT_METADATA,
-        handler,
-      ) as PermissionRequirement,
-    ).toEqual({
-      scope: AccessScope.ORGANIZATION,
-      permissionCodes: ['settings.manage'],
-      match: PermissionMatch.ANY,
-      organizationIdParam: 'organizationId',
-    });
-  });
+      expect(getGuards(handler)).toEqual(
+        expect.arrayContaining([JwtAuthGuard, PermissionsGuard]),
+      );
+      expect(
+        Reflect.getMetadata(
+          PERMISSION_REQUIREMENT_METADATA,
+          handler,
+        ) as PermissionRequirement,
+      ).toEqual({
+        scope: AccessScope.ORGANIZATION,
+        permissionCodes: ['settings.manage'],
+        match: PermissionMatch.ANY,
+        organizationIdParam: 'organizationId',
+      });
+    },
+  );
 
   it('protects current-user access with JWT without requiring users.manage', () => {
     expect(getGuards(CurrentUserAccessController)).toEqual([JwtAuthGuard]);

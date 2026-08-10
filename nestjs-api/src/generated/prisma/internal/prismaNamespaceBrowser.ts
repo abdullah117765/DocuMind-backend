@@ -70,6 +70,7 @@ export const ModelName = {
   JoinRequest: 'JoinRequest',
   AuditLog: 'AuditLog',
   Document: 'Document',
+  DocumentRagIndex: 'DocumentRagIndex',
   DocumentVersion: 'DocumentVersion',
   DocumentAccess: 'DocumentAccess',
   DocumentUploadSession: 'DocumentUploadSession',
@@ -266,6 +267,7 @@ export const OrganizationInviteScalarFieldEnum = {
   expiresAt: 'expiresAt',
   acceptedAt: 'acceptedAt',
   revokedAt: 'revokedAt',
+  revocationReason: 'revocationReason',
   lastSentAt: 'lastSentAt',
   lastSendFailureAt: 'lastSendFailureAt',
   lastSendFailureReason: 'lastSendFailureReason',
@@ -377,6 +379,24 @@ export const DocumentScalarFieldEnum = {
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const DocumentRagIndexScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  organizationId: 'organizationId',
+  versionId: 'versionId',
+  versionNumber: 'versionNumber',
+  status: 'status',
+  chunksCount: 'chunksCount',
+  embeddingModel: 'embeddingModel',
+  errorMessage: 'errorMessage',
+  indexedAt: 'indexedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentRagIndexScalarFieldEnum = (typeof DocumentRagIndexScalarFieldEnum)[keyof typeof DocumentRagIndexScalarFieldEnum]
 
 
 export const DocumentVersionScalarFieldEnum = {

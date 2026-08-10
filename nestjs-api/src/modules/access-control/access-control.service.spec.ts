@@ -44,11 +44,7 @@ describe('AccessControlService', () => {
     getVirtualRole: getSuperAdminVirtualRole,
     listActivePermissionCodes: listSuperAdminPermissionCodes,
   } as unknown as EnvSuperAdminService;
-  const service = new AccessControlService(
-    prisma,
-    cache,
-    envSuperAdminService,
-  );
+  const service = new AccessControlService(prisma, cache, envSuperAdminService);
   const stamp = {
     globalVersion: '0',
     userVersion: '0',

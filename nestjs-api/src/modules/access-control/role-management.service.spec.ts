@@ -62,6 +62,7 @@ describe('RoleManagementService', () => {
   const platformUserRoleFindFirst = jest.fn();
   const roleFindFirst = jest.fn();
   const roleFindMany = jest.fn();
+  const roleCount = jest.fn();
   const roleCreate = jest.fn();
   const roleUpdate = jest.fn();
   const membershipFindFirst = jest.fn();
@@ -94,6 +95,7 @@ describe('RoleManagementService', () => {
       findFirst: platformUserRoleFindFirst,
     },
     role: {
+      count: roleCount,
       findFirst: roleFindFirst,
       findMany: roleFindMany,
       update: roleUpdate,
@@ -125,6 +127,7 @@ describe('RoleManagementService', () => {
     );
     permissionFindMany.mockResolvedValue([]);
     platformUserRoleFindFirst.mockResolvedValue(null);
+    roleCount.mockResolvedValue(0);
     roleFindMany.mockResolvedValue([]);
     roleCreate.mockResolvedValue({ id: roleId });
     roleUpdate.mockResolvedValue(customRole);
@@ -154,10 +157,11 @@ describe('RoleManagementService', () => {
 
   it('lists applicable system and custom roles as API views', async () => {
     roleFindMany.mockResolvedValue([systemRole, customRole]);
+    roleCount.mockResolvedValue(2);
 
     const result = await service.listRoles(organizationId, actorUserId);
 
-    expect(result).toEqual([
+    expect(result.roles).toEqual([
       expect.objectContaining({
         id: systemRole.id,
         isSystem: true,
@@ -171,6 +175,12 @@ describe('RoleManagementService', () => {
         permissions: [permission],
       }),
     ]);
+    expect(result.pagination).toEqual({
+      page: 1,
+      pageCount: 1,
+      pageSize: 20,
+      total: 2,
+    });
   });
 
   it('marks protected roles as not assignable for organization admins', async () => {
@@ -186,10 +196,11 @@ describe('RoleManagementService', () => {
         isSystem: true,
       },
     ]);
+    roleCount.mockResolvedValue(3);
 
     const result = await service.listRoles(organizationId, actorUserId);
 
-    expect(result).toEqual([
+    expect(result.roles).toEqual([
       expect.objectContaining({
         id: systemRole.id,
         systemKey: 'organization_admin',
@@ -204,6 +215,12 @@ describe('RoleManagementService', () => {
         canAssign: true,
       }),
     ]);
+    expect(result.pagination).toEqual({
+      page: 1,
+      pageCount: 1,
+      pageSize: 20,
+      total: 3,
+    });
   });
 
   it('returns not found for a role outside the organization context', async () => {

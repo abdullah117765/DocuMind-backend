@@ -1,6 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  Min,
+} from 'class-validator';
 
 function optionalInteger({ value }: TransformFnParams): unknown {
   if (value === undefined || value === null || value === '') {
@@ -30,6 +38,13 @@ export class ListUsersQueryDto {
   @IsOptional()
   @IsString({ message: 'Search must be a string' })
   search?: string;
+
+  @ApiPropertyOptional({
+    description: 'Restrict users to a specific organization membership',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'Organization must be a valid identifier' })
+  organizationId?: string;
 
   @ApiPropertyOptional({ enum: ['active', 'inactive', 'all'] })
   @IsOptional()

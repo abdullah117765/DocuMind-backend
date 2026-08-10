@@ -2,6 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
 import {
   IsDateString,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -43,6 +44,13 @@ export class ListAuditLogsQueryDto {
   @IsOptional()
   @IsString({ message: 'Action must be a string' })
   action?: string;
+
+  @ApiPropertyOptional({ enum: ['success', 'warning'] })
+  @IsOptional()
+  @IsIn(['success', 'warning'], {
+    message: 'Outcome must be success or warning',
+  })
+  outcome?: 'success' | 'warning';
 
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()

@@ -37,8 +37,7 @@ export class UpdateRoleDto {
   @MinLength(2, { message: 'Role name must be at least 2 characters long' })
   @MaxLength(100, { message: 'Role name must not exceed 100 characters' })
   @Matches(ROLE_NAME_PATTERN, {
-    message:
-      'Role name can contain only letters, numbers, and single spaces',
+    message: 'Role name can contain only letters, numbers, and single spaces',
   })
   name?: string;
 

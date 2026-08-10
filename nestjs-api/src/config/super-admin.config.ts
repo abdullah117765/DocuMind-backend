@@ -65,9 +65,7 @@ function validateSuperAdminName(name: string): string {
   const normalizedName = name.trim().replace(/\s+/g, ' ');
 
   if (normalizedName.length < 2 || normalizedName.length > 100) {
-    throw new Error(
-      'SUPER_ADMIN_NAME must be between 2 and 100 characters.',
-    );
+    throw new Error('SUPER_ADMIN_NAME must be between 2 and 100 characters.');
   }
 
   if (!SUPER_ADMIN_NAME_PATTERN.test(normalizedName)) {

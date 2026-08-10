@@ -10,6 +10,7 @@ import {
   Post,
   Query,
   Res,
+  Sse,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -47,16 +48,22 @@ import { GrantDocumentAccessDto } from './dto/grant-document-access.dto';
 import { ListDocumentsQueryDto } from './dto/list-documents-query.dto';
 import { ListPlatformDocumentsQueryDto } from './dto/list-platform-documents-query.dto';
 import { PlatformDocumentIdDto } from './dto/platform-document-id.dto';
+import { RagQueryDto, RagReindexDto } from './dto/rag-query.dto';
 import { StageZipArchiveDto } from './dto/stage-zip-archive.dto';
 import {
-  CommitUploadSessionResult,
   DocumentListResult,
   DocumentStreamResult,
   DocumentView,
   DocumentVersionView,
   DocumentsService,
+  RagAskView,
+  RagDocumentStatusView,
+  RagSearchView,
   UploadSessionView,
 } from './documents.service';
+import type { MessageEvent } from '@nestjs/common';
+import type { Observable } from 'rxjs';
+import type { DocumentUploadJobView } from './document-upload-jobs.service';
 
 const CSRF_HEADER = {
   name: 'x-csrf-token',
@@ -99,7 +106,9 @@ interface ZipManifestResponse {
 }
 
 interface CommitUploadSessionResponse {
-  data: CommitUploadSessionResult;
+  data: {
+    uploadJob: DocumentUploadJobView;
+  };
 }
 
 interface PreviewResponse {
@@ -111,6 +120,20 @@ interface PreviewResponse {
 interface DocumentVersionsResponse {
   data: {
     versions: DocumentVersionView[];
+  };
+}
+
+interface RagSearchResponse {
+  data: RagSearchView;
+}
+
+interface RagAskResponse {
+  data: RagAskView;
+}
+
+interface RagStatusResponse {
+  data: {
+    documents: RagDocumentStatusView[];
   };
 }
 
@@ -346,12 +369,31 @@ export class OrganizationDocumentsController {
     @CurrentUser() principal: AuthenticatedPrincipal,
   ): Promise<CommitUploadSessionResponse> {
     return {
-      data: await this.documentsService.commitUploadSession(
-        params.organizationId,
-        params.sessionId,
-        principal,
-      ),
+      data: {
+        uploadJob: await this.documentsService.commitUploadSession(
+          params.organizationId,
+          params.sessionId,
+          principal,
+        ),
+      },
     };
+  }
+
+  @Sse('upload-jobs/:jobId/events')
+  @Header('Cache-Control', 'no-cache, no-transform')
+  @Header('X-Accel-Buffering', 'no')
+  @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.documentsUpload)
+  @ApiOperation({ summary: 'Stream staged upload job progress' })
+  streamUploadJobEvents(
+    @Param('organizationId') organizationId: string,
+    @Param('jobId') jobId: string,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Observable<MessageEvent> {
+    return this.documentsService.streamUploadJobEvents(
+      organizationId,
+      jobId,
+      principal,
+    );
   }
 
   @Get()
@@ -369,6 +411,99 @@ export class OrganizationDocumentsController {
         principal,
         query,
       ),
+    };
+  }
+
+  @Post('rag/search')
+  @HttpCode(HttpStatus.OK)
+  @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.documentsRead)
+  @ApiOperation({
+    summary: 'Search hierarchy-accessible documents with RAG',
+  })
+  async searchRagDocuments(
+    @Param() params: OrganizationIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Body() dto: RagQueryDto,
+  ): Promise<RagSearchResponse> {
+    return {
+      data: await this.documentsService.searchRagDocuments(
+        params.organizationId,
+        principal,
+        dto,
+      ),
+    };
+  }
+
+  @Post('rag/ask')
+  @HttpCode(HttpStatus.OK)
+  @RequireOrganizationPermissions(
+    ORGANIZATION_PERMISSIONS.documentsRead,
+    ORGANIZATION_PERMISSIONS.aiAccess,
+  )
+  @ApiOperation({
+    summary: 'Ask AI from hierarchy-accessible selected documents',
+  })
+  async askRagDocuments(
+    @Param() params: OrganizationIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Body() dto: RagQueryDto,
+  ): Promise<RagAskResponse> {
+    return {
+      data: await this.documentsService.askRagDocuments(
+        params.organizationId,
+        principal,
+        dto,
+      ),
+    };
+  }
+
+  @Get('rag/status')
+  @HttpCode(HttpStatus.OK)
+  @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.documentsRead)
+  @ApiOperation({
+    summary: 'List RAG indexing status for readable documents',
+  })
+  async listRagStatuses(
+    @Param() params: OrganizationIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Query() query: RagReindexDto,
+  ): Promise<RagStatusResponse> {
+    return {
+      data: {
+        documents: await this.documentsService.listRagStatuses(
+          params.organizationId,
+          principal,
+          query,
+        ),
+      },
+    };
+  }
+
+  @Post('rag/reindex')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
+  @RequireAnyOrganizationPermission(
+    ORGANIZATION_PERMISSIONS.documentsUpdate,
+    ORGANIZATION_PERMISSIONS.documentsUpload,
+    ORGANIZATION_PERMISSIONS.documentsDelete,
+  )
+  @ApiHeader(CSRF_HEADER)
+  @ApiOperation({
+    summary: 'Reindex selected organization documents for RAG',
+  })
+  async reindexRagDocuments(
+    @Param() params: OrganizationIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Body() dto: RagReindexDto,
+  ): Promise<RagStatusResponse> {
+    return {
+      data: {
+        documents: await this.documentsService.reindexRagDocuments(
+          params.organizationId,
+          principal,
+          dto,
+        ),
+      },
     };
   }
 
