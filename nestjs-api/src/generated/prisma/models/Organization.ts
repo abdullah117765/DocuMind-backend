@@ -213,6 +213,7 @@ export type OrganizationWhereInput = {
   joinRequests?: Prisma.JoinRequestListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   documents?: Prisma.DocumentListRelationFilter
+  documentRagIndexes?: Prisma.DocumentRagIndexListRelationFilter
   documentUploadSessions?: Prisma.DocumentUploadSessionListRelationFilter
   subscription?: Prisma.XOR<Prisma.OrganizationSubscriptionNullableScalarRelationFilter, Prisma.OrganizationSubscriptionWhereInput> | null
   limits?: Prisma.XOR<Prisma.OrganizationLimitNullableScalarRelationFilter, Prisma.OrganizationLimitWhereInput> | null
@@ -234,6 +235,7 @@ export type OrganizationOrderByWithRelationInput = {
   joinRequests?: Prisma.JoinRequestOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   documents?: Prisma.DocumentOrderByRelationAggregateInput
+  documentRagIndexes?: Prisma.DocumentRagIndexOrderByRelationAggregateInput
   documentUploadSessions?: Prisma.DocumentUploadSessionOrderByRelationAggregateInput
   subscription?: Prisma.OrganizationSubscriptionOrderByWithRelationInput
   limits?: Prisma.OrganizationLimitOrderByWithRelationInput
@@ -258,6 +260,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   joinRequests?: Prisma.JoinRequestListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   documents?: Prisma.DocumentListRelationFilter
+  documentRagIndexes?: Prisma.DocumentRagIndexListRelationFilter
   documentUploadSessions?: Prisma.DocumentUploadSessionListRelationFilter
   subscription?: Prisma.XOR<Prisma.OrganizationSubscriptionNullableScalarRelationFilter, Prisma.OrganizationSubscriptionWhereInput> | null
   limits?: Prisma.XOR<Prisma.OrganizationLimitNullableScalarRelationFilter, Prisma.OrganizationLimitWhereInput> | null
@@ -306,6 +309,7 @@ export type OrganizationCreateInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
@@ -326,6 +330,7 @@ export type OrganizationUncheckedCreateInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
@@ -346,6 +351,7 @@ export type OrganizationUpdateInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
@@ -366,6 +372,7 @@ export type OrganizationUncheckedUpdateInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -618,6 +625,20 @@ export type OrganizationUpdateOneRequiredWithoutDocumentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutDocumentsInput, Prisma.OrganizationUpdateWithoutDocumentsInput>, Prisma.OrganizationUncheckedUpdateWithoutDocumentsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutDocumentRagIndexesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDocumentRagIndexesInput, Prisma.OrganizationUncheckedCreateWithoutDocumentRagIndexesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDocumentRagIndexesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutDocumentRagIndexesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDocumentRagIndexesInput, Prisma.OrganizationUncheckedCreateWithoutDocumentRagIndexesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDocumentRagIndexesInput
+  upsert?: Prisma.OrganizationUpsertWithoutDocumentRagIndexesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutDocumentRagIndexesInput, Prisma.OrganizationUpdateWithoutDocumentRagIndexesInput>, Prisma.OrganizationUncheckedUpdateWithoutDocumentRagIndexesInput>
+}
+
 export type OrganizationCreateNestedOneWithoutDocumentUploadSessionsInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDocumentUploadSessionsInput, Prisma.OrganizationUncheckedCreateWithoutDocumentUploadSessionsInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDocumentUploadSessionsInput
@@ -646,6 +667,7 @@ export type OrganizationCreateWithoutCreatedByInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
@@ -665,6 +687,7 @@ export type OrganizationUncheckedCreateWithoutCreatedByInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
@@ -724,6 +747,7 @@ export type OrganizationCreateWithoutMembershipsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
@@ -743,6 +767,7 @@ export type OrganizationUncheckedCreateWithoutMembershipsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
@@ -778,6 +803,7 @@ export type OrganizationUpdateWithoutMembershipsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
@@ -797,6 +823,7 @@ export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -816,6 +843,7 @@ export type OrganizationCreateWithoutRolesInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
@@ -835,6 +863,7 @@ export type OrganizationUncheckedCreateWithoutRolesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
@@ -870,6 +899,7 @@ export type OrganizationUpdateWithoutRolesInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
@@ -889,6 +919,7 @@ export type OrganizationUncheckedUpdateWithoutRolesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -908,6 +939,7 @@ export type OrganizationCreateWithoutInvitesInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
@@ -927,6 +959,7 @@ export type OrganizationUncheckedCreateWithoutInvitesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
@@ -962,6 +995,7 @@ export type OrganizationUpdateWithoutInvitesInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
@@ -981,6 +1015,7 @@ export type OrganizationUncheckedUpdateWithoutInvitesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -1001,6 +1036,7 @@ export type OrganizationCreateWithoutSubscriptionInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
 }
@@ -1020,6 +1056,7 @@ export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
 }
@@ -1055,6 +1092,7 @@ export type OrganizationUpdateWithoutSubscriptionInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
 }
@@ -1074,6 +1112,7 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
 }
@@ -1093,6 +1132,7 @@ export type OrganizationCreateWithoutLimitsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
 }
@@ -1112,6 +1152,7 @@ export type OrganizationUncheckedCreateWithoutLimitsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
 }
@@ -1147,6 +1188,7 @@ export type OrganizationUpdateWithoutLimitsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
 }
@@ -1166,6 +1208,7 @@ export type OrganizationUncheckedUpdateWithoutLimitsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
 }
@@ -1184,6 +1227,7 @@ export type OrganizationCreateWithoutJoinRequestsInput = {
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
@@ -1203,6 +1247,7 @@ export type OrganizationUncheckedCreateWithoutJoinRequestsInput = {
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
@@ -1238,6 +1283,7 @@ export type OrganizationUpdateWithoutJoinRequestsInput = {
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
@@ -1257,6 +1303,7 @@ export type OrganizationUncheckedUpdateWithoutJoinRequestsInput = {
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -1276,6 +1323,7 @@ export type OrganizationCreateWithoutAuditLogsInput = {
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
@@ -1295,6 +1343,7 @@ export type OrganizationUncheckedCreateWithoutAuditLogsInput = {
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
@@ -1330,6 +1379,7 @@ export type OrganizationUpdateWithoutAuditLogsInput = {
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
@@ -1349,6 +1399,7 @@ export type OrganizationUncheckedUpdateWithoutAuditLogsInput = {
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -1368,6 +1419,7 @@ export type OrganizationCreateWithoutDocumentsInput = {
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
@@ -1387,6 +1439,7 @@ export type OrganizationUncheckedCreateWithoutDocumentsInput = {
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
@@ -1422,6 +1475,7 @@ export type OrganizationUpdateWithoutDocumentsInput = {
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
@@ -1441,6 +1495,103 @@ export type OrganizationUncheckedUpdateWithoutDocumentsInput = {
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutDocumentRagIndexesInput = {
+  id?: string
+  name: string
+  slug: string
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutDocumentRagIndexesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutDocumentRagIndexesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutDocumentRagIndexesInput, Prisma.OrganizationUncheckedCreateWithoutDocumentRagIndexesInput>
+}
+
+export type OrganizationUpsertWithoutDocumentRagIndexesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutDocumentRagIndexesInput, Prisma.OrganizationUncheckedUpdateWithoutDocumentRagIndexesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutDocumentRagIndexesInput, Prisma.OrganizationUncheckedCreateWithoutDocumentRagIndexesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutDocumentRagIndexesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutDocumentRagIndexesInput, Prisma.OrganizationUncheckedUpdateWithoutDocumentRagIndexesInput>
+}
+
+export type OrganizationUpdateWithoutDocumentRagIndexesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutDocumentRagIndexesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -1461,6 +1612,7 @@ export type OrganizationCreateWithoutDocumentUploadSessionsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
 }
@@ -1480,6 +1632,7 @@ export type OrganizationUncheckedCreateWithoutDocumentUploadSessionsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
 }
@@ -1515,6 +1668,7 @@ export type OrganizationUpdateWithoutDocumentUploadSessionsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
 }
@@ -1534,6 +1688,7 @@ export type OrganizationUncheckedUpdateWithoutDocumentUploadSessionsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
 }
@@ -1562,6 +1717,7 @@ export type OrganizationUpdateWithoutCreatedByInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
@@ -1581,6 +1737,7 @@ export type OrganizationUncheckedUpdateWithoutCreatedByInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -1608,6 +1765,7 @@ export type OrganizationCountOutputType = {
   joinRequests: number
   auditLogs: number
   documents: number
+  documentRagIndexes: number
   documentUploadSessions: number
 }
 
@@ -1618,6 +1776,7 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   joinRequests?: boolean | OrganizationCountOutputTypeCountJoinRequestsArgs
   auditLogs?: boolean | OrganizationCountOutputTypeCountAuditLogsArgs
   documents?: boolean | OrganizationCountOutputTypeCountDocumentsArgs
+  documentRagIndexes?: boolean | OrganizationCountOutputTypeCountDocumentRagIndexesArgs
   documentUploadSessions?: boolean | OrganizationCountOutputTypeCountDocumentUploadSessionsArgs
 }
 
@@ -1676,6 +1835,13 @@ export type OrganizationCountOutputTypeCountDocumentsArgs<ExtArgs extends runtim
 /**
  * OrganizationCountOutputType without action
  */
+export type OrganizationCountOutputTypeCountDocumentRagIndexesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentRagIndexWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
 export type OrganizationCountOutputTypeCountDocumentUploadSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.DocumentUploadSessionWhereInput
 }
@@ -1697,6 +1863,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   joinRequests?: boolean | Prisma.Organization$joinRequestsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>
   documents?: boolean | Prisma.Organization$documentsArgs<ExtArgs>
+  documentRagIndexes?: boolean | Prisma.Organization$documentRagIndexesArgs<ExtArgs>
   documentUploadSessions?: boolean | Prisma.Organization$documentUploadSessionsArgs<ExtArgs>
   subscription?: boolean | Prisma.Organization$subscriptionArgs<ExtArgs>
   limits?: boolean | Prisma.Organization$limitsArgs<ExtArgs>
@@ -1747,6 +1914,7 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   joinRequests?: boolean | Prisma.Organization$joinRequestsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>
   documents?: boolean | Prisma.Organization$documentsArgs<ExtArgs>
+  documentRagIndexes?: boolean | Prisma.Organization$documentRagIndexesArgs<ExtArgs>
   documentUploadSessions?: boolean | Prisma.Organization$documentUploadSessionsArgs<ExtArgs>
   subscription?: boolean | Prisma.Organization$subscriptionArgs<ExtArgs>
   limits?: boolean | Prisma.Organization$limitsArgs<ExtArgs>
@@ -1769,6 +1937,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     joinRequests: Prisma.$JoinRequestPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     documents: Prisma.$DocumentPayload<ExtArgs>[]
+    documentRagIndexes: Prisma.$DocumentRagIndexPayload<ExtArgs>[]
     documentUploadSessions: Prisma.$DocumentUploadSessionPayload<ExtArgs>[]
     subscription: Prisma.$OrganizationSubscriptionPayload<ExtArgs> | null
     limits: Prisma.$OrganizationLimitPayload<ExtArgs> | null
@@ -2183,6 +2352,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   joinRequests<T extends Prisma.Organization$joinRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$joinRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Organization$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documents<T extends Prisma.Organization$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentRagIndexes<T extends Prisma.Organization$documentRagIndexesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$documentRagIndexesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentRagIndexPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentUploadSessions<T extends Prisma.Organization$documentUploadSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$documentUploadSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentUploadSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   subscription<T extends Prisma.Organization$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$subscriptionArgs<ExtArgs>>): Prisma.Prisma__OrganizationSubscriptionClient<runtime.Types.Result.GetResult<Prisma.$OrganizationSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   limits<T extends Prisma.Organization$limitsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$limitsArgs<ExtArgs>>): Prisma.Prisma__OrganizationLimitClient<runtime.Types.Result.GetResult<Prisma.$OrganizationLimitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -2784,6 +2954,30 @@ export type Organization$documentsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * Organization.documentRagIndexes
+ */
+export type Organization$documentRagIndexesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentRagIndex
+   */
+  select?: Prisma.DocumentRagIndexSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentRagIndex
+   */
+  omit?: Prisma.DocumentRagIndexOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentRagIndexInclude<ExtArgs> | null
+  where?: Prisma.DocumentRagIndexWhereInput
+  orderBy?: Prisma.DocumentRagIndexOrderByWithRelationInput | Prisma.DocumentRagIndexOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentRagIndexWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentRagIndexScalarFieldEnum | Prisma.DocumentRagIndexScalarFieldEnum[]
 }
 
 /**

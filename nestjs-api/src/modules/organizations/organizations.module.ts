@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AccessControlModule } from '../access-control/access-control.module';
+import { RagOrchestratorService } from '../documents/rag-orchestrator.service';
 import { InviteAcceptanceController } from './invite-acceptance.controller';
 import { JoinRequestsController } from './join-requests.controller';
 import { JoinRequestsService } from './join-requests.service';
@@ -24,6 +25,7 @@ import { OrganizationsService } from './organizations.service';
     JoinRequestsService,
     OrganizationInvitesService,
     OrganizationsService,
+    RagOrchestratorService,
   ],
 })
 export class OrganizationsModule {}

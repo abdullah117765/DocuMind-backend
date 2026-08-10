@@ -5,6 +5,7 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
+import { RagOrchestratorService } from '../documents/rag-orchestrator.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganizationsService } from './organizations.service';
 
@@ -54,7 +55,15 @@ describe('OrganizationsService', () => {
   const accessControlService = {
     invalidateOrganizationAccess,
   } as unknown as AccessControlService;
-  const service = new OrganizationsService(prisma, accessControlService);
+  const deleteOrganizationVectors = jest.fn();
+  const ragOrchestrator = {
+    deleteOrganization: deleteOrganizationVectors,
+  } as unknown as RagOrchestratorService;
+  const service = new OrganizationsService(
+    prisma,
+    accessControlService,
+    ragOrchestrator,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,6 +74,7 @@ describe('OrganizationsService', () => {
     organizationDelete.mockResolvedValue(organizationRecord);
     organizationFindUniqueOrThrow.mockResolvedValue(organizationRecord);
     invalidateOrganizationAccess.mockResolvedValue(undefined);
+    deleteOrganizationVectors.mockResolvedValue(undefined);
   });
 
   it('lists platform organization views', async () => {
@@ -168,6 +178,16 @@ describe('OrganizationsService', () => {
         slug: 'acme-finance',
       }),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('deletes an organization and cleans up its RAG vectors', async () => {
+    await expect(service.deleteOrganization(organizationId)).resolves.toBeUndefined();
+
+    expect(organizationDelete).toHaveBeenCalledWith({
+      where: { id: organizationId },
+    });
+    expect(invalidateOrganizationAccess).toHaveBeenCalledWith(organizationId);
+    expect(deleteOrganizationVectors).toHaveBeenCalledWith(organizationId);
   });
 
 });

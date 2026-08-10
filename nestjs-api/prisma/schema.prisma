@@ -77,6 +77,14 @@ enum DocumentStagedFileStatus {
   COMMITTED
 }
 
+enum DocumentRagIndexStatus {
+  PENDING
+  INDEXING
+  INDEXED
+  FAILED
+  NO_CONTENT
+}
+
 model User {
   id                            String                   @id @default(uuid()) @db.Uuid
   name                          String?                  @db.VarChar(150)
@@ -197,6 +205,7 @@ model Organization {
   joinRequests    JoinRequest[]
   auditLogs       AuditLog[]
   documents       Document[]
+  documentRagIndexes DocumentRagIndex[]
   documentUploadSessions DocumentUploadSession[]
   subscription    OrganizationSubscription?
   limits          OrganizationLimit?
@@ -462,11 +471,34 @@ model Document {
   purgedBy        User?          @relation("DocumentPurger", fields: [purgedByUserId], references: [id], onDelete: SetNull)
   versions        DocumentVersion[]
   accessGrants    DocumentAccess[]
+  ragIndex        DocumentRagIndex?
 
   @@index([organizationId, status, updatedAt])
   @@index([createdByUserId, status, updatedAt])
   @@index([checksumSha256])
   @@map("documents")
+}
+
+model DocumentRagIndex {
+  id              String                 @id @default(uuid()) @db.Uuid
+  documentId      String                 @unique @map("document_id") @db.Uuid
+  organizationId  String                 @map("organization_id") @db.Uuid
+  versionId       String?                @map("version_id") @db.Uuid
+  versionNumber   Int                    @map("version_number")
+  status          DocumentRagIndexStatus @default(PENDING)
+  chunksCount     Int                    @default(0) @map("chunks_count")
+  embeddingModel  String                 @map("embedding_model") @db.VarChar(120)
+  errorMessage    String?                @map("error_message") @db.Text
+  indexedAt       DateTime?              @map("indexed_at")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  document        Document               @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  organization    Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([documentId, versionNumber])
+  @@map("document_rag_indexes")
 }
 
 model DocumentVersion {

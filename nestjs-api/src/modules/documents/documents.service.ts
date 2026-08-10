@@ -4,12 +4,15 @@ import {
   ForbiddenException,
   GoneException,
   Injectable,
+  Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import {
   AccessScope,
   DocumentAccessLevel,
+  DocumentRagIndexStatus,
   DocumentStagedFileStatus,
   DocumentStatus,
   DocumentUploadSessionStatus,
@@ -41,6 +44,17 @@ import {
 } from './document-validation.service';
 import { ListDocumentsQueryDto } from './dto/list-documents-query.dto';
 import { ListPlatformDocumentsQueryDto } from './dto/list-platform-documents-query.dto';
+import {
+  RagDocumentScope,
+  RagQueryDto,
+  RagReindexDto,
+} from './dto/rag-query.dto';
+import {
+  RagAskResponse,
+  RagIngestPayload,
+  RagOrchestratorService,
+  RagSearchResponse,
+} from './rag-orchestrator.service';
 
 const documentSelect = {
   id: true,
@@ -266,6 +280,23 @@ export interface DocumentView {
   accessGrants: DocumentAccessGrantView[];
 }
 
+export interface RagDocumentStatusView {
+  documentId: string;
+  status: DocumentRagIndexStatus | 'NOT_INDEXED';
+  chunksCount: number;
+  errorMessage: string | null;
+  indexedAt: Date | null;
+  updatedAt: Date | null;
+}
+
+export interface RagSearchView extends RagSearchResponse {
+  allowedDocumentIds: string[];
+}
+
+export interface RagAskView extends RagAskResponse {
+  allowedDocumentIds: string[];
+}
+
 export interface DocumentVersionView {
   id: string;
   documentId: string;
@@ -407,6 +438,8 @@ interface DocumentRoleAssignmentRecord {
 
 @Injectable()
 export class DocumentsService {
+  private readonly logger = new Logger(DocumentsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: DocumentStorageService,
@@ -415,6 +448,7 @@ export class DocumentsService {
     private readonly archiveService: DocumentArchiveService,
     private readonly accessControlService: AccessControlService,
     private readonly envSuperAdminService: EnvSuperAdminService,
+    private readonly ragOrchestrator: RagOrchestratorService,
   ) {}
 
   getZipManifest(archive: Express.Multer.File): ZipManifestView {
@@ -582,6 +616,7 @@ export class DocumentsService {
     }
 
     const documents: DocumentView[] = [];
+    const committedDocumentRecords: DocumentRecord[] = [];
     const warnings: CommitUploadSessionResult['warnings'] = [];
     const newObjectReferences: StoredObjectReference[] = [];
 
@@ -665,6 +700,7 @@ export class DocumentsService {
           select: documentSelect,
         });
 
+        committedDocumentRecords.push(document);
         documents.push(this.toDocumentView(document));
       }
     } catch (error: unknown) {
@@ -702,6 +738,10 @@ export class DocumentsService {
         })),
       )
       .catch(() => undefined);
+
+    for (const document of committedDocumentRecords) {
+      void this.scheduleRagIngestion(document);
+    }
 
     return {
       documents,
@@ -746,6 +786,171 @@ export class DocumentsService {
         pageCount: Math.max(Math.ceil(total / pageSize), 1),
       },
     };
+  }
+
+  async searchRagDocuments(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagQueryDto,
+  ): Promise<RagSearchView> {
+    this.assertRagConfigured();
+    const documents = await this.resolveReadableRagDocumentRecords(
+      organizationId,
+      principal,
+      dto,
+    );
+    const allowedDocumentIds = documents.map((document) => document.id);
+
+    const response = await this.executeRagRequest(() =>
+      this.ragOrchestrator.search({
+        organization_id: organizationId,
+        query: dto.query,
+        allowed_document_ids: allowedDocumentIds,
+        search_type: dto.searchType ?? 'hybrid',
+        top_k: dto.topK ?? 5,
+      }),
+    );
+
+    return {
+      ...response,
+      allowedDocumentIds,
+    };
+  }
+
+  async askRagDocuments(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagQueryDto,
+  ): Promise<RagAskView> {
+    this.assertRagConfigured();
+    const documents = await this.resolveReadableRagDocumentRecords(
+      organizationId,
+      principal,
+      dto,
+    );
+    const allowedDocumentIds = documents.map((document) => document.id);
+
+    const response = await this.executeRagRequest(() =>
+      this.ragOrchestrator.ask({
+        organization_id: organizationId,
+        query: dto.query,
+        allowed_document_ids: allowedDocumentIds,
+        search_type: dto.searchType ?? 'hybrid',
+        top_k: dto.topK ?? 5,
+      }),
+    );
+
+    return {
+      ...response,
+      allowedDocumentIds,
+    };
+  }
+
+  async listRagStatuses(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagReindexDto = {},
+  ): Promise<RagDocumentStatusView[]> {
+    const documents = await this.resolveReadableRagDocumentRecords(
+      organizationId,
+      principal,
+      {
+        documentIds: dto.documentIds,
+        query: 'status',
+        scope:
+          dto.documentIds && dto.documentIds.length > 0
+            ? RagDocumentScope.SELECTED
+            : RagDocumentScope.ALL,
+      } as RagQueryDto,
+    );
+    const indexes = await this.prisma.documentRagIndex.findMany({
+      where: {
+        documentId: {
+          in: documents.map((document) => document.id),
+        },
+      },
+    });
+    const byDocumentId = new Map(
+      indexes.map((index) => [index.documentId, index]),
+    );
+
+    return documents.map((document) => {
+      const index = byDocumentId.get(document.id);
+
+      return {
+        documentId: document.id,
+        status: index?.status ?? 'NOT_INDEXED',
+        chunksCount: index?.chunksCount ?? 0,
+        errorMessage: index?.errorMessage ?? null,
+        indexedAt: index?.indexedAt ?? null,
+        updatedAt: index?.updatedAt ?? null,
+      };
+    });
+  }
+
+  async reindexRagDocuments(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagReindexDto,
+  ): Promise<RagDocumentStatusView[]> {
+    this.assertRagConfigured();
+    const access = await this.resolveOrganizationAccessOrThrow(
+      principal.userId,
+      organizationId,
+    );
+    const actorTier = await this.resolveActorDocumentTier(
+      organizationId,
+      principal.userId,
+      access,
+    );
+
+    if (actorTier < DOCUMENT_ROLE_TIER.organizationAdmin) {
+      throw new ForbiddenException(
+        'Only an Organization Admin can reindex organization documents.',
+      );
+    }
+
+    const documents = await this.resolveReadableRagDocumentRecords(
+      organizationId,
+      principal,
+      {
+        documentIds: dto.documentIds,
+        query: 'reindex',
+        scope:
+          dto.documentIds && dto.documentIds.length > 0
+            ? RagDocumentScope.SELECTED
+            : RagDocumentScope.ALL,
+      } as RagQueryDto,
+    );
+    const payloads = documents.map((document) =>
+      this.toRagIngestPayload(document),
+    );
+
+    await Promise.all(
+      documents.map((document) =>
+        this.markRagIndexPending(document).catch(() => undefined),
+      ),
+    );
+    const results = await this.executeRagRequest(() =>
+      this.ragOrchestrator.reindex(payloads),
+    );
+
+    if (results) {
+      await Promise.all(
+        results.map((result) =>
+          this.applyRagIngestResult(
+            result.document_id,
+            result.status,
+            result.chunks_created,
+            result.error_message ?? null,
+          ),
+        ),
+      );
+    }
+
+    return this.listRagStatuses(organizationId, principal, {
+      documentIds: documents.map((document) => document.id),
+    });
   }
 
   async listPlatformDocuments(
@@ -996,6 +1201,8 @@ export class DocumentsService {
           });
         },
       );
+
+      void this.scheduleRagIngestion(updatedDocument);
 
       return this.toDocumentView(updatedDocument);
     } catch (error: unknown) {
@@ -1329,7 +1536,203 @@ export class DocumentsService {
       select: documentSelect,
     });
 
+    void this.ragOrchestrator.deleteDocument(
+      updatedDocument.organizationId,
+      updatedDocument.id,
+    );
+
     return this.toDocumentView(updatedDocument);
+  }
+
+  private assertRagConfigured(): void {
+    if (!this.ragOrchestrator.isConfigured()) {
+      throw new ServiceUnavailableException(
+        'RAG service is not configured. Set RAG_SERVICE_URL and RAG_HMAC_SECRET.',
+      );
+    }
+  }
+
+  private async executeRagRequest<T>(request: () => Promise<T>): Promise<T> {
+    try {
+      return await request();
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Document AI request failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      throw new ServiceUnavailableException(
+        'Document AI service is currently unavailable. Start the FastAPI RAG service and verify RAG_SERVICE_URL and RAG_HMAC_SECRET.',
+      );
+    }
+  }
+
+  private async resolveReadableRagDocumentRecords(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+    dto: RagQueryDto,
+  ): Promise<DocumentRecord[]> {
+    const scope = dto.scope ?? RagDocumentScope.ALL;
+    const access = await this.resolveOrganizationAccessOrThrow(
+      principal.userId,
+      organizationId,
+    );
+
+    if (scope === RagDocumentScope.SELECTED) {
+      const documentIds = [...new Set(dto.documentIds ?? [])];
+
+      if (documentIds.length === 0) {
+        throw new BadRequestException('Select at least one document.');
+      }
+
+      const documents = await this.prisma.document.findMany({
+        where: {
+          id: { in: documentIds },
+          organizationId,
+          status: DocumentStatus.ACTIVE,
+        },
+        select: documentSelect,
+      });
+      const byId = new Map(documents.map((document) => [document.id, document]));
+
+      if (documents.length !== documentIds.length) {
+        throw new NotFoundException('Document not found.');
+      }
+
+      for (const document of documents) {
+        if (
+          !(await this.canReadDocument(
+            organizationId,
+            document,
+            access,
+            principal.userId,
+          ))
+        ) {
+          throw new NotFoundException('Document not found.');
+        }
+      }
+
+      return documentIds
+        .map((documentId) => byId.get(documentId))
+        .filter((document): document is DocumentRecord => Boolean(document));
+    }
+
+    const where = await this.buildOrganizationDocumentWhere(
+      organizationId,
+      principal.userId,
+      access,
+      {} as ListDocumentsQueryDto,
+    );
+
+    return this.prisma.document.findMany({
+      where,
+      select: documentSelect,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+    });
+  }
+
+  private async scheduleRagIngestion(document: DocumentRecord): Promise<void> {
+    await this.markRagIndexPending(document).catch(() => undefined);
+
+    if (!this.ragOrchestrator.isConfigured()) {
+      return;
+    }
+
+    await this.prisma.documentRagIndex
+      .update({
+        where: { documentId: document.id },
+        data: {
+          status: DocumentRagIndexStatus.INDEXING,
+          errorMessage: null,
+        },
+      })
+      .catch(() => undefined);
+
+    try {
+      const result = await this.ragOrchestrator.ingest(
+        this.toRagIngestPayload(document),
+      );
+
+      if (!result) return;
+
+      await this.applyRagIngestResult(
+        result.document_id,
+        result.status,
+        result.chunks_created,
+        result.error_message ?? null,
+      );
+    } catch (error: unknown) {
+      await this.applyRagIngestResult(
+        document.id,
+        DocumentRagIndexStatus.FAILED,
+        0,
+        String(error).slice(0, 1000),
+      ).catch(() => undefined);
+    }
+  }
+
+  private async markRagIndexPending(document: DocumentRecord): Promise<void> {
+    const latestVersion = document.versions[0] ?? null;
+
+    await this.prisma.documentRagIndex.upsert({
+      where: { documentId: document.id },
+      update: {
+        organizationId: document.organizationId,
+        versionId: latestVersion?.id ?? null,
+        versionNumber: latestVersion?.versionNumber ?? 1,
+        status: DocumentRagIndexStatus.PENDING,
+        chunksCount: 0,
+        embeddingModel: this.ragOrchestrator.getEmbeddingModel(),
+        errorMessage: null,
+        indexedAt: null,
+      },
+      create: {
+        documentId: document.id,
+        organizationId: document.organizationId,
+        versionId: latestVersion?.id ?? null,
+        versionNumber: latestVersion?.versionNumber ?? 1,
+        status: DocumentRagIndexStatus.PENDING,
+        chunksCount: 0,
+        embeddingModel: this.ragOrchestrator.getEmbeddingModel(),
+      },
+    });
+  }
+
+  private async applyRagIngestResult(
+    documentId: string,
+    status: DocumentRagIndexStatus | keyof typeof DocumentRagIndexStatus,
+    chunksCount: number,
+    errorMessage: string | null,
+  ): Promise<void> {
+    await this.prisma.documentRagIndex.update({
+      where: { documentId },
+      data: {
+        status,
+        chunksCount,
+        errorMessage,
+        indexedAt:
+          status === DocumentRagIndexStatus.INDEXED ||
+          status === DocumentRagIndexStatus.NO_CONTENT
+            ? new Date()
+            : null,
+      },
+    });
+  }
+
+  private toRagIngestPayload(document: DocumentRecord): RagIngestPayload {
+    const latestVersion = document.versions[0] ?? null;
+
+    return {
+      document_id: document.id,
+      organization_id: document.organizationId,
+      version_id: latestVersion?.id ?? null,
+      version_number: latestVersion?.versionNumber ?? 1,
+      document_name: document.name,
+      file_type: document.extension,
+      storage_bucket: document.storageBucket,
+      storage_key: document.storageKey,
+      uploaded_by_id: document.createdByUserId,
+    };
   }
 
   private async stageValidatedFiles(

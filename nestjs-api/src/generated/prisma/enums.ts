@@ -108,3 +108,14 @@ export const DocumentStagedFileStatus = {
 } as const
 
 export type DocumentStagedFileStatus = (typeof DocumentStagedFileStatus)[keyof typeof DocumentStagedFileStatus]
+
+
+export const DocumentRagIndexStatus = {
+  PENDING: 'PENDING',
+  INDEXING: 'INDEXING',
+  INDEXED: 'INDEXED',
+  FAILED: 'FAILED',
+  NO_CONTENT: 'NO_CONTENT'
+} as const
+
+export type DocumentRagIndexStatus = (typeof DocumentRagIndexStatus)[keyof typeof DocumentRagIndexStatus]

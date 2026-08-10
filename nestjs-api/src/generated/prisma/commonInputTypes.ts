@@ -443,6 +443,23 @@ export type EnumDocumentStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
 }
 
+export type EnumDocumentRagIndexStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentRagIndexStatus | Prisma.EnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentRagIndexStatus[] | Prisma.ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentRagIndexStatus[] | Prisma.ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentRagIndexStatusFilter<$PrismaModel> | $Enums.DocumentRagIndexStatus
+}
+
+export type EnumDocumentRagIndexStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentRagIndexStatus | Prisma.EnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentRagIndexStatus[] | Prisma.ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentRagIndexStatus[] | Prisma.ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentRagIndexStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentRagIndexStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentRagIndexStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentRagIndexStatusFilter<$PrismaModel>
+}
+
 export type EnumDocumentAccessLevelFilter<$PrismaModel = never> = {
   equals?: $Enums.DocumentAccessLevel | Prisma.EnumDocumentAccessLevelFieldRefInput<$PrismaModel>
   in?: $Enums.DocumentAccessLevel[] | Prisma.ListEnumDocumentAccessLevelFieldRefInput<$PrismaModel>
@@ -903,6 +920,23 @@ export type NestedEnumDocumentStatusWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumDocumentRagIndexStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentRagIndexStatus | Prisma.EnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentRagIndexStatus[] | Prisma.ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentRagIndexStatus[] | Prisma.ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentRagIndexStatusFilter<$PrismaModel> | $Enums.DocumentRagIndexStatus
+}
+
+export type NestedEnumDocumentRagIndexStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentRagIndexStatus | Prisma.EnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentRagIndexStatus[] | Prisma.ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentRagIndexStatus[] | Prisma.ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentRagIndexStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentRagIndexStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentRagIndexStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentRagIndexStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumDocumentAccessLevelFilter<$PrismaModel = never> = {

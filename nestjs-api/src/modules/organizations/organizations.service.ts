@@ -10,6 +10,7 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
+import { RagOrchestratorService } from '../documents/rag-orchestrator.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationSettingsDto } from './dto/update-organization-settings.dto';
@@ -93,6 +94,7 @@ export class OrganizationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessControlService: AccessControlService,
+    private readonly ragOrchestrator: RagOrchestratorService,
   ) {}
 
   async listOrganizations(): Promise<PlatformOrganizationView[]> {
@@ -194,6 +196,7 @@ export class OrganizationsService {
     await this.accessControlService.invalidateOrganizationAccess(
       organizationId,
     );
+    void this.ragOrchestrator.deleteOrganization(organizationId);
   }
 
   private async updateOrganization(

@@ -10,6 +10,7 @@ import {
   PlatformDocumentsController,
 } from './documents.controller';
 import { DocumentsService } from './documents.service';
+import { RagOrchestratorService } from './rag-orchestrator.service';
 
 @Module({
   imports: [AccessControlModule, PrismaModule],
@@ -20,6 +21,7 @@ import { DocumentsService } from './documents.service';
     DocumentStorageService,
     DocumentValidationService,
     DocumentsService,
+    RagOrchestratorService,
   ],
 })
 export class DocumentsModule {}

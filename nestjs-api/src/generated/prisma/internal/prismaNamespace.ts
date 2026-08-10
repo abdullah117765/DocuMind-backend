@@ -416,6 +416,7 @@ export const ModelName = {
   JoinRequest: 'JoinRequest',
   AuditLog: 'AuditLog',
   Document: 'Document',
+  DocumentRagIndex: 'DocumentRagIndex',
   DocumentVersion: 'DocumentVersion',
   DocumentAccess: 'DocumentAccess',
   DocumentUploadSession: 'DocumentUploadSession',
@@ -435,7 +436,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "emailVerificationToken" | "passwordResetAuthorization" | "session" | "refreshToken" | "organization" | "organizationMembership" | "role" | "permission" | "rolePermission" | "membershipRole" | "platformUserRole" | "organizationInvite" | "organizationInviteRole" | "organizationSubscription" | "organizationLimit" | "joinRequest" | "auditLog" | "document" | "documentVersion" | "documentAccess" | "documentUploadSession" | "documentUploadStagedFile"
+    modelProps: "user" | "emailVerificationToken" | "passwordResetAuthorization" | "session" | "refreshToken" | "organization" | "organizationMembership" | "role" | "permission" | "rolePermission" | "membershipRole" | "platformUserRole" | "organizationInvite" | "organizationInviteRole" | "organizationSubscription" | "organizationLimit" | "joinRequest" | "auditLog" | "document" | "documentRagIndex" | "documentVersion" | "documentAccess" | "documentUploadSession" | "documentUploadStagedFile"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1845,6 +1846,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DocumentRagIndex: {
+      payload: Prisma.$DocumentRagIndexPayload<ExtArgs>
+      fields: Prisma.DocumentRagIndexFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentRagIndexFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentRagIndexFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentRagIndexFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentRagIndexFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentRagIndexFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentRagIndexCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentRagIndexCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocumentRagIndexCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload>[]
+        }
+        delete: {
+          args: Prisma.DocumentRagIndexDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload>
+        }
+        update: {
+          args: Prisma.DocumentRagIndexUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentRagIndexDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentRagIndexUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocumentRagIndexUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocumentRagIndexUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentRagIndexPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentRagIndexAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentRagIndex>
+        }
+        groupBy: {
+          args: Prisma.DocumentRagIndexGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentRagIndexGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentRagIndexCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentRagIndexCountAggregateOutputType> | number
+        }
+      }
+    }
     DocumentVersion: {
       payload: Prisma.$DocumentVersionPayload<ExtArgs>
       fields: Prisma.DocumentVersionFieldRefs
@@ -2467,6 +2542,24 @@ export const DocumentScalarFieldEnum = {
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
 
 
+export const DocumentRagIndexScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  organizationId: 'organizationId',
+  versionId: 'versionId',
+  versionNumber: 'versionNumber',
+  status: 'status',
+  chunksCount: 'chunksCount',
+  embeddingModel: 'embeddingModel',
+  errorMessage: 'errorMessage',
+  indexedAt: 'indexedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentRagIndexScalarFieldEnum = (typeof DocumentRagIndexScalarFieldEnum)[keyof typeof DocumentRagIndexScalarFieldEnum]
+
+
 export const DocumentVersionScalarFieldEnum = {
   id: 'id',
   documentId: 'documentId',
@@ -2762,6 +2855,20 @@ export type ListEnumDocumentStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'DocumentRagIndexStatus'
+ */
+export type EnumDocumentRagIndexStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentRagIndexStatus'>
+
+
+
+/**
+ * Reference to a field of type 'DocumentRagIndexStatus[]'
+ */
+export type ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentRagIndexStatus[]'>
+
+
+
+/**
  * Reference to a field of type 'DocumentAccessLevel'
  */
 export type EnumDocumentAccessLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentAccessLevel'>
@@ -2986,6 +3093,7 @@ export type GlobalOmitConfig = {
   joinRequest?: Prisma.JoinRequestOmit
   auditLog?: Prisma.AuditLogOmit
   document?: Prisma.DocumentOmit
+  documentRagIndex?: Prisma.DocumentRagIndexOmit
   documentVersion?: Prisma.DocumentVersionOmit
   documentAccess?: Prisma.DocumentAccessOmit
   documentUploadSession?: Prisma.DocumentUploadSessionOmit
@@ -3052,4 +3160,3 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
-
