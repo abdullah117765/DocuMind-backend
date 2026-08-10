@@ -29,6 +29,7 @@ import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AcceptInviteWithTemporaryPasswordDto } from './dto/accept-invite-with-temporary-password.dto';
 import { InviteOrganizationMemberDto } from './dto/invite-organization-member.dto';
+import { ListOrganizationInvitesQueryDto } from './dto/list-organization-invites-query.dto';
 import {
   ORGANIZATION_INVITE_TEMPORARY_PASSWORD_TTL_HOURS,
   ORGANIZATION_INVITE_TTL_DAYS,
@@ -64,6 +65,7 @@ interface InviteRecord {
   expiresAt: Date;
   acceptedAt: Date | null;
   revokedAt: Date | null;
+  revocationReason: string | null;
   lastSentAt: Date | null;
   lastSendFailureAt: Date | null;
   lastSendFailureReason: string | null;
@@ -92,12 +94,23 @@ export interface OrganizationInviteView {
   expiresAt: Date;
   acceptedAt: Date | null;
   revokedAt: Date | null;
+  revocationReason: string | null;
   lastSentAt: Date | null;
   lastSendFailureAt: Date | null;
   lastSendFailureReason: string | null;
   createdAt: Date;
   updatedAt: Date;
   roles: InviteRoleRecord[];
+}
+
+export interface OrganizationInviteListResult {
+  invites: OrganizationInviteView[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pageCount: number;
+  };
 }
 
 export interface OrganizationInvitePreview {
@@ -161,15 +174,34 @@ export class OrganizationInvitesService {
     private readonly envSuperAdminService: EnvSuperAdminService,
   ) {}
 
-  async listInvites(organizationId: string): Promise<OrganizationInviteView[]> {
+  async listInvites(
+    organizationId: string,
+    query: ListOrganizationInvitesQueryDto = {},
+  ): Promise<OrganizationInviteListResult> {
     const now = new Date();
-    const invites = await this.prisma.organizationInvite.findMany({
-      where: { organizationId },
-      include: this.inviteInclude(organizationId),
-      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
-    });
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const where = this.buildInviteWhere(organizationId, query, now);
+    const [total, invites] = await Promise.all([
+      this.prisma.organizationInvite.count({ where }),
+      this.prisma.organizationInvite.findMany({
+        where,
+        include: this.inviteInclude(organizationId),
+        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ]);
 
-    return invites.map((invite) => this.toInviteView(invite, now));
+    return {
+      invites: invites.map((invite) => this.toInviteView(invite, now)),
+      pagination: {
+        page,
+        pageSize,
+        total,
+        pageCount: Math.max(Math.ceil(total / pageSize), 1),
+      },
+    };
   }
 
   async inviteMember(
@@ -307,6 +339,7 @@ export class OrganizationInvitesService {
       data: {
         status: OrganizationInviteStatus.REVOKED,
         revokedAt: new Date(),
+        revocationReason: 'Superseded by a newer invitation.',
       },
     });
 
@@ -363,6 +396,7 @@ export class OrganizationInvitesService {
         status: OrganizationInviteStatus.PENDING,
         expiresAt,
         revokedAt: null,
+        revocationReason: null,
         ...(temporaryPasswordHash
           ? {
               temporaryPasswordHash,
@@ -426,7 +460,11 @@ export class OrganizationInvitesService {
     }
   }
 
-  async revokeInvite(organizationId: string, inviteId: string): Promise<void> {
+  async revokeInvite(
+    organizationId: string,
+    inviteId: string,
+    revocationReason?: string,
+  ): Promise<OrganizationInviteView> {
     const revoked = await this.prisma.organizationInvite.updateMany({
       where: {
         id: inviteId,
@@ -436,12 +474,20 @@ export class OrganizationInvitesService {
       data: {
         status: OrganizationInviteStatus.REVOKED,
         revokedAt: new Date(),
+        revocationReason,
       },
     });
 
     if (revoked.count !== 1) {
       throw new NotFoundException('Pending invite not found');
     }
+
+    const invite = await this.prisma.organizationInvite.findUniqueOrThrow({
+      where: { id: inviteId },
+      include: this.inviteInclude(organizationId),
+    });
+
+    return this.toInviteView(invite);
   }
 
   async previewInvite(token: string, now = new Date()) {
@@ -1075,6 +1121,76 @@ export class OrganizationInvitesService {
     } as const;
   }
 
+  private buildInviteWhere(
+    organizationId: string,
+    query: ListOrganizationInvitesQueryDto,
+    now: Date,
+  ): Prisma.OrganizationInviteWhereInput {
+    const search = query.search?.trim();
+
+    return {
+      organizationId,
+      ...this.resolveInviteStatusWhere(query.status, now),
+      ...(search
+        ? {
+            OR: [
+              {
+                email: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              {
+                invitedName: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              {
+                roles: {
+                  some: {
+                    role: {
+                      is: {
+                        name: {
+                          contains: search,
+                          mode: Prisma.QueryMode.insensitive,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+  }
+
+  private resolveInviteStatusWhere(
+    status: OrganizationInviteStatus | undefined,
+    now: Date,
+  ): Prisma.OrganizationInviteWhereInput {
+    if (!status) {
+      return {};
+    }
+
+    if (status === OrganizationInviteStatus.EXPIRED) {
+      return {
+        status: OrganizationInviteStatus.PENDING,
+        expiresAt: { lte: now },
+      };
+    }
+
+    if (status === OrganizationInviteStatus.PENDING) {
+      return {
+        status: OrganizationInviteStatus.PENDING,
+        expiresAt: { gt: now },
+      };
+    }
+
+    return { status };
+  }
+
   private toInviteView(
     invite: InviteRecord,
     now = new Date(),
@@ -1088,6 +1204,7 @@ export class OrganizationInvitesService {
       expiresAt: invite.expiresAt,
       acceptedAt: invite.acceptedAt,
       revokedAt: invite.revokedAt,
+      revocationReason: invite.revocationReason,
       lastSentAt: invite.lastSentAt,
       lastSendFailureAt: invite.lastSendFailureAt,
       lastSendFailureReason: invite.lastSendFailureReason,

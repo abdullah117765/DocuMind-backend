@@ -53,80 +53,81 @@ export class CurrentUserAccessService {
   async getCurrentUserAccess(userId: string): Promise<CurrentUserAccessView> {
     const [platform, memberships, globalOrganizationGrant, isEnvSuperAdmin] =
       await Promise.all([
-      this.accessControlService.resolvePlatformAccess(userId),
-      this.prisma.organizationMembership.findMany({
-        where: {
-          userId,
-          status: {
-            not: OrganizationMembershipStatus.REMOVED,
-          },
-          organization: {
-            is: {
-              status: OrganizationStatus.ACTIVE,
+        this.accessControlService.resolvePlatformAccess(userId),
+        this.prisma.organizationMembership.findMany({
+          where: {
+            userId,
+            status: {
+              not: OrganizationMembershipStatus.REMOVED,
             },
-          },
-        },
-        select: {
-          id: true,
-          status: true,
-          organization: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
-        },
-        orderBy: [
-          {
             organization: {
-              name: 'asc',
+              is: {
+                status: OrganizationStatus.ACTIVE,
+              },
             },
           },
-          { id: 'asc' },
-        ],
-      }),
-      this.prisma.platformUserRole.findFirst({
-        where: {
-          userId,
-          role: {
-            is: {
-              organizationId: null,
-              scope: AccessScope.PLATFORM,
-              isActive: true,
-              permissions: {
-                some: {
-                  permission: {
-                    is: {
-                      scope: AccessScope.ORGANIZATION,
-                      isActive: true,
+          select: {
+            id: true,
+            status: true,
+            organization: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+          orderBy: [
+            {
+              organization: {
+                name: 'asc',
+              },
+            },
+            { id: 'asc' },
+          ],
+        }),
+        this.prisma.platformUserRole.findFirst({
+          where: {
+            userId,
+            role: {
+              is: {
+                organizationId: null,
+                scope: AccessScope.PLATFORM,
+                isActive: true,
+                permissions: {
+                  some: {
+                    permission: {
+                      is: {
+                        scope: AccessScope.ORGANIZATION,
+                        isActive: true,
+                      },
                     },
                   },
                 },
               },
             },
           },
-        },
-        select: {
-          roleId: true,
-        },
-      }),
-      this.envSuperAdminService.isConfiguredUserId(userId),
-    ]);
+          select: {
+            roleId: true,
+          },
+        }),
+        this.envSuperAdminService.isConfiguredUserId(userId),
+      ]);
     const membershipByOrganizationId = new Map(
       memberships.map((membership) => [membership.organization.id, membership]),
     );
-    const organizations = globalOrganizationGrant || isEnvSuperAdmin
-      ? await this.prisma.organization.findMany({
-          where: { status: OrganizationStatus.ACTIVE },
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-          orderBy: [{ name: 'asc' }, { id: 'asc' }],
-        })
-      : memberships.map((membership) => membership.organization);
+    const organizations =
+      globalOrganizationGrant || isEnvSuperAdmin
+        ? await this.prisma.organization.findMany({
+            where: { status: OrganizationStatus.ACTIVE },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+            orderBy: [{ name: 'asc' }, { id: 'asc' }],
+          })
+        : memberships.map((membership) => membership.organization);
     const organizationAccess = await Promise.all(
       organizations.map((organization) =>
         this.accessControlService.resolveOrganizationAccess(

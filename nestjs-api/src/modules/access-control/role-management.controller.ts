@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
@@ -40,12 +41,14 @@ import {
   PermissionMatch,
 } from './permission-requirement';
 import { CreateRoleDto } from './dto/create-role.dto';
+import { ListRolesQueryDto } from './dto/list-roles-query.dto';
 import { OrganizationIdDto } from './dto/organization-id.dto';
 import { OrganizationRoleParamsDto } from './dto/organization-role-params.dto';
 import { UpdateRolePermissionsDto } from './dto/update-role-permissions.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import {
   PermissionView,
+  RoleListResult as RoleManagementListResult,
   RoleManagementService,
   RoleView,
 } from './role-management.service';
@@ -60,6 +63,7 @@ interface PermissionListResult {
 interface RoleListResult {
   data: {
     roles: RoleView[];
+    pagination: RoleManagementListResult['pagination'];
   };
 }
 
@@ -132,14 +136,19 @@ export class RoleManagementController {
   @ApiOkResponse({ description: 'Available organization roles' })
   async listRoles(
     @Param() params: OrganizationIdDto,
+    @Query() query: ListRolesQueryDto,
     @CurrentUser() principal: AuthenticatedPrincipal,
   ): Promise<RoleListResult> {
+    const result = await this.roleManagementService.listRoles(
+      params.organizationId,
+      principal.userId,
+      query,
+    );
+
     return {
       data: {
-        roles: await this.roleManagementService.listRoles(
-          params.organizationId,
-          principal.userId,
-        ),
+        roles: result.roles,
+        pagination: result.pagination,
       },
     };
   }

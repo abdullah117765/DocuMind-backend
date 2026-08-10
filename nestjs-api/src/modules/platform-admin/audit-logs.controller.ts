@@ -16,10 +16,7 @@ import {
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
-import {
-  AuditLogListResult,
-  AuditLogsService,
-} from './audit-logs.service';
+import { AuditLogListResult, AuditLogsService } from './audit-logs.service';
 import { ListAuditLogsQueryDto } from './dto/list-audit-logs-query.dto';
 
 interface AuditLogsResult {

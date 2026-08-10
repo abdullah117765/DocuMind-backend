@@ -36,6 +36,7 @@ export type OrganizationInviteMinAggregateOutputType = {
   expiresAt: Date | null
   acceptedAt: Date | null
   revokedAt: Date | null
+  revocationReason: string | null
   lastSentAt: Date | null
   lastSendFailureAt: Date | null
   lastSendFailureReason: string | null
@@ -58,6 +59,7 @@ export type OrganizationInviteMaxAggregateOutputType = {
   expiresAt: Date | null
   acceptedAt: Date | null
   revokedAt: Date | null
+  revocationReason: string | null
   lastSentAt: Date | null
   lastSendFailureAt: Date | null
   lastSendFailureReason: string | null
@@ -80,6 +82,7 @@ export type OrganizationInviteCountAggregateOutputType = {
   expiresAt: number
   acceptedAt: number
   revokedAt: number
+  revocationReason: number
   lastSentAt: number
   lastSendFailureAt: number
   lastSendFailureReason: number
@@ -104,6 +107,7 @@ export type OrganizationInviteMinAggregateInputType = {
   expiresAt?: true
   acceptedAt?: true
   revokedAt?: true
+  revocationReason?: true
   lastSentAt?: true
   lastSendFailureAt?: true
   lastSendFailureReason?: true
@@ -126,6 +130,7 @@ export type OrganizationInviteMaxAggregateInputType = {
   expiresAt?: true
   acceptedAt?: true
   revokedAt?: true
+  revocationReason?: true
   lastSentAt?: true
   lastSendFailureAt?: true
   lastSendFailureReason?: true
@@ -148,6 +153,7 @@ export type OrganizationInviteCountAggregateInputType = {
   expiresAt?: true
   acceptedAt?: true
   revokedAt?: true
+  revocationReason?: true
   lastSentAt?: true
   lastSendFailureAt?: true
   lastSendFailureReason?: true
@@ -243,6 +249,7 @@ export type OrganizationInviteGroupByOutputType = {
   expiresAt: Date
   acceptedAt: Date | null
   revokedAt: Date | null
+  revocationReason: string | null
   lastSentAt: Date | null
   lastSendFailureAt: Date | null
   lastSendFailureReason: string | null
@@ -286,6 +293,7 @@ export type OrganizationInviteWhereInput = {
   expiresAt?: Prisma.DateTimeFilter<"OrganizationInvite"> | Date | string
   acceptedAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   revokedAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
+  revocationReason?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
   lastSentAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureReason?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
@@ -312,6 +320,7 @@ export type OrganizationInviteOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  revocationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -341,6 +350,7 @@ export type OrganizationInviteWhereUniqueInput = Prisma.AtLeast<{
   expiresAt?: Prisma.DateTimeFilter<"OrganizationInvite"> | Date | string
   acceptedAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   revokedAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
+  revocationReason?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
   lastSentAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureReason?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
@@ -367,6 +377,7 @@ export type OrganizationInviteOrderByWithAggregationInput = {
   expiresAt?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  revocationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -395,6 +406,7 @@ export type OrganizationInviteScalarWhereWithAggregatesInput = {
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"OrganizationInvite"> | Date | string
   acceptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OrganizationInvite"> | Date | string | null
   revokedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OrganizationInvite"> | Date | string | null
+  revocationReason?: Prisma.StringNullableWithAggregatesFilter<"OrganizationInvite"> | string | null
   lastSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureReason?: Prisma.StringNullableWithAggregatesFilter<"OrganizationInvite"> | string | null
@@ -414,6 +426,7 @@ export type OrganizationInviteCreateInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -440,6 +453,7 @@ export type OrganizationInviteUncheckedCreateInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -460,6 +474,7 @@ export type OrganizationInviteUpdateInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -486,6 +501,7 @@ export type OrganizationInviteUncheckedUpdateInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -509,6 +525,7 @@ export type OrganizationInviteCreateManyInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -528,6 +545,7 @@ export type OrganizationInviteUpdateManyMutationInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -550,6 +568,7 @@ export type OrganizationInviteUncheckedUpdateManyInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -582,6 +601,7 @@ export type OrganizationInviteCountOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrder
   revokedAt?: Prisma.SortOrder
+  revocationReason?: Prisma.SortOrder
   lastSentAt?: Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrder
@@ -604,6 +624,7 @@ export type OrganizationInviteMaxOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrder
   revokedAt?: Prisma.SortOrder
+  revocationReason?: Prisma.SortOrder
   lastSentAt?: Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrder
@@ -626,6 +647,7 @@ export type OrganizationInviteMinOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrder
   revokedAt?: Prisma.SortOrder
+  revocationReason?: Prisma.SortOrder
   lastSentAt?: Prisma.SortOrder
   lastSendFailureAt?: Prisma.SortOrder
   lastSendFailureReason?: Prisma.SortOrder
@@ -794,6 +816,7 @@ export type OrganizationInviteCreateWithoutInvitedByInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -818,6 +841,7 @@ export type OrganizationInviteUncheckedCreateWithoutInvitedByInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -848,6 +872,7 @@ export type OrganizationInviteCreateWithoutAcceptedByInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -872,6 +897,7 @@ export type OrganizationInviteUncheckedCreateWithoutAcceptedByInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -924,6 +950,7 @@ export type OrganizationInviteScalarWhereInput = {
   expiresAt?: Prisma.DateTimeFilter<"OrganizationInvite"> | Date | string
   acceptedAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   revokedAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
+  revocationReason?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
   lastSentAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureAt?: Prisma.DateTimeNullableFilter<"OrganizationInvite"> | Date | string | null
   lastSendFailureReason?: Prisma.StringNullableFilter<"OrganizationInvite"> | string | null
@@ -959,6 +986,7 @@ export type OrganizationInviteCreateWithoutOrganizationInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -983,6 +1011,7 @@ export type OrganizationInviteUncheckedCreateWithoutOrganizationInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -1029,6 +1058,7 @@ export type OrganizationInviteCreateWithoutRolesInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -1054,6 +1084,7 @@ export type OrganizationInviteUncheckedCreateWithoutRolesInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -1089,6 +1120,7 @@ export type OrganizationInviteUpdateWithoutRolesInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1114,6 +1146,7 @@ export type OrganizationInviteUncheckedUpdateWithoutRolesInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1135,6 +1168,7 @@ export type OrganizationInviteCreateManyInvitedByInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -1156,6 +1190,7 @@ export type OrganizationInviteCreateManyAcceptedByInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -1175,6 +1210,7 @@ export type OrganizationInviteUpdateWithoutInvitedByInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1199,6 +1235,7 @@ export type OrganizationInviteUncheckedUpdateWithoutInvitedByInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1221,6 +1258,7 @@ export type OrganizationInviteUncheckedUpdateManyWithoutInvitedByInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1240,6 +1278,7 @@ export type OrganizationInviteUpdateWithoutAcceptedByInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1264,6 +1303,7 @@ export type OrganizationInviteUncheckedUpdateWithoutAcceptedByInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1286,6 +1326,7 @@ export type OrganizationInviteUncheckedUpdateManyWithoutAcceptedByInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1307,6 +1348,7 @@ export type OrganizationInviteCreateManyOrganizationInput = {
   expiresAt: Date | string
   acceptedAt?: Date | string | null
   revokedAt?: Date | string | null
+  revocationReason?: string | null
   lastSentAt?: Date | string | null
   lastSendFailureAt?: Date | string | null
   lastSendFailureReason?: string | null
@@ -1326,6 +1368,7 @@ export type OrganizationInviteUpdateWithoutOrganizationInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1350,6 +1393,7 @@ export type OrganizationInviteUncheckedUpdateWithoutOrganizationInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1372,6 +1416,7 @@ export type OrganizationInviteUncheckedUpdateManyWithoutOrganizationInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revocationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastSendFailureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1425,6 +1470,7 @@ export type OrganizationInviteSelect<ExtArgs extends runtime.Types.Extensions.In
   expiresAt?: boolean
   acceptedAt?: boolean
   revokedAt?: boolean
+  revocationReason?: boolean
   lastSentAt?: boolean
   lastSendFailureAt?: boolean
   lastSendFailureReason?: boolean
@@ -1452,6 +1498,7 @@ export type OrganizationInviteSelectCreateManyAndReturn<ExtArgs extends runtime.
   expiresAt?: boolean
   acceptedAt?: boolean
   revokedAt?: boolean
+  revocationReason?: boolean
   lastSentAt?: boolean
   lastSendFailureAt?: boolean
   lastSendFailureReason?: boolean
@@ -1477,6 +1524,7 @@ export type OrganizationInviteSelectUpdateManyAndReturn<ExtArgs extends runtime.
   expiresAt?: boolean
   acceptedAt?: boolean
   revokedAt?: boolean
+  revocationReason?: boolean
   lastSentAt?: boolean
   lastSendFailureAt?: boolean
   lastSendFailureReason?: boolean
@@ -1502,6 +1550,7 @@ export type OrganizationInviteSelectScalar = {
   expiresAt?: boolean
   acceptedAt?: boolean
   revokedAt?: boolean
+  revocationReason?: boolean
   lastSentAt?: boolean
   lastSendFailureAt?: boolean
   lastSendFailureReason?: boolean
@@ -1512,7 +1561,7 @@ export type OrganizationInviteSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrganizationInviteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "invitedName" | "email" | "tokenHash" | "status" | "invitedByUserId" | "acceptedByUserId" | "expiresAt" | "acceptedAt" | "revokedAt" | "lastSentAt" | "lastSendFailureAt" | "lastSendFailureReason" | "temporaryPasswordHash" | "temporaryPasswordExpiresAt" | "temporaryPasswordUsedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["organizationInvite"]>
+export type OrganizationInviteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "invitedName" | "email" | "tokenHash" | "status" | "invitedByUserId" | "acceptedByUserId" | "expiresAt" | "acceptedAt" | "revokedAt" | "revocationReason" | "lastSentAt" | "lastSendFailureAt" | "lastSendFailureReason" | "temporaryPasswordHash" | "temporaryPasswordExpiresAt" | "temporaryPasswordUsedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["organizationInvite"]>
 export type OrganizationInviteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   invitedBy?: boolean | Prisma.OrganizationInvite$invitedByArgs<ExtArgs>
@@ -1551,6 +1600,7 @@ export type $OrganizationInvitePayload<ExtArgs extends runtime.Types.Extensions.
     expiresAt: Date
     acceptedAt: Date | null
     revokedAt: Date | null
+    revocationReason: string | null
     lastSentAt: Date | null
     lastSendFailureAt: Date | null
     lastSendFailureReason: string | null
@@ -1997,6 +2047,7 @@ export interface OrganizationInviteFieldRefs {
   readonly expiresAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
   readonly acceptedAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
   readonly revokedAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
+  readonly revocationReason: Prisma.FieldRef<"OrganizationInvite", 'String'>
   readonly lastSentAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
   readonly lastSendFailureAt: Prisma.FieldRef<"OrganizationInvite", 'DateTime'>
   readonly lastSendFailureReason: Prisma.FieldRef<"OrganizationInvite", 'String'>

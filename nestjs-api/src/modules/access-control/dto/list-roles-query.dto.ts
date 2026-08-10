@@ -5,8 +5,8 @@ import {
   IsInt,
   IsOptional,
   IsString,
-  IsUUID,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -18,7 +18,7 @@ function optionalInteger({ value }: TransformFnParams): unknown {
   return Number(value);
 }
 
-export class ListUsersQueryDto {
+export class ListRolesQueryDto {
   @ApiPropertyOptional({ example: 1, minimum: 1 })
   @IsOptional()
   @Transform(optionalInteger)
@@ -34,22 +34,19 @@ export class ListUsersQueryDto {
   @Max(100, { message: 'Page size must not exceed 100' })
   pageSize?: number;
 
-  @ApiPropertyOptional({ example: 'admin@example.com' })
+  @ApiPropertyOptional({ example: 'manager' })
   @IsOptional()
+  @Transform(({ value }): unknown =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString({ message: 'Search must be a string' })
+  @MaxLength(100, { message: 'Search must not exceed 100 characters' })
   search?: string;
 
-  @ApiPropertyOptional({
-    description: 'Restrict users to a specific organization membership',
-  })
+  @ApiPropertyOptional({ enum: ['all', 'system', 'custom'] })
   @IsOptional()
-  @IsUUID('4', { message: 'Organization must be a valid identifier' })
-  organizationId?: string;
-
-  @ApiPropertyOptional({ enum: ['active', 'inactive', 'all'] })
-  @IsOptional()
-  @IsIn(['active', 'inactive', 'all'], {
-    message: 'Status must be active, inactive, or all',
+  @IsIn(['all', 'system', 'custom'], {
+    message: 'Type must be all, system, or custom',
   })
-  status?: 'active' | 'inactive' | 'all';
+  type?: 'all' | 'system' | 'custom';
 }

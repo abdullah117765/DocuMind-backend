@@ -152,11 +152,10 @@ export class JoinRequestsController {
   ): Promise<JoinRequestsResult> {
     return {
       data: {
-        joinRequests:
-          await this.joinRequestsService.listOrganizationRequests(
-            params.organizationId,
-            query.status,
-          ),
+        joinRequests: await this.joinRequestsService.listOrganizationRequests(
+          params.organizationId,
+          query.status,
+        ),
       },
     };
   }

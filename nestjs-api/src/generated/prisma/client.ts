@@ -22,7 +22,7 @@ export * as $Enums from './enums'
 export * from "./enums"
 /**
  * ## Prisma Client
- *
+ * 
  * Type-safe database client for TypeScript
  * @example
  * ```
@@ -32,7 +32,7 @@ export * from "./enums"
  * // Fetch zero or more Users
  * const users = await prisma.user.findMany()
  * ```
- *
+ * 
  * Read more in our [docs](https://pris.ly/d/client).
  */
 export const PrismaClient = $Class.getPrismaClientClass()
@@ -41,121 +41,121 @@ export { Prisma }
 
 /**
  * Model User
- *
+ * 
  */
 export type User = Prisma.UserModel
 /**
  * Model EmailVerificationToken
- *
+ * 
  */
 export type EmailVerificationToken = Prisma.EmailVerificationTokenModel
 /**
  * Model PasswordResetAuthorization
- *
+ * 
  */
 export type PasswordResetAuthorization = Prisma.PasswordResetAuthorizationModel
 /**
  * Model Session
- *
+ * 
  */
 export type Session = Prisma.SessionModel
 /**
  * Model RefreshToken
- *
+ * 
  */
 export type RefreshToken = Prisma.RefreshTokenModel
 /**
  * Model Organization
- *
+ * 
  */
 export type Organization = Prisma.OrganizationModel
 /**
  * Model OrganizationMembership
- *
+ * 
  */
 export type OrganizationMembership = Prisma.OrganizationMembershipModel
 /**
  * Model Role
- *
+ * 
  */
 export type Role = Prisma.RoleModel
 /**
  * Model Permission
- *
+ * 
  */
 export type Permission = Prisma.PermissionModel
 /**
  * Model RolePermission
- *
+ * 
  */
 export type RolePermission = Prisma.RolePermissionModel
 /**
  * Model MembershipRole
- *
+ * 
  */
 export type MembershipRole = Prisma.MembershipRoleModel
 /**
  * Model PlatformUserRole
- *
+ * 
  */
 export type PlatformUserRole = Prisma.PlatformUserRoleModel
 /**
  * Model OrganizationInvite
- *
+ * 
  */
 export type OrganizationInvite = Prisma.OrganizationInviteModel
 /**
  * Model OrganizationInviteRole
- *
+ * 
  */
 export type OrganizationInviteRole = Prisma.OrganizationInviteRoleModel
 /**
  * Model OrganizationSubscription
- *
+ * 
  */
 export type OrganizationSubscription = Prisma.OrganizationSubscriptionModel
 /**
  * Model OrganizationLimit
- *
+ * 
  */
 export type OrganizationLimit = Prisma.OrganizationLimitModel
 /**
  * Model JoinRequest
- *
+ * 
  */
 export type JoinRequest = Prisma.JoinRequestModel
 /**
  * Model AuditLog
- *
+ * 
  */
 export type AuditLog = Prisma.AuditLogModel
 /**
  * Model Document
- *
+ * 
  */
 export type Document = Prisma.DocumentModel
 /**
  * Model DocumentRagIndex
- *
+ * 
  */
 export type DocumentRagIndex = Prisma.DocumentRagIndexModel
 /**
  * Model DocumentVersion
- *
+ * 
  */
 export type DocumentVersion = Prisma.DocumentVersionModel
 /**
  * Model DocumentAccess
- *
+ * 
  */
 export type DocumentAccess = Prisma.DocumentAccessModel
 /**
  * Model DocumentUploadSession
- *
+ * 
  */
 export type DocumentUploadSession = Prisma.DocumentUploadSessionModel
 /**
  * Model DocumentUploadStagedFile
- *
+ * 
  */
 export type DocumentUploadStagedFile = Prisma.DocumentUploadStagedFileModel

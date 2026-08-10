@@ -32,8 +32,18 @@ class Settings(BaseSettings):
 
     CHUNK_SIZE: int = 500
     CHUNK_OVERLAP: int = 50
-    DEFAULT_TOP_K: int = 5
-    MAX_TOP_K: int = 20
+
+    RAG_INITIAL_CANDIDATE_K: int = 30
+    RAG_MAX_CANDIDATE_K: int = 50
+    RAG_MIN_RELEVANCE_SCORE: float = 0.2
+    RAG_RERANKER_ENABLED: bool = True
+    RAG_RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    RAG_RERANKER_WEIGHT: float = 0.75
+    RAG_MIN_RERANKED_SCORE: float = 0.2
+    RAG_MAX_FINAL_CHUNKS: int = 10
+    RAG_MAX_CONTEXT_TOKENS: int = 3000
+    RAG_CONTEXT_METADATA_TOKENS: int = 80
+    RAG_REDUNDANCY_THRESHOLD: float = 0.88
 
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3.5-flash"

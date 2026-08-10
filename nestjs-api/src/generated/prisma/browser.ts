@@ -6,7 +6,7 @@
 /*
  * This file should be your main import to use Prisma-related types and utilities in a browser. 
  * Use it to get access to models, enums, and input types.
- *
+ * 
  * This file does not contain a `PrismaClient` class, nor several other helpers that are intended as server-side only.
  * See `client.ts` for the standard, server-side entry point.
  *
@@ -19,121 +19,121 @@ export * as $Enums from './enums'
 export * from './enums';
 /**
  * Model User
- *
+ * 
  */
 export type User = Prisma.UserModel
 /**
  * Model EmailVerificationToken
- *
+ * 
  */
 export type EmailVerificationToken = Prisma.EmailVerificationTokenModel
 /**
  * Model PasswordResetAuthorization
- *
+ * 
  */
 export type PasswordResetAuthorization = Prisma.PasswordResetAuthorizationModel
 /**
  * Model Session
- *
+ * 
  */
 export type Session = Prisma.SessionModel
 /**
  * Model RefreshToken
- *
+ * 
  */
 export type RefreshToken = Prisma.RefreshTokenModel
 /**
  * Model Organization
- *
+ * 
  */
 export type Organization = Prisma.OrganizationModel
 /**
  * Model OrganizationMembership
- *
+ * 
  */
 export type OrganizationMembership = Prisma.OrganizationMembershipModel
 /**
  * Model Role
- *
+ * 
  */
 export type Role = Prisma.RoleModel
 /**
  * Model Permission
- *
+ * 
  */
 export type Permission = Prisma.PermissionModel
 /**
  * Model RolePermission
- *
+ * 
  */
 export type RolePermission = Prisma.RolePermissionModel
 /**
  * Model MembershipRole
- *
+ * 
  */
 export type MembershipRole = Prisma.MembershipRoleModel
 /**
  * Model PlatformUserRole
- *
+ * 
  */
 export type PlatformUserRole = Prisma.PlatformUserRoleModel
 /**
  * Model OrganizationInvite
- *
+ * 
  */
 export type OrganizationInvite = Prisma.OrganizationInviteModel
 /**
  * Model OrganizationInviteRole
- *
+ * 
  */
 export type OrganizationInviteRole = Prisma.OrganizationInviteRoleModel
 /**
  * Model OrganizationSubscription
- *
+ * 
  */
 export type OrganizationSubscription = Prisma.OrganizationSubscriptionModel
 /**
  * Model OrganizationLimit
- *
+ * 
  */
 export type OrganizationLimit = Prisma.OrganizationLimitModel
 /**
  * Model JoinRequest
- *
+ * 
  */
 export type JoinRequest = Prisma.JoinRequestModel
 /**
  * Model AuditLog
- *
+ * 
  */
 export type AuditLog = Prisma.AuditLogModel
 /**
  * Model Document
- *
+ * 
  */
 export type Document = Prisma.DocumentModel
 /**
  * Model DocumentRagIndex
- *
+ * 
  */
 export type DocumentRagIndex = Prisma.DocumentRagIndexModel
 /**
  * Model DocumentVersion
- *
+ * 
  */
 export type DocumentVersion = Prisma.DocumentVersionModel
 /**
  * Model DocumentAccess
- *
+ * 
  */
 export type DocumentAccess = Prisma.DocumentAccessModel
 /**
  * Model DocumentUploadSession
- *
+ * 
  */
 export type DocumentUploadSession = Prisma.DocumentUploadSessionModel
 /**
  * Model DocumentUploadStagedFile
- *
+ * 
  */
 export type DocumentUploadStagedFile = Prisma.DocumentUploadStagedFileModel

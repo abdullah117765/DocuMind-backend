@@ -267,6 +267,7 @@ export const OrganizationInviteScalarFieldEnum = {
   expiresAt: 'expiresAt',
   acceptedAt: 'acceptedAt',
   revokedAt: 'revokedAt',
+  revocationReason: 'revocationReason',
   lastSentAt: 'lastSentAt',
   lastSendFailureAt: 'lastSendFailureAt',
   lastSendFailureReason: 'lastSendFailureReason',

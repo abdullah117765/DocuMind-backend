@@ -18,8 +18,8 @@ export interface RagQueryPayload {
   organization_id: string;
   query: string;
   allowed_document_ids: string[];
-  search_type: 'semantic' | 'keyword' | 'hybrid';
-  top_k: number;
+  search_type?: 'semantic' | 'keyword' | 'hybrid';
+  top_k?: number;
 }
 
 export interface RagIngestResponse {

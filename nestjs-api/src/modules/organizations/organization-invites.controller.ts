@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Get,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -25,8 +26,11 @@ import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-pr
 import { OrganizationIdDto } from '../access-control/dto/organization-id.dto';
 import { ORGANIZATION_PERMISSIONS } from '../access-control/rbac.constants';
 import { InviteOrganizationMemberDto } from './dto/invite-organization-member.dto';
+import { ListOrganizationInvitesQueryDto } from './dto/list-organization-invites-query.dto';
 import { OrganizationInviteParamsDto } from './dto/organization-invite-params.dto';
+import { RevokeOrganizationInviteDto } from './dto/revoke-organization-invite.dto';
 import {
+  OrganizationInviteListResult,
   OrganizationInviteView,
   OrganizationInvitesService,
 } from './organization-invites.service';
@@ -34,6 +38,7 @@ import {
 interface InviteListResult {
   data: {
     invites: OrganizationInviteView[];
+    pagination: OrganizationInviteListResult['pagination'];
   };
 }
 
@@ -57,10 +62,17 @@ export class OrganizationInvitesController {
   @ApiOkResponse({ description: 'Organization invitations' })
   async listInvites(
     @Param() params: OrganizationIdDto,
+    @Query() query: ListOrganizationInvitesQueryDto,
   ): Promise<InviteListResult> {
+    const result = await this.invitesService.listInvites(
+      params.organizationId,
+      query,
+    );
+
     return {
       data: {
-        invites: await this.invitesService.listInvites(params.organizationId),
+        invites: result.invites,
+        pagination: result.pagination,
       },
     };
   }
@@ -102,13 +114,18 @@ export class OrganizationInvitesController {
   @ApiOperation({ summary: 'Revoke a pending organization invitation' })
   async revokeInvite(
     @Param() params: OrganizationInviteParamsDto,
-  ): Promise<{ message: string }> {
-    await this.invitesService.revokeInvite(
+    @Body() dto: RevokeOrganizationInviteDto,
+  ): Promise<InviteResult & { message: string }> {
+    const invite = await this.invitesService.revokeInvite(
       params.organizationId,
       params.inviteId,
+      dto.revocationReason,
     );
 
-    return { message: 'Invitation revoked successfully' };
+    return {
+      data: { invite },
+      message: 'Invitation revoked successfully',
+    };
   }
 
   @Post(':inviteId/resend')

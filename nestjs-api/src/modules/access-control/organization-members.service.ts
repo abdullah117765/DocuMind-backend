@@ -14,6 +14,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import { AccessControlService } from './access-control.service';
 import { AddOrganizationMemberDto } from './dto/add-organization-member.dto';
+import { ListMembersQueryDto } from './dto/list-members-query.dto';
 import {
   ORGANIZATION_PERMISSIONS,
   ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
@@ -89,6 +90,16 @@ export interface OrganizationMemberView {
   updatedAt: Date;
 }
 
+export interface OrganizationMemberListResult {
+  members: OrganizationMemberView[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pageCount: number;
+  };
+}
+
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
@@ -122,17 +133,12 @@ export class OrganizationMembersService {
   async listMembers(
     organizationId: string,
     actorUserId?: string,
-  ): Promise<OrganizationMemberView[]> {
+    query: ListMembersQueryDto = {},
+  ): Promise<OrganizationMemberListResult> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
     const memberships = await this.prisma.organizationMembership.findMany({
-      where: {
-        organizationId,
-        status: {
-          in: [
-            OrganizationMembershipStatus.ACTIVE,
-            OrganizationMembershipStatus.SUSPENDED,
-          ],
-        },
-      },
+      where: this.buildMemberWhere(organizationId, query),
       select: this.membershipSelect(organizationId),
       orderBy: [{ user: { email: 'asc' } }, { id: 'asc' }],
     });
@@ -143,10 +149,23 @@ export class OrganizationMembersService {
           memberships,
         )
       : memberships;
-
-    return visibleMemberships.map((membership) =>
-      this.toMemberView(membership),
+    const total = visibleMemberships.length;
+    const pagedMemberships = visibleMemberships.slice(
+      (page - 1) * pageSize,
+      page * pageSize,
     );
+
+    return {
+      members: pagedMemberships.map((membership) =>
+        this.toMemberView(membership),
+      ),
+      pagination: {
+        page,
+        pageSize,
+        total,
+        pageCount: Math.max(Math.ceil(total / pageSize), 1),
+      },
+    };
   }
 
   async getMember(
@@ -624,6 +643,78 @@ export class OrganizationMembersService {
         this.getMemberVisibilityTierFromRoles(membership.roles) ===
           MEMBER_VISIBILITY_TIER.employee,
     );
+  }
+
+  private buildMemberWhere(
+    organizationId: string,
+    query: ListMembersQueryDto,
+  ): Prisma.OrganizationMembershipWhereInput {
+    const search = query.search?.trim();
+    const statusFilter =
+      query.status === 'active'
+        ? [OrganizationMembershipStatus.ACTIVE]
+        : query.status === 'suspended'
+          ? [OrganizationMembershipStatus.SUSPENDED]
+          : [
+              OrganizationMembershipStatus.ACTIVE,
+              OrganizationMembershipStatus.SUSPENDED,
+            ];
+
+    return {
+      organizationId,
+      status: {
+        in: statusFilter,
+      },
+      ...(query.roleId
+        ? {
+            roles: {
+              some: {
+                roleId: query.roleId,
+              },
+            },
+          }
+        : {}),
+      ...(search
+        ? {
+            OR: [
+              {
+                user: {
+                  is: {
+                    email: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                user: {
+                  is: {
+                    name: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                roles: {
+                  some: {
+                    role: {
+                      is: {
+                        name: {
+                          contains: search,
+                          mode: Prisma.QueryMode.insensitive,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
+    };
   }
 
   private async canActorViewMembership(

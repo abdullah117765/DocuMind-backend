@@ -2429,6 +2429,7 @@ export const OrganizationInviteScalarFieldEnum = {
   expiresAt: 'expiresAt',
   acceptedAt: 'acceptedAt',
   revokedAt: 'revokedAt',
+  revocationReason: 'revocationReason',
   lastSentAt: 'lastSentAt',
   lastSendFailureAt: 'lastSendFailureAt',
   lastSendFailureReason: 'lastSendFailureReason',
@@ -2858,14 +2859,14 @@ export type ListEnumDocumentStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
  * Reference to a field of type 'DocumentRagIndexStatus'
  */
 export type EnumDocumentRagIndexStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentRagIndexStatus'>
-
+    
 
 
 /**
  * Reference to a field of type 'DocumentRagIndexStatus[]'
  */
 export type ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentRagIndexStatus[]'>
-
+    
 
 
 /**
@@ -3160,3 +3161,4 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
+

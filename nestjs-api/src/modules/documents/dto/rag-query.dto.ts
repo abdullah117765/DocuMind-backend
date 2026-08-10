@@ -67,7 +67,9 @@ export class RagQueryDto {
   searchType?: RagSearchType = RagSearchType.HYBRID;
 
   @ApiPropertyOptional({
-    default: 5,
+    deprecated: true,
+    description:
+      'Deprecated. Final RAG context size is now controlled by FastAPI retrieval configuration.',
     maximum: 20,
     minimum: 1,
   })
@@ -75,12 +77,13 @@ export class RagQueryDto {
   @IsInt()
   @Min(1)
   @Max(20)
-  topK?: number = 5;
+  topK?: number;
 }
 
 export class RagReindexDto {
   @ApiPropertyOptional({
-    description: 'If omitted, all hierarchy-accessible documents are reindexed.',
+    description:
+      'If omitted, all hierarchy-accessible documents are reindexed.',
     example: ['550e8400-e29b-41d4-a716-446655440000'],
   })
   @IsOptional()

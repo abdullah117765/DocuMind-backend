@@ -99,10 +99,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const superAdminMetadata =
       this.envSuperAdminService.getSessionUserMetadata(user);
 
-    if (
-      !superAdminMetadata &&
-      (!user.isVerified || user.isActive === false)
-    ) {
+    if (!superAdminMetadata && (!user.isVerified || user.isActive === false)) {
       throw new UnauthorizedException();
     }
 

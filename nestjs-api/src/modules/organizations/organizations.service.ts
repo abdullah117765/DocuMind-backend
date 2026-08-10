@@ -13,6 +13,7 @@ import { AccessControlService } from '../access-control/access-control.service';
 import { RagOrchestratorService } from '../documents/rag-orchestrator.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
+import { ListOrganizationsQueryDto } from './dto/list-organizations-query.dto';
 import { UpdateOrganizationSettingsDto } from './dto/update-organization-settings.dto';
 import { UpdatePlatformOrganizationDto } from './dto/update-platform-organization.dto';
 
@@ -57,6 +58,16 @@ export interface PlatformOrganizationView {
   memberCount: number;
 }
 
+export interface PlatformOrganizationListResult {
+  organizations: PlatformOrganizationView[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pageCount: number;
+  };
+}
+
 function normalizeOrganizationName(name: string): string {
   return name.trim().replace(/\s+/g, ' ');
 }
@@ -97,13 +108,56 @@ export class OrganizationsService {
     private readonly ragOrchestrator: RagOrchestratorService,
   ) {}
 
-  async listOrganizations(): Promise<PlatformOrganizationView[]> {
-    const organizations = await this.prisma.organization.findMany({
-      select: organizationSelect,
-      orderBy: [{ name: 'asc' }, { id: 'asc' }],
-    });
+  async listOrganizations(
+    query: ListOrganizationsQueryDto = {},
+  ): Promise<PlatformOrganizationListResult> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const search = query.search?.trim();
+    const where: Prisma.OrganizationWhereInput = {
+      ...(query.status ? { status: query.status } : {}),
+      ...(search
+        ? {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              {
+                slug: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+    const orderBy = this.resolveOrganizationOrderBy(query.sort);
+    const [total, organizations] = await Promise.all([
+      this.prisma.organization.count({ where }),
+      this.prisma.organization.findMany({
+        where,
+        select: organizationSelect,
+        orderBy,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ]);
 
-    return organizations.map((organization) => this.toView(organization));
+    return {
+      organizations: organizations.map((organization) =>
+        this.toView(organization),
+      ),
+      pagination: {
+        page,
+        pageSize,
+        total,
+        pageCount: Math.max(Math.ceil(total / pageSize), 1),
+      },
+    };
   }
 
   async getOrganization(
@@ -219,7 +273,9 @@ export class OrganizationsService {
     };
 
     if (Object.keys(data).length === 0) {
-      throw new BadRequestException('At least one organization field is required');
+      throw new BadRequestException(
+        'At least one organization field is required',
+      );
     }
 
     try {
@@ -276,6 +332,20 @@ export class OrganizationsService {
       updatedAt: organization.updatedAt,
       memberCount: organization._count.memberships,
     };
+  }
+
+  private resolveOrganizationOrderBy(
+    sort?: 'name' | 'newest' | 'oldest',
+  ): Prisma.OrganizationOrderByWithRelationInput[] {
+    if (sort === 'newest') {
+      return [{ createdAt: 'desc' }, { id: 'asc' }];
+    }
+
+    if (sort === 'oldest') {
+      return [{ createdAt: 'asc' }, { id: 'asc' }];
+    }
+
+    return [{ name: 'asc' }, { id: 'asc' }];
   }
 
   private isMissingRecordError(error: unknown): boolean {

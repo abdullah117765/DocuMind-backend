@@ -98,7 +98,9 @@ export class AuditLogsService {
     const where = this.buildWhere(
       query,
       forcedOrganizationId,
-      forcedOrganizationId ? this.envSuperAdminService.getConfiguredEmail() : null,
+      forcedOrganizationId
+        ? this.envSuperAdminService.getConfiguredEmail()
+        : null,
     );
     const [total, logs] = await Promise.all([
       this.prisma.auditLog.count({ where }),
@@ -141,9 +143,7 @@ export class AuditLogsService {
       requestedOrganizationId,
     );
 
-    if (
-      !access?.permissions.includes(ORGANIZATION_PERMISSIONS.membersManage)
-    ) {
+    if (!access?.permissions.includes(ORGANIZATION_PERMISSIONS.membersManage)) {
       throw new ForbiddenException(
         'Only organization administrators can view organization audit logs.',
       );
@@ -165,6 +165,11 @@ export class AuditLogsService {
 
     return {
       ...(query.action ? { action: { contains: query.action } } : {}),
+      ...(query.outcome === 'success'
+        ? { statusCode: { lt: 400 } }
+        : query.outcome === 'warning'
+          ? { statusCode: { gte: 400 } }
+          : {}),
       ...(query.actorUserId ? { actorUserId: query.actorUserId } : {}),
       ...(forcedOrganizationId
         ? { organizationId: forcedOrganizationId }
@@ -199,8 +204,15 @@ export class AuditLogsService {
       ...(search
         ? {
             OR: [
-              { action: { contains: search, mode: Prisma.QueryMode.insensitive } },
-              { path: { contains: search, mode: Prisma.QueryMode.insensitive } },
+              {
+                action: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              {
+                path: { contains: search, mode: Prisma.QueryMode.insensitive },
+              },
               {
                 actorEmail: {
                   contains: search,
@@ -290,9 +302,7 @@ export class AuditLogsService {
       return {
         id: log.actorUserId,
         email: log.actorEmail,
-        name:
-          log.actorName?.trim() ||
-          this.getActorDisplayName(log.actorEmail),
+        name: log.actorName?.trim() || this.getActorDisplayName(log.actorEmail),
       };
     }
 

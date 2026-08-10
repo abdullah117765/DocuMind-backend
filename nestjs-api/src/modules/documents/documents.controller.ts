@@ -10,6 +10,7 @@ import {
   Post,
   Query,
   Res,
+  Sse,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -50,7 +51,6 @@ import { PlatformDocumentIdDto } from './dto/platform-document-id.dto';
 import { RagQueryDto, RagReindexDto } from './dto/rag-query.dto';
 import { StageZipArchiveDto } from './dto/stage-zip-archive.dto';
 import {
-  CommitUploadSessionResult,
   DocumentListResult,
   DocumentStreamResult,
   DocumentView,
@@ -61,6 +61,9 @@ import {
   RagSearchView,
   UploadSessionView,
 } from './documents.service';
+import type { MessageEvent } from '@nestjs/common';
+import type { Observable } from 'rxjs';
+import type { DocumentUploadJobView } from './document-upload-jobs.service';
 
 const CSRF_HEADER = {
   name: 'x-csrf-token',
@@ -103,7 +106,9 @@ interface ZipManifestResponse {
 }
 
 interface CommitUploadSessionResponse {
-  data: CommitUploadSessionResult;
+  data: {
+    uploadJob: DocumentUploadJobView;
+  };
 }
 
 interface PreviewResponse {
@@ -364,12 +369,31 @@ export class OrganizationDocumentsController {
     @CurrentUser() principal: AuthenticatedPrincipal,
   ): Promise<CommitUploadSessionResponse> {
     return {
-      data: await this.documentsService.commitUploadSession(
-        params.organizationId,
-        params.sessionId,
-        principal,
-      ),
+      data: {
+        uploadJob: await this.documentsService.commitUploadSession(
+          params.organizationId,
+          params.sessionId,
+          principal,
+        ),
+      },
     };
+  }
+
+  @Sse('upload-jobs/:jobId/events')
+  @Header('Cache-Control', 'no-cache, no-transform')
+  @Header('X-Accel-Buffering', 'no')
+  @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.documentsUpload)
+  @ApiOperation({ summary: 'Stream staged upload job progress' })
+  streamUploadJobEvents(
+    @Param('organizationId') organizationId: string,
+    @Param('jobId') jobId: string,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Observable<MessageEvent> {
+    return this.documentsService.streamUploadJobEvents(
+      organizationId,
+      jobId,
+      principal,
+    );
   }
 
   @Get()

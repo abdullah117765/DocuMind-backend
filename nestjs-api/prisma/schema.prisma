@@ -334,6 +334,7 @@ model OrganizationInvite {
   expiresAt        DateTime                 @map("expires_at")
   acceptedAt       DateTime?                @map("accepted_at")
   revokedAt        DateTime?                @map("revoked_at")
+  revocationReason String?                  @map("revocation_reason") @db.VarChar(500)
   lastSentAt       DateTime?                @map("last_sent_at")
   lastSendFailureAt DateTime?               @map("last_send_failure_at")
   lastSendFailureReason String?             @map("last_send_failure_reason") @db.VarChar(500)

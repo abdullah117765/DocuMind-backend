@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -33,16 +34,19 @@ import { OrganizationIdDto } from '../access-control/dto/organization-id.dto';
 import { ORGANIZATION_PERMISSIONS } from '../access-control/rbac.constants';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
+import { ListOrganizationsQueryDto } from './dto/list-organizations-query.dto';
 import { UpdateOrganizationSettingsDto } from './dto/update-organization-settings.dto';
 import { UpdatePlatformOrganizationDto } from './dto/update-platform-organization.dto';
 import {
   OrganizationsService,
+  PlatformOrganizationListResult,
   PlatformOrganizationView,
 } from './organizations.service';
 
 interface OrganizationListResult {
   data: {
     organizations: PlatformOrganizationView[];
+    pagination: PlatformOrganizationListResult['pagination'];
   };
 }
 
@@ -76,10 +80,15 @@ export class OrganizationsController {
     summary: 'List tenant organizations visible to platform administrators',
   })
   @ApiOkResponse({ description: 'Tenant organizations' })
-  async listOrganizations(): Promise<OrganizationListResult> {
+  async listOrganizations(
+    @Query() query: ListOrganizationsQueryDto,
+  ): Promise<OrganizationListResult> {
+    const result = await this.organizationsService.listOrganizations(query);
+
     return {
       data: {
-        organizations: await this.organizationsService.listOrganizations(),
+        organizations: result.organizations,
+        pagination: result.pagination,
       },
     };
   }
@@ -136,10 +145,11 @@ export class OrganizationsController {
   ): Promise<OrganizationResult> {
     return {
       data: {
-        organization: await this.organizationsService.updatePlatformOrganization(
-          params.organizationId,
-          dto,
-        ),
+        organization:
+          await this.organizationsService.updatePlatformOrganization(
+            params.organizationId,
+            dto,
+          ),
       },
     };
   }
@@ -205,10 +215,11 @@ export class OrganizationSettingsController {
   ): Promise<OrganizationResult> {
     return {
       data: {
-        organization: await this.organizationsService.updateOrganizationSettings(
-          params.organizationId,
-          dto,
-        ),
+        organization:
+          await this.organizationsService.updateOrganizationSettings(
+            params.organizationId,
+            dto,
+          ),
       },
     };
   }

@@ -112,7 +112,10 @@ class QdrantService:
         if not self.client.collection_exists(name):
             return []
 
-        query_filter = self._allowed_documents_filter(allowed_document_ids)
+        query_filter = self._allowed_documents_filter(
+            allowed_document_ids,
+            organization_id,
+        )
 
         try:
             points = self.client.search(
@@ -150,6 +153,7 @@ class QdrantService:
 
         query_filter = self._allowed_documents_filter(
             allowed_document_ids,
+            organization_id,
             extra=[
                 models.FieldCondition(
                     key="text",
@@ -177,6 +181,7 @@ class QdrantService:
     def _allowed_documents_filter(
         self,
         allowed_document_ids: list[str],
+        organization_id: str,
         extra: list[models.FieldCondition] | None = None,
     ) -> models.Filter:
         return models.Filter(
@@ -184,6 +189,10 @@ class QdrantService:
                 models.FieldCondition(
                     key="document_id",
                     match=models.MatchAny(any=allowed_document_ids),
+                ),
+                models.FieldCondition(
+                    key="organization_id",
+                    match=models.MatchValue(value=organization_id),
                 ),
                 models.FieldCondition(
                     key="status",

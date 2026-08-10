@@ -179,7 +179,11 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap(() => {
-        this.writeAuditLog(request, response.statusCode, Date.now() - startedAt);
+        this.writeAuditLog(
+          request,
+          response.statusCode,
+          Date.now() - startedAt,
+        );
       }),
       catchError((error: unknown) => {
         this.writeAuditLog(

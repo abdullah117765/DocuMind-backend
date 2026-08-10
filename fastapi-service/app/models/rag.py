@@ -43,7 +43,12 @@ class RagQueryRequest(BaseModel):
     query: str = Field(min_length=1, max_length=4000)
     allowed_document_ids: list[str] = Field(default_factory=list)
     search_type: SearchType = SearchType.HYBRID
-    top_k: int = Field(default=5, ge=1, le=20)
+    top_k: int | None = Field(
+        default=None,
+        ge=1,
+        le=50,
+        description="Deprecated compatibility field. Final context is selected by retrieval configuration.",
+    )
 
 
 class RagSearchResult(BaseModel):

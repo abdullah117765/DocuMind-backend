@@ -1,14 +1,16 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
 import {
+  IsEnum,
   IsIn,
   IsInt,
   IsOptional,
   IsString,
-  IsUUID,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
+import { OrganizationStatus } from '../../../generated/prisma/client';
 
 function optionalInteger({ value }: TransformFnParams): unknown {
   if (value === undefined || value === null || value === '') {
@@ -18,7 +20,7 @@ function optionalInteger({ value }: TransformFnParams): unknown {
   return Number(value);
 }
 
-export class ListUsersQueryDto {
+export class ListOrganizationsQueryDto {
   @ApiPropertyOptional({ example: 1, minimum: 1 })
   @IsOptional()
   @Transform(optionalInteger)
@@ -34,22 +36,29 @@ export class ListUsersQueryDto {
   @Max(100, { message: 'Page size must not exceed 100' })
   pageSize?: number;
 
-  @ApiPropertyOptional({ example: 'admin@example.com' })
+  @ApiPropertyOptional({ example: 'Acme' })
   @IsOptional()
+  @Transform(({ value }): unknown =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString({ message: 'Search must be a string' })
+  @MaxLength(100, { message: 'Search must not exceed 100 characters' })
   search?: string;
 
-  @ApiPropertyOptional({
-    description: 'Restrict users to a specific organization membership',
-  })
+  @ApiPropertyOptional({ enum: OrganizationStatus })
   @IsOptional()
-  @IsUUID('4', { message: 'Organization must be a valid identifier' })
-  organizationId?: string;
+  @IsEnum(OrganizationStatus, {
+    message: 'Status must be a valid organization status',
+  })
+  status?: OrganizationStatus;
 
-  @ApiPropertyOptional({ enum: ['active', 'inactive', 'all'] })
-  @IsOptional()
-  @IsIn(['active', 'inactive', 'all'], {
-    message: 'Status must be active, inactive, or all',
+  @ApiPropertyOptional({
+    enum: ['name', 'newest', 'oldest'],
+    default: 'name',
   })
-  status?: 'active' | 'inactive' | 'all';
+  @IsOptional()
+  @IsIn(['name', 'newest', 'oldest'], {
+    message: 'Sort must be name, newest, or oldest',
+  })
+  sort?: 'name' | 'newest' | 'oldest';
 }
