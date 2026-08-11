@@ -1,6 +1,7 @@
 import csv
 import io
 import json
+import shutil
 import subprocess
 import tempfile
 from html.parser import HTMLParser
@@ -180,15 +181,59 @@ class ExtractionService:
     def _extract_image(self, file_bytes: bytes, extension: str) -> str:
         import fitz
 
-        document = fitz.open(stream=file_bytes, filetype=extension)
-        page = document[0]
-        text = page.get_text("text")
+        normalized_extension = "jpeg" if extension.lower() in {"jpg", "jpeg"} else extension
+        pymupdf_error: Exception | None = None
 
-        if not text.strip():
-            text_page = page.get_textpage_ocr(language="eng")
-            text = page.get_text("text", textpage=text_page)
+        try:
+            document = fitz.open(stream=file_bytes, filetype=normalized_extension)
+            page = document[0]
+            text = page.get_text("text")
 
-        return text
+            if not text.strip():
+                text_page = page.get_textpage_ocr(language="eng")
+                text = page.get_text("text", textpage=text_page)
+
+            if text.strip():
+                return text
+        except Exception as exc:
+            pymupdf_error = exc
+
+        try:
+            return self._extract_image_with_tesseract(file_bytes, normalized_extension)
+        except Exception as exc:
+            details = str(exc).strip() or "OCR could not read this image."
+
+            if pymupdf_error:
+                details = f"{details} PyMuPDF OCR detail: {pymupdf_error}"
+
+            raise ValueError(
+                "Image text extraction failed. Verify that Tesseract OCR and English language data are installed. "
+                f"Details: {details[:500]}",
+            ) from exc
+
+    def _extract_image_with_tesseract(self, file_bytes: bytes, extension: str) -> str:
+        if shutil.which("tesseract") is None:
+            raise RuntimeError("Tesseract OCR is not installed or is not on PATH.")
+
+        suffix = ".jpg" if extension in {"jpg", "jpeg"} else f".{extension}"
+
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=True) as temp_file:
+            temp_file.write(file_bytes)
+            temp_file.flush()
+
+            completed = subprocess.run(
+                ["tesseract", temp_file.name, "stdout", "-l", "eng"],
+                check=False,
+                timeout=60,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
+        if completed.returncode != 0:
+            stderr = completed.stderr.decode("utf-8", errors="replace").strip()
+            raise RuntimeError(stderr or "Tesseract OCR could not read this image.")
+
+        return completed.stdout.decode("utf-8", errors="replace")
 
     def _convert_legacy_office(
         self,

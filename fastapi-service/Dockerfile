@@ -5,14 +5,16 @@ RUN apt-get update && \
       libreoffice-core \
       libreoffice-writer \
       libreoffice-impress \
-      tesseract-ocr && \
+      tesseract-ocr \
+      tesseract-ocr-eng && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 ENV HF_HOME=/models/huggingface \
     SENTENCE_TRANSFORMERS_HOME=/models/sentence-transformers \
-    TRANSFORMERS_CACHE=/models/huggingface
+    TRANSFORMERS_CACHE=/models/huggingface \
+    TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

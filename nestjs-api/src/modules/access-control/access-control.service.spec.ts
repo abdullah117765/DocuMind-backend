@@ -176,20 +176,7 @@ describe('AccessControlService', () => {
     expect(setOrganizationAccess).not.toHaveBeenCalled();
   });
 
-  it('merges platform and membership permissions for an organization', async () => {
-    platformRoleFindMany.mockResolvedValue([
-      {
-        role: {
-          id: 'role-platform',
-          name: 'Super Admin',
-          scope: AccessScope.PLATFORM,
-          permissions: [
-            { permission: { code: 'documents.delete' } },
-            { permission: { code: 'documents.read' } },
-          ],
-        },
-      },
-    ]);
+  it('resolves organization permissions from active membership roles only', async () => {
     membershipFindFirst.mockResolvedValue({
       id: 'membership-1',
       roles: [
@@ -222,13 +209,8 @@ describe('AccessControlService', () => {
           name: 'Manager',
           scope: AccessScope.ORGANIZATION,
         },
-        {
-          id: 'role-platform',
-          name: 'Super Admin',
-          scope: AccessScope.PLATFORM,
-        },
       ],
-      permissions: ['documents.delete', 'documents.read', 'documents.update'],
+      permissions: ['documents.read', 'documents.update'],
     });
     expect(setOrganizationAccess).toHaveBeenCalledWith(
       'user-1',
@@ -241,7 +223,7 @@ describe('AccessControlService', () => {
     );
   });
 
-  it('returns platform organization permissions without a membership', async () => {
+  it('does not grant organization permissions from platform roles without membership', async () => {
     platformRoleFindMany.mockResolvedValue([
       {
         role: {
@@ -258,7 +240,8 @@ describe('AccessControlService', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         membershipId: null,
-        permissions: ['documents.read'],
+        permissions: [],
+        roles: [],
       }),
     );
   });

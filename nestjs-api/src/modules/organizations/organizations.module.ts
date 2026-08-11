@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AccessControlModule } from '../access-control/access-control.module';
+import { DocumentStorageService } from '../documents/document-storage.service';
 import { RagOrchestratorService } from '../documents/rag-orchestrator.service';
 import { InviteAcceptanceController } from './invite-acceptance.controller';
 import { JoinRequestsController } from './join-requests.controller';
@@ -23,6 +24,7 @@ import { OrganizationsService } from './organizations.service';
   ],
   providers: [
     JoinRequestsService,
+    DocumentStorageService,
     OrganizationInvitesService,
     OrganizationsService,
     RagOrchestratorService,

@@ -5,6 +5,7 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
+import { DocumentStorageService } from '../documents/document-storage.service';
 import { RagOrchestratorService } from '../documents/rag-orchestrator.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganizationsService } from './organizations.service';
@@ -33,6 +34,8 @@ describe('OrganizationsService', () => {
   const organizationUpdate = jest.fn();
   const organizationDelete = jest.fn();
   const organizationFindUniqueOrThrow = jest.fn();
+  const documentFindMany = jest.fn();
+  const stagedFileFindMany = jest.fn();
   const transaction = {
     organization: {
       create: organizationCreate,
@@ -51,6 +54,12 @@ describe('OrganizationsService', () => {
       update: organizationUpdate,
       delete: organizationDelete,
     },
+    document: {
+      findMany: documentFindMany,
+    },
+    documentUploadStagedFile: {
+      findMany: stagedFileFindMany,
+    },
     $transaction: runTransaction,
   } as unknown as PrismaService;
   const invalidateOrganizationAccess = jest.fn();
@@ -61,9 +70,14 @@ describe('OrganizationsService', () => {
   const ragOrchestrator = {
     deleteOrganization: deleteOrganizationVectors,
   } as unknown as RagOrchestratorService;
+  const removeObjects = jest.fn();
+  const storageService = {
+    removeObjects,
+  } as unknown as DocumentStorageService;
   const service = new OrganizationsService(
     prisma,
     accessControlService,
+    storageService,
     ragOrchestrator,
   );
 
@@ -76,8 +90,11 @@ describe('OrganizationsService', () => {
     organizationUpdate.mockResolvedValue(organizationRecord);
     organizationDelete.mockResolvedValue(organizationRecord);
     organizationFindUniqueOrThrow.mockResolvedValue(organizationRecord);
+    documentFindMany.mockResolvedValue([]);
+    stagedFileFindMany.mockResolvedValue([]);
     invalidateOrganizationAccess.mockResolvedValue(undefined);
     deleteOrganizationVectors.mockResolvedValue(undefined);
+    removeObjects.mockResolvedValue(undefined);
   });
 
   it('lists platform organization views', async () => {
@@ -196,10 +213,17 @@ describe('OrganizationsService', () => {
   });
 
   it('deletes an organization and cleans up its RAG vectors', async () => {
+    organizationFindUnique.mockResolvedValueOnce({
+      id: organizationId,
+      name: 'Acme Finance',
+      slug: 'acme-finance',
+    });
+
     await expect(
-      service.deleteOrganization(organizationId),
+      service.deleteOrganization(organizationId, 'acme-finance'),
     ).resolves.toBeUndefined();
 
+    expect(removeObjects).not.toHaveBeenCalled();
     expect(organizationDelete).toHaveBeenCalledWith({
       where: { id: organizationId },
     });
