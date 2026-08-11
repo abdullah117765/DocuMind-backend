@@ -8,6 +8,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import type Redis from 'ioredis';
 import { randomUUID } from 'node:crypto';
+import {
+  formatSafeLogEvent,
+  safeErrorFields,
+} from '../../common/logging/safe-log.util';
 import { REDIS_CLIENT } from '../redis/redis.constants';
 
 export type DocumentUploadJobStatus =
@@ -56,6 +60,16 @@ export interface DocumentUploadJobView {
   expiresAt: string;
 }
 
+export interface DocumentUploadQueueSummary {
+  waiting: number;
+  queued: number;
+  processing: number;
+  succeeded: number;
+  failed: number;
+  scanned: number;
+  truncated: boolean;
+}
+
 export type DocumentUploadJobPatch = Partial<
   Pick<
     DocumentUploadJobView,
@@ -77,7 +91,7 @@ export type DocumentUploadJobPatch = Partial<
 const CACHE_PREFIX = 'document-upload-jobs:v1';
 const QUEUE_KEY = `${CACHE_PREFIX}:queue`;
 const MIN_JOB_TTL_SECONDS = 45 * 60;
-const DEFAULT_JOB_TTL_SECONDS = 4 * 60 * 60;
+const DEFAULT_JOB_TTL_SECONDS = 24 * 60 * 60;
 const MIN_STALE_REQUEUE_SECONDS = 35 * 60;
 const DEFAULT_STALE_REQUEUE_SECONDS = 40 * 60;
 
@@ -165,9 +179,18 @@ export class DocumentUploadJobsService
     if (this.workerClient.status === 'wait') {
       await this.workerClient.connect();
     }
+
+    this.logger.log(
+      formatSafeLogEvent('upload_worker_started', {
+        jobTtlSeconds: this.ttlSeconds,
+        staleRequeueSeconds: this.staleRequeueSeconds,
+      }),
+    );
   }
 
   async onModuleDestroy(): Promise<void> {
+    this.logger.log(formatSafeLogEvent('upload_worker_stopping'));
+
     if (this.workerClient.status === 'end') {
       return;
     }
@@ -266,6 +289,17 @@ export class DocumentUploadJobsService
     );
     await this.client.rpush(QUEUE_KEY, job.id);
 
+    this.logger.log(
+      formatSafeLogEvent('upload_job_queued', {
+        jobId: job.id,
+        organizationId: job.organizationId,
+        sessionId: job.sessionId,
+        createdByUserId: job.createdByUserId,
+        totalFiles: job.totalFiles,
+        ttlSeconds: this.ttlSeconds,
+      }),
+    );
+
     return job;
   }
 
@@ -282,8 +316,23 @@ export class DocumentUploadJobsService
     const job = await this.getJob(queuedJobId);
 
     if (!job || job.status !== 'QUEUED') {
+      this.logger.warn(
+        formatSafeLogEvent('upload_queue_reserved_missing_or_invalid', {
+          jobId: queuedJobId,
+          status: job?.status ?? 'missing',
+        }),
+      );
       return null;
     }
+
+    this.logger.log(
+      formatSafeLogEvent('upload_job_reserved', {
+        jobId: job.id,
+        organizationId: job.organizationId,
+        sessionId: job.sessionId,
+        totalFiles: job.totalFiles,
+      }),
+    );
 
     return job;
   }
@@ -389,6 +438,16 @@ export class DocumentUploadJobsService
 
     await this.client.rpush(QUEUE_KEY, nextJob.id);
 
+    this.logger.warn(
+      formatSafeLogEvent('upload_job_requeued', {
+        jobId: nextJob.id,
+        organizationId: nextJob.organizationId,
+        sessionId: nextJob.sessionId,
+        previousProgress: job.progress,
+        staleRequeueSeconds: this.staleRequeueSeconds,
+      }),
+    );
+
     return nextJob;
   }
 
@@ -399,7 +458,7 @@ export class DocumentUploadJobsService
       warnings: DocumentUploadJobWarning[];
     },
   ): Promise<DocumentUploadJobView | null> {
-    return this.updateJob(jobId, {
+    const completedJob = await this.updateJob(jobId, {
       status: 'SUCCEEDED',
       stage: 'completed',
       progress: 100,
@@ -411,6 +470,22 @@ export class DocumentUploadJobsService
       error: null,
       finishedAt: new Date().toISOString(),
     });
+
+    if (completedJob) {
+      this.logger.log(
+        formatSafeLogEvent('upload_job_completed', {
+          jobId: completedJob.id,
+          organizationId: completedJob.organizationId,
+          sessionId: completedJob.sessionId,
+          totalFiles: completedJob.totalFiles,
+          processedFiles: completedJob.processedFiles,
+          warnings: completedJob.warnings.length,
+          durationMs: this.resolveDurationMs(completedJob),
+        }),
+      );
+    }
+
+    return completedJob;
   }
 
   async failJob(
@@ -424,7 +499,12 @@ export class DocumentUploadJobsService
         : 'Upload job failed. Please try again.';
 
     if (!job) {
-      this.logger.warn(`Upload job ${jobId} failed but job state was missing.`);
+      this.logger.warn(
+        formatSafeLogEvent('upload_job_failed_missing_state', {
+          jobId,
+          ...safeErrorFields(error),
+        }),
+      );
       return null;
     }
 
@@ -432,7 +512,7 @@ export class DocumentUploadJobsService
       .del(sessionJobKey(job.organizationId, job.sessionId))
       .catch(() => undefined);
 
-    return this.updateJob(jobId, {
+    const failedJob = await this.updateJob(jobId, {
       status: 'FAILED',
       stage: 'failed',
       progress: Math.max(job.progress, 1),
@@ -441,5 +521,80 @@ export class DocumentUploadJobsService
       error: message,
       finishedAt: new Date().toISOString(),
     });
+
+    this.logger.error(
+      formatSafeLogEvent('upload_job_failed', {
+        jobId: job.id,
+        organizationId: job.organizationId,
+        sessionId: job.sessionId,
+        stage: job.stage,
+        progress: job.progress,
+        durationMs: failedJob ? this.resolveDurationMs(failedJob) : null,
+        ...safeErrorFields(error),
+      }),
+    );
+
+    return failedJob;
+  }
+
+  async getQueueSummary(maxScan = 1000): Promise<DocumentUploadQueueSummary> {
+    const summary: DocumentUploadQueueSummary = {
+      waiting: 0,
+      queued: 0,
+      processing: 0,
+      succeeded: 0,
+      failed: 0,
+      scanned: 0,
+      truncated: false,
+    };
+
+    summary.waiting = await this.client.llen(QUEUE_KEY);
+
+    let cursor = '0';
+
+    do {
+      const [nextCursor, keys] = await this.client.scan(
+        cursor,
+        'MATCH',
+        `${CACHE_PREFIX}:job:*`,
+        'COUNT',
+        '100',
+      );
+      cursor = nextCursor;
+      const remaining = Math.max(maxScan - summary.scanned, 0);
+      const keysToRead = keys.slice(0, remaining);
+      const rawJobs = keysToRead.length ? await this.client.mget(...keysToRead) : [];
+
+      for (const rawJob of rawJobs) {
+        const job = parseJob(rawJob);
+
+        if (!job) continue;
+
+        summary.scanned += 1;
+
+        if (job.status === 'QUEUED') summary.queued += 1;
+        if (job.status === 'PROCESSING') summary.processing += 1;
+        if (job.status === 'SUCCEEDED') summary.succeeded += 1;
+        if (job.status === 'FAILED') summary.failed += 1;
+      }
+
+      if (keys.length > keysToRead.length || summary.scanned >= maxScan) {
+        summary.truncated = true;
+        break;
+      }
+    } while (cursor !== '0');
+
+    return summary;
+  }
+
+  private resolveDurationMs(job: DocumentUploadJobView): number | null {
+    const startedAt = job.startedAt ? Date.parse(job.startedAt) : NaN;
+    const finishedAt = job.finishedAt ? Date.parse(job.finishedAt) : NaN;
+
+    if (!Number.isFinite(startedAt) || !Number.isFinite(finishedAt)) {
+      return null;
+    }
+
+    return Math.max(0, finishedAt - startedAt);
   }
 }

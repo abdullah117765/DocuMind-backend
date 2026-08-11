@@ -38,6 +38,8 @@ const auditLogSelect = {
   },
 } as const satisfies Prisma.AuditLogSelect;
 
+const AUDIT_LOG_EXPORT_LIMIT = 5000;
+
 type AuditLogRecord = Prisma.AuditLogGetPayload<{
   select: typeof auditLogSelect;
 }>;
@@ -75,6 +77,13 @@ export interface AuditLogListResult {
     total: number;
     pageCount: number;
   };
+}
+
+export interface AuditLogExportResult {
+  filename: string;
+  content: string;
+  count: number;
+  truncated: boolean;
 }
 
 @Injectable()
@@ -121,6 +130,49 @@ export class AuditLogsService {
         total,
         pageCount: Math.max(Math.ceil(total / pageSize), 1),
       },
+    };
+  }
+
+  async exportAuditLogs(
+    query: ListAuditLogsQueryDto,
+    principal: AuthenticatedPrincipal,
+  ): Promise<AuditLogExportResult> {
+    const forcedOrganizationId = await this.resolveOrganizationScope(
+      principal,
+      query.organizationId,
+    );
+    const where = this.buildWhere(
+      query,
+      forcedOrganizationId,
+      forcedOrganizationId
+        ? this.envSuperAdminService.getConfiguredEmail()
+        : null,
+    );
+    const logs = await this.prisma.auditLog.findMany({
+      where,
+      select: auditLogSelect,
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+      take: AUDIT_LOG_EXPORT_LIMIT + 1,
+    });
+    const visibleLogs = logs.slice(0, AUDIT_LOG_EXPORT_LIMIT).map((log) =>
+      this.toView(log),
+    );
+    const requestedScope = forcedOrganizationId ?? query.organizationId ?? null;
+    const timestamp = new Date().toISOString();
+    const filenameScope = requestedScope ? `organization-${requestedScope}` : 'platform';
+    const filename = `audit-logs-${filenameScope}-${timestamp.slice(0, 10)}.txt`;
+    const content = this.formatAuditLogsText({
+      filters: query,
+      generatedAt: timestamp,
+      logs: visibleLogs,
+      truncated: logs.length > AUDIT_LOG_EXPORT_LIMIT,
+    });
+
+    return {
+      filename,
+      content,
+      count: visibleLogs.length,
+      truncated: logs.length > AUDIT_LOG_EXPORT_LIMIT,
     };
   }
 
@@ -274,6 +326,112 @@ export class AuditLogsService {
       actor: this.getActorView(log),
       organization: log.organization,
     };
+  }
+
+  private formatAuditLogsText(input: {
+    filters: ListAuditLogsQueryDto;
+    generatedAt: string;
+    logs: AuditLogView[];
+    truncated: boolean;
+  }): string {
+    const lines: string[] = [
+      'DOCUMIND Audit Logs',
+      `Generated at: ${input.generatedAt}`,
+      `Records exported: ${input.logs.length}`,
+      input.truncated
+        ? `Note: Export was limited to the latest ${AUDIT_LOG_EXPORT_LIMIT} matching records.`
+        : '',
+      '',
+      'Applied filters:',
+      `- Search: ${input.filters.search?.trim() || 'Any'}`,
+      `- Action: ${input.filters.action?.trim() || 'Any'}`,
+      `- Outcome: ${input.filters.outcome || 'Any'}`,
+      `- Organization ID: ${input.filters.organizationId || 'All allowed'}`,
+      `- Actor user ID: ${input.filters.actorUserId || 'Any'}`,
+      `- From: ${input.filters.from || 'Any'}`,
+      `- To: ${input.filters.to || 'Any'}`,
+      '',
+      'Records',
+      '-------',
+    ].filter((line) => line !== '');
+
+    if (input.logs.length === 0) {
+      lines.push('No matching audit logs found.');
+      return `${lines.join('\n')}\n`;
+    }
+
+    input.logs.forEach((log, index) => {
+      const actor = log.actor;
+      const status =
+        typeof log.statusCode === 'number' && log.statusCode >= 400
+          ? 'Needs review'
+          : 'Completed';
+
+      lines.push(
+        '',
+        `#${index + 1}`,
+        `When: ${log.createdAt.toISOString()}`,
+        `Actor: ${
+          actor
+            ? `${actor.name} <${actor.email}>`
+            : 'System / automated event'
+        }`,
+        `Organization: ${log.organization?.name ?? 'Platform'}${
+          log.organization?.slug ? ` (${log.organization.slug})` : ''
+        }`,
+        `Action: ${log.action}`,
+        `Area: ${log.resource}`,
+        `Status: ${status}${
+          typeof log.statusCode === 'number' ? ` (${log.statusCode})` : ''
+        }`,
+        `IP address: ${log.ipAddress ?? 'Not captured'}`,
+        `Device: ${log.userAgent ?? 'Not captured'}`,
+        `Details: ${this.formatMetadataForExport(log.metadata)}`,
+      );
+    });
+
+    return `${lines.join('\n')}\n`;
+  }
+
+  private formatMetadataForExport(metadata: Prisma.JsonValue | null): string {
+    if (
+      !metadata ||
+      typeof metadata !== 'object' ||
+      Array.isArray(metadata) ||
+      Object.keys(metadata).length === 0
+    ) {
+      return 'No extra details for this event.';
+    }
+
+    const record = metadata as Record<string, unknown>;
+    const details: string[] = [];
+
+    if (typeof record.reason === 'string' && record.reason.trim()) {
+      details.push(`Reason: ${record.reason.trim()}`);
+    }
+
+    if (typeof record.message === 'string' && record.message.trim()) {
+      details.push(record.message.trim());
+    }
+
+    if (record.oldRole || record.newRole) {
+      details.push(
+        `Role changed from ${String(record.oldRole ?? 'previous role')} to ${String(
+          record.newRole ?? 'new role',
+        )}.`,
+      );
+    }
+
+    if (
+      typeof record.targetUserEmail === 'string' &&
+      record.targetUserEmail.trim()
+    ) {
+      details.push(`User: ${record.targetUserEmail.trim()}`);
+    }
+
+    return details.length
+      ? details.join(' ')
+      : 'Additional details are available in the system audit record.';
   }
 
   private getActorView(log: AuditLogRecord): {

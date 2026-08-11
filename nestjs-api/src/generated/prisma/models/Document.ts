@@ -361,6 +361,8 @@ export type DocumentWhereInput = {
   versions?: Prisma.DocumentVersionListRelationFilter
   accessGrants?: Prisma.DocumentAccessListRelationFilter
   ragIndex?: Prisma.XOR<Prisma.DocumentRagIndexNullableScalarRelationFilter, Prisma.DocumentRagIndexWhereInput> | null
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentListRelationFilter
+  ragChatMessageSources?: Prisma.RagChatMessageSourceListRelationFilter
 }
 
 export type DocumentOrderByWithRelationInput = {
@@ -395,6 +397,8 @@ export type DocumentOrderByWithRelationInput = {
   versions?: Prisma.DocumentVersionOrderByRelationAggregateInput
   accessGrants?: Prisma.DocumentAccessOrderByRelationAggregateInput
   ragIndex?: Prisma.DocumentRagIndexOrderByWithRelationInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentOrderByRelationAggregateInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceOrderByRelationAggregateInput
 }
 
 export type DocumentWhereUniqueInput = Prisma.AtLeast<{
@@ -432,6 +436,8 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   versions?: Prisma.DocumentVersionListRelationFilter
   accessGrants?: Prisma.DocumentAccessListRelationFilter
   ragIndex?: Prisma.XOR<Prisma.DocumentRagIndexNullableScalarRelationFilter, Prisma.DocumentRagIndexWhereInput> | null
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentListRelationFilter
+  ragChatMessageSources?: Prisma.RagChatMessageSourceListRelationFilter
 }, "id">
 
 export type DocumentOrderByWithAggregationInput = {
@@ -518,6 +524,8 @@ export type DocumentCreateInput = {
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateInput = {
@@ -546,6 +554,8 @@ export type DocumentUncheckedCreateInput = {
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUpdateInput = {
@@ -574,6 +584,8 @@ export type DocumentUpdateInput = {
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateInput = {
@@ -602,6 +614,8 @@ export type DocumentUncheckedUpdateInput = {
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentCreateManyInput = {
@@ -769,6 +783,11 @@ export type DocumentSumOrderByAggregateInput = {
 export type DocumentScalarRelationFilter = {
   is?: Prisma.DocumentWhereInput
   isNot?: Prisma.DocumentWhereInput
+}
+
+export type DocumentNullableScalarRelationFilter = {
+  is?: Prisma.DocumentWhereInput | null
+  isNot?: Prisma.DocumentWhereInput | null
 }
 
 export type DocumentCreateNestedManyWithoutCreatedByInput = {
@@ -1041,6 +1060,36 @@ export type DocumentUpdateOneRequiredWithoutRagIndexNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentUpdateToOneWithWhereWithoutRagIndexInput, Prisma.DocumentUpdateWithoutRagIndexInput>, Prisma.DocumentUncheckedUpdateWithoutRagIndexInput>
 }
 
+export type DocumentCreateNestedOneWithoutRagChatMessageSourcesInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutRagChatMessageSourcesInput, Prisma.DocumentUncheckedCreateWithoutRagChatMessageSourcesInput>
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutRagChatMessageSourcesInput
+  connect?: Prisma.DocumentWhereUniqueInput
+}
+
+export type DocumentUpdateOneWithoutRagChatMessageSourcesNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutRagChatMessageSourcesInput, Prisma.DocumentUncheckedCreateWithoutRagChatMessageSourcesInput>
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutRagChatMessageSourcesInput
+  upsert?: Prisma.DocumentUpsertWithoutRagChatMessageSourcesInput
+  disconnect?: Prisma.DocumentWhereInput | boolean
+  delete?: Prisma.DocumentWhereInput | boolean
+  connect?: Prisma.DocumentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentUpdateToOneWithWhereWithoutRagChatMessageSourcesInput, Prisma.DocumentUpdateWithoutRagChatMessageSourcesInput>, Prisma.DocumentUncheckedUpdateWithoutRagChatMessageSourcesInput>
+}
+
+export type DocumentCreateNestedOneWithoutRagChatSelectedDocumentsInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutRagChatSelectedDocumentsInput, Prisma.DocumentUncheckedCreateWithoutRagChatSelectedDocumentsInput>
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutRagChatSelectedDocumentsInput
+  connect?: Prisma.DocumentWhereUniqueInput
+}
+
+export type DocumentUpdateOneRequiredWithoutRagChatSelectedDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutRagChatSelectedDocumentsInput, Prisma.DocumentUncheckedCreateWithoutRagChatSelectedDocumentsInput>
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutRagChatSelectedDocumentsInput
+  upsert?: Prisma.DocumentUpsertWithoutRagChatSelectedDocumentsInput
+  connect?: Prisma.DocumentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentUpdateToOneWithWhereWithoutRagChatSelectedDocumentsInput, Prisma.DocumentUpdateWithoutRagChatSelectedDocumentsInput>, Prisma.DocumentUncheckedUpdateWithoutRagChatSelectedDocumentsInput>
+}
+
 export type DocumentCreateNestedOneWithoutVersionsInput = {
   create?: Prisma.XOR<Prisma.DocumentCreateWithoutVersionsInput, Prisma.DocumentUncheckedCreateWithoutVersionsInput>
   connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutVersionsInput
@@ -1094,6 +1143,8 @@ export type DocumentCreateWithoutCreatedByInput = {
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutCreatedByInput = {
@@ -1121,6 +1172,8 @@ export type DocumentUncheckedCreateWithoutCreatedByInput = {
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutCreatedByInput = {
@@ -1158,6 +1211,8 @@ export type DocumentCreateWithoutUserDeletedByInput = {
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutUserDeletedByInput = {
@@ -1185,6 +1240,8 @@ export type DocumentUncheckedCreateWithoutUserDeletedByInput = {
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutUserDeletedByInput = {
@@ -1222,6 +1279,8 @@ export type DocumentCreateWithoutOrgDeletedByInput = {
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutOrgDeletedByInput = {
@@ -1249,6 +1308,8 @@ export type DocumentUncheckedCreateWithoutOrgDeletedByInput = {
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutOrgDeletedByInput = {
@@ -1286,6 +1347,8 @@ export type DocumentCreateWithoutRestoredByInput = {
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutRestoredByInput = {
@@ -1313,6 +1376,8 @@ export type DocumentUncheckedCreateWithoutRestoredByInput = {
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutRestoredByInput = {
@@ -1350,6 +1415,8 @@ export type DocumentCreateWithoutPurgedByInput = {
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutPurgedByInput = {
@@ -1377,6 +1444,8 @@ export type DocumentUncheckedCreateWithoutPurgedByInput = {
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutPurgedByInput = {
@@ -1522,6 +1591,8 @@ export type DocumentCreateWithoutOrganizationInput = {
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutOrganizationInput = {
@@ -1549,6 +1620,8 @@ export type DocumentUncheckedCreateWithoutOrganizationInput = {
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutOrganizationInput = {
@@ -1602,6 +1675,8 @@ export type DocumentCreateWithoutRagIndexInput = {
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutRagIndexInput = {
@@ -1629,6 +1704,8 @@ export type DocumentUncheckedCreateWithoutRagIndexInput = {
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutRagIndexInput = {
@@ -1672,6 +1749,8 @@ export type DocumentUpdateWithoutRagIndexInput = {
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutRagIndexInput = {
@@ -1699,6 +1778,272 @@ export type DocumentUncheckedUpdateWithoutRagIndexInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
+}
+
+export type DocumentCreateWithoutRagChatMessageSourcesInput = {
+  id?: string
+  name: string
+  originalFilename: string
+  extension: string
+  mimeType: string
+  sizeBytes: number
+  checksumSha256: string
+  storageBucket: string
+  storageKey: string
+  status?: $Enums.DocumentStatus
+  userDeletedAt?: Date | string | null
+  orgDeletedAt?: Date | string | null
+  restoredAt?: Date | string | null
+  purgedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutDocumentsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutDocumentsCreatedInput
+  userDeletedBy?: Prisma.UserCreateNestedOneWithoutDocumentUserDeletionsInput
+  orgDeletedBy?: Prisma.UserCreateNestedOneWithoutDocumentOrgDeletionsInput
+  restoredBy?: Prisma.UserCreateNestedOneWithoutDocumentRestorationsInput
+  purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
+  versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
+  accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentUncheckedCreateWithoutRagChatMessageSourcesInput = {
+  id?: string
+  organizationId: string
+  name: string
+  originalFilename: string
+  extension: string
+  mimeType: string
+  sizeBytes: number
+  checksumSha256: string
+  storageBucket: string
+  storageKey: string
+  status?: $Enums.DocumentStatus
+  createdByUserId: string
+  userDeletedByUserId?: string | null
+  userDeletedAt?: Date | string | null
+  orgDeletedByUserId?: string | null
+  orgDeletedAt?: Date | string | null
+  restoredByUserId?: string | null
+  restoredAt?: Date | string | null
+  purgedByUserId?: string | null
+  purgedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
+  accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentCreateOrConnectWithoutRagChatMessageSourcesInput = {
+  where: Prisma.DocumentWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutRagChatMessageSourcesInput, Prisma.DocumentUncheckedCreateWithoutRagChatMessageSourcesInput>
+}
+
+export type DocumentUpsertWithoutRagChatMessageSourcesInput = {
+  update: Prisma.XOR<Prisma.DocumentUpdateWithoutRagChatMessageSourcesInput, Prisma.DocumentUncheckedUpdateWithoutRagChatMessageSourcesInput>
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutRagChatMessageSourcesInput, Prisma.DocumentUncheckedCreateWithoutRagChatMessageSourcesInput>
+  where?: Prisma.DocumentWhereInput
+}
+
+export type DocumentUpdateToOneWithWhereWithoutRagChatMessageSourcesInput = {
+  where?: Prisma.DocumentWhereInput
+  data: Prisma.XOR<Prisma.DocumentUpdateWithoutRagChatMessageSourcesInput, Prisma.DocumentUncheckedUpdateWithoutRagChatMessageSourcesInput>
+}
+
+export type DocumentUpdateWithoutRagChatMessageSourcesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  originalFilename?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  checksumSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  userDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  orgDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  restoredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  purgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutDocumentsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutDocumentsCreatedNestedInput
+  userDeletedBy?: Prisma.UserUpdateOneWithoutDocumentUserDeletionsNestedInput
+  orgDeletedBy?: Prisma.UserUpdateOneWithoutDocumentOrgDeletionsNestedInput
+  restoredBy?: Prisma.UserUpdateOneWithoutDocumentRestorationsNestedInput
+  purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
+  versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
+  accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+}
+
+export type DocumentUncheckedUpdateWithoutRagChatMessageSourcesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  originalFilename?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  checksumSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  userDeletedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  orgDeletedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  restoredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  restoredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  purgedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
+  accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+}
+
+export type DocumentCreateWithoutRagChatSelectedDocumentsInput = {
+  id?: string
+  name: string
+  originalFilename: string
+  extension: string
+  mimeType: string
+  sizeBytes: number
+  checksumSha256: string
+  storageBucket: string
+  storageKey: string
+  status?: $Enums.DocumentStatus
+  userDeletedAt?: Date | string | null
+  orgDeletedAt?: Date | string | null
+  restoredAt?: Date | string | null
+  purgedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutDocumentsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutDocumentsCreatedInput
+  userDeletedBy?: Prisma.UserCreateNestedOneWithoutDocumentUserDeletionsInput
+  orgDeletedBy?: Prisma.UserCreateNestedOneWithoutDocumentOrgDeletionsInput
+  restoredBy?: Prisma.UserCreateNestedOneWithoutDocumentRestorationsInput
+  purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
+  versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
+  accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentUncheckedCreateWithoutRagChatSelectedDocumentsInput = {
+  id?: string
+  organizationId: string
+  name: string
+  originalFilename: string
+  extension: string
+  mimeType: string
+  sizeBytes: number
+  checksumSha256: string
+  storageBucket: string
+  storageKey: string
+  status?: $Enums.DocumentStatus
+  createdByUserId: string
+  userDeletedByUserId?: string | null
+  userDeletedAt?: Date | string | null
+  orgDeletedByUserId?: string | null
+  orgDeletedAt?: Date | string | null
+  restoredByUserId?: string | null
+  restoredAt?: Date | string | null
+  purgedByUserId?: string | null
+  purgedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
+  accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentCreateOrConnectWithoutRagChatSelectedDocumentsInput = {
+  where: Prisma.DocumentWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutRagChatSelectedDocumentsInput, Prisma.DocumentUncheckedCreateWithoutRagChatSelectedDocumentsInput>
+}
+
+export type DocumentUpsertWithoutRagChatSelectedDocumentsInput = {
+  update: Prisma.XOR<Prisma.DocumentUpdateWithoutRagChatSelectedDocumentsInput, Prisma.DocumentUncheckedUpdateWithoutRagChatSelectedDocumentsInput>
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutRagChatSelectedDocumentsInput, Prisma.DocumentUncheckedCreateWithoutRagChatSelectedDocumentsInput>
+  where?: Prisma.DocumentWhereInput
+}
+
+export type DocumentUpdateToOneWithWhereWithoutRagChatSelectedDocumentsInput = {
+  where?: Prisma.DocumentWhereInput
+  data: Prisma.XOR<Prisma.DocumentUpdateWithoutRagChatSelectedDocumentsInput, Prisma.DocumentUncheckedUpdateWithoutRagChatSelectedDocumentsInput>
+}
+
+export type DocumentUpdateWithoutRagChatSelectedDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  originalFilename?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  checksumSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  userDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  orgDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  restoredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  purgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutDocumentsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutDocumentsCreatedNestedInput
+  userDeletedBy?: Prisma.UserUpdateOneWithoutDocumentUserDeletionsNestedInput
+  orgDeletedBy?: Prisma.UserUpdateOneWithoutDocumentOrgDeletionsNestedInput
+  restoredBy?: Prisma.UserUpdateOneWithoutDocumentRestorationsNestedInput
+  purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
+  versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
+  accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
+}
+
+export type DocumentUncheckedUpdateWithoutRagChatSelectedDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  originalFilename?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  checksumSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  userDeletedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  orgDeletedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgDeletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  restoredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  restoredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  purgedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
+  accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
+  ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentCreateWithoutVersionsInput = {
@@ -1726,6 +2071,8 @@ export type DocumentCreateWithoutVersionsInput = {
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   accessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutVersionsInput = {
@@ -1753,6 +2100,8 @@ export type DocumentUncheckedCreateWithoutVersionsInput = {
   updatedAt?: Date | string
   accessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutVersionsInput = {
@@ -1796,6 +2145,8 @@ export type DocumentUpdateWithoutVersionsInput = {
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutVersionsInput = {
@@ -1823,6 +2174,8 @@ export type DocumentUncheckedUpdateWithoutVersionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentCreateWithoutAccessGrantsInput = {
@@ -1850,6 +2203,8 @@ export type DocumentCreateWithoutAccessGrantsInput = {
   purgedBy?: Prisma.UserCreateNestedOneWithoutDocumentPurgesInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutAccessGrantsInput = {
@@ -1877,6 +2232,8 @@ export type DocumentUncheckedCreateWithoutAccessGrantsInput = {
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedCreateNestedOneWithoutDocumentInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedCreateNestedManyWithoutDocumentInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutAccessGrantsInput = {
@@ -1920,6 +2277,8 @@ export type DocumentUpdateWithoutAccessGrantsInput = {
   purgedBy?: Prisma.UserUpdateOneWithoutDocumentPurgesNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutAccessGrantsInput = {
@@ -1947,6 +2306,8 @@ export type DocumentUncheckedUpdateWithoutAccessGrantsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentCreateManyCreatedByInput = {
@@ -2094,6 +2455,8 @@ export type DocumentUpdateWithoutCreatedByInput = {
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutCreatedByInput = {
@@ -2121,6 +2484,8 @@ export type DocumentUncheckedUpdateWithoutCreatedByInput = {
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutCreatedByInput = {
@@ -2172,6 +2537,8 @@ export type DocumentUpdateWithoutUserDeletedByInput = {
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutUserDeletedByInput = {
@@ -2199,6 +2566,8 @@ export type DocumentUncheckedUpdateWithoutUserDeletedByInput = {
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutUserDeletedByInput = {
@@ -2250,6 +2619,8 @@ export type DocumentUpdateWithoutOrgDeletedByInput = {
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutOrgDeletedByInput = {
@@ -2277,6 +2648,8 @@ export type DocumentUncheckedUpdateWithoutOrgDeletedByInput = {
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutOrgDeletedByInput = {
@@ -2328,6 +2701,8 @@ export type DocumentUpdateWithoutRestoredByInput = {
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutRestoredByInput = {
@@ -2355,6 +2730,8 @@ export type DocumentUncheckedUpdateWithoutRestoredByInput = {
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutRestoredByInput = {
@@ -2406,6 +2783,8 @@ export type DocumentUpdateWithoutPurgedByInput = {
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutPurgedByInput = {
@@ -2433,6 +2812,8 @@ export type DocumentUncheckedUpdateWithoutPurgedByInput = {
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutPurgedByInput = {
@@ -2508,6 +2889,8 @@ export type DocumentUpdateWithoutOrganizationInput = {
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutOrganizationInput = {
@@ -2535,6 +2918,8 @@ export type DocumentUncheckedUpdateWithoutOrganizationInput = {
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
   accessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutDocumentNestedInput
   ragIndex?: Prisma.DocumentRagIndexUncheckedUpdateOneWithoutDocumentNestedInput
+  ragChatSelectedDocuments?: Prisma.RagChatSelectedDocumentUncheckedUpdateManyWithoutDocumentNestedInput
+  ragChatMessageSources?: Prisma.RagChatMessageSourceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutOrganizationInput = {
@@ -2569,11 +2954,15 @@ export type DocumentUncheckedUpdateManyWithoutOrganizationInput = {
 export type DocumentCountOutputType = {
   versions: number
   accessGrants: number
+  ragChatSelectedDocuments: number
+  ragChatMessageSources: number
 }
 
 export type DocumentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   versions?: boolean | DocumentCountOutputTypeCountVersionsArgs
   accessGrants?: boolean | DocumentCountOutputTypeCountAccessGrantsArgs
+  ragChatSelectedDocuments?: boolean | DocumentCountOutputTypeCountRagChatSelectedDocumentsArgs
+  ragChatMessageSources?: boolean | DocumentCountOutputTypeCountRagChatMessageSourcesArgs
 }
 
 /**
@@ -2598,6 +2987,20 @@ export type DocumentCountOutputTypeCountVersionsArgs<ExtArgs extends runtime.Typ
  */
 export type DocumentCountOutputTypeCountAccessGrantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.DocumentAccessWhereInput
+}
+
+/**
+ * DocumentCountOutputType without action
+ */
+export type DocumentCountOutputTypeCountRagChatSelectedDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RagChatSelectedDocumentWhereInput
+}
+
+/**
+ * DocumentCountOutputType without action
+ */
+export type DocumentCountOutputTypeCountRagChatMessageSourcesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RagChatMessageSourceWhereInput
 }
 
 
@@ -2633,6 +3036,8 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   versions?: boolean | Prisma.Document$versionsArgs<ExtArgs>
   accessGrants?: boolean | Prisma.Document$accessGrantsArgs<ExtArgs>
   ragIndex?: boolean | Prisma.Document$ragIndexArgs<ExtArgs>
+  ragChatSelectedDocuments?: boolean | Prisma.Document$ragChatSelectedDocumentsArgs<ExtArgs>
+  ragChatMessageSources?: boolean | Prisma.Document$ragChatMessageSourcesArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["document"]>
 
@@ -2734,6 +3139,8 @@ export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   versions?: boolean | Prisma.Document$versionsArgs<ExtArgs>
   accessGrants?: boolean | Prisma.Document$accessGrantsArgs<ExtArgs>
   ragIndex?: boolean | Prisma.Document$ragIndexArgs<ExtArgs>
+  ragChatSelectedDocuments?: boolean | Prisma.Document$ragChatSelectedDocumentsArgs<ExtArgs>
+  ragChatMessageSources?: boolean | Prisma.Document$ragChatMessageSourcesArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocumentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2765,6 +3172,8 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     versions: Prisma.$DocumentVersionPayload<ExtArgs>[]
     accessGrants: Prisma.$DocumentAccessPayload<ExtArgs>[]
     ragIndex: Prisma.$DocumentRagIndexPayload<ExtArgs> | null
+    ragChatSelectedDocuments: Prisma.$RagChatSelectedDocumentPayload<ExtArgs>[]
+    ragChatMessageSources: Prisma.$RagChatMessageSourcePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3192,6 +3601,8 @@ export interface Prisma__DocumentClient<T, Null = never, ExtArgs extends runtime
   versions<T extends Prisma.Document$versionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$versionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accessGrants<T extends Prisma.Document$accessGrantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$accessGrantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ragIndex<T extends Prisma.Document$ragIndexArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$ragIndexArgs<ExtArgs>>): Prisma.Prisma__DocumentRagIndexClient<runtime.Types.Result.GetResult<Prisma.$DocumentRagIndexPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  ragChatSelectedDocuments<T extends Prisma.Document$ragChatSelectedDocumentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$ragChatSelectedDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RagChatSelectedDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ragChatMessageSources<T extends Prisma.Document$ragChatMessageSourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$ragChatMessageSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RagChatMessageSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3784,6 +4195,54 @@ export type Document$ragIndexArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   include?: Prisma.DocumentRagIndexInclude<ExtArgs> | null
   where?: Prisma.DocumentRagIndexWhereInput
+}
+
+/**
+ * Document.ragChatSelectedDocuments
+ */
+export type Document$ragChatSelectedDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RagChatSelectedDocument
+   */
+  select?: Prisma.RagChatSelectedDocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RagChatSelectedDocument
+   */
+  omit?: Prisma.RagChatSelectedDocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RagChatSelectedDocumentInclude<ExtArgs> | null
+  where?: Prisma.RagChatSelectedDocumentWhereInput
+  orderBy?: Prisma.RagChatSelectedDocumentOrderByWithRelationInput | Prisma.RagChatSelectedDocumentOrderByWithRelationInput[]
+  cursor?: Prisma.RagChatSelectedDocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RagChatSelectedDocumentScalarFieldEnum | Prisma.RagChatSelectedDocumentScalarFieldEnum[]
+}
+
+/**
+ * Document.ragChatMessageSources
+ */
+export type Document$ragChatMessageSourcesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RagChatMessageSource
+   */
+  select?: Prisma.RagChatMessageSourceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RagChatMessageSource
+   */
+  omit?: Prisma.RagChatMessageSourceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RagChatMessageSourceInclude<ExtArgs> | null
+  where?: Prisma.RagChatMessageSourceWhereInput
+  orderBy?: Prisma.RagChatMessageSourceOrderByWithRelationInput | Prisma.RagChatMessageSourceOrderByWithRelationInput[]
+  cursor?: Prisma.RagChatMessageSourceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RagChatMessageSourceScalarFieldEnum | Prisma.RagChatMessageSourceScalarFieldEnum[]
 }
 
 /**

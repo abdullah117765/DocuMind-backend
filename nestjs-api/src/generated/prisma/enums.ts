@@ -119,3 +119,11 @@ export const DocumentRagIndexStatus = {
 } as const
 
 export type DocumentRagIndexStatus = (typeof DocumentRagIndexStatus)[keyof typeof DocumentRagIndexStatus]
+
+
+export const RagChatMessageRole = {
+  USER: 'USER',
+  ASSISTANT: 'ASSISTANT'
+} as const
+
+export type RagChatMessageRole = (typeof RagChatMessageRole)[keyof typeof RagChatMessageRole]

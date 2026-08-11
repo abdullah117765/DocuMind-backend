@@ -140,6 +140,26 @@ export type Document = Prisma.DocumentModel
  */
 export type DocumentRagIndex = Prisma.DocumentRagIndexModel
 /**
+ * Model RagChatSession
+ * 
+ */
+export type RagChatSession = Prisma.RagChatSessionModel
+/**
+ * Model RagChatMessage
+ * 
+ */
+export type RagChatMessage = Prisma.RagChatMessageModel
+/**
+ * Model RagChatMessageSource
+ * 
+ */
+export type RagChatMessageSource = Prisma.RagChatMessageSourceModel
+/**
+ * Model RagChatSelectedDocument
+ * 
+ */
+export type RagChatSelectedDocument = Prisma.RagChatSelectedDocumentModel
+/**
  * Model DocumentVersion
  * 
  */

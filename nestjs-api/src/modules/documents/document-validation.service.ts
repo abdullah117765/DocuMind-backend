@@ -54,6 +54,20 @@ const EXTENSION_MIME_TYPES = new Map<string, string>([
 ]);
 
 const ALLOWED_EXTENSION_SET = new Set<string>(DOCUMENT_ALLOWED_EXTENSIONS);
+const ZIP_EXTENSIONS = new Set(['zip', 'docx', 'pptx', 'xlsx']);
+const OLE_EXTENSIONS = new Set(['doc', 'ppt']);
+const TEXT_EXTENSIONS = new Set(['csv', 'txt', 'html', 'xml', 'json']);
+const ZIP_HEADERS = [
+  Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+  Buffer.from([0x50, 0x4b, 0x05, 0x06]),
+  Buffer.from([0x50, 0x4b, 0x07, 0x08]),
+];
+const OLE_HEADER = Buffer.from([
+  0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1,
+]);
+const PNG_HEADER = Buffer.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+]);
 
 function normalizeMimeType(
   mimeType: string | undefined,
@@ -74,6 +88,38 @@ function stripPath(originalName: string): string {
   );
 }
 
+function startsWith(buffer: Buffer, signature: Buffer): boolean {
+  return (
+    buffer.length >= signature.length &&
+    signature.every((byte, index) => buffer[index] === byte)
+  );
+}
+
+function looksLikeZip(buffer: Buffer): boolean {
+  return ZIP_HEADERS.some((signature) => startsWith(buffer, signature));
+}
+
+function looksLikeText(buffer: Buffer): boolean {
+  if (buffer.includes(0)) return false;
+
+  const sample = buffer.subarray(0, Math.min(buffer.length, 4096));
+  const controlBytes = [...sample].filter(
+    (byte) =>
+      byte < 0x09 ||
+      (byte > 0x0d && byte < 0x20) ||
+      byte === 0x7f,
+  ).length;
+
+  return controlBytes / Math.max(sample.length, 1) < 0.02;
+}
+
+function decodeText(buffer: Buffer): string {
+  return buffer
+    .toString('utf8')
+    .replace(/^\uFEFF/, '')
+    .trimStart();
+}
+
 @Injectable()
 export class DocumentValidationService {
   private readonly limits: DocumentUploadLimits;
@@ -84,7 +130,7 @@ export class DocumentValidationService {
     this.limits = config?.documents ?? {
       maxFileSizeBytes: 10 * 1024 * 1024,
       maxFilesPerBatch: 8,
-      stagingTtlSeconds: 3600,
+      stagingTtlSeconds: 24 * 60 * 60,
       maxZipExpandedBytes: 40 * 1024 * 1024,
     };
   }
@@ -152,10 +198,14 @@ export class DocumentValidationService {
       );
     }
 
+    this.assertFileContentMatchesExtension(input.buffer, extension);
+
     return {
       originalFilename,
       extension,
-      mimeType: normalizeMimeType(input.mimeType, extension),
+      mimeType:
+        EXTENSION_MIME_TYPES.get(extension) ??
+        normalizeMimeType(input.mimeType, extension),
       sizeBytes: input.buffer.length,
       checksumSha256: createHash('sha256').update(input.buffer).digest('hex'),
       buffer: input.buffer,
@@ -220,5 +270,76 @@ export class DocumentValidationService {
     this.assertZipEntryPath(entryPath);
 
     return this.normalizeOriginalFilename(entryPath);
+  }
+
+  private assertFileContentMatchesExtension(
+    buffer: Buffer,
+    extension: string,
+  ): void {
+    const isValid = this.isContentValidForExtension(buffer, extension);
+
+    if (!isValid) {
+      throw new BadRequestException(
+        'The file content does not match the selected file type. Upload the original file or choose the correct file type.',
+      );
+    }
+  }
+
+  private isContentValidForExtension(
+    buffer: Buffer,
+    extension: string,
+  ): boolean {
+    if (extension === 'pdf') {
+      return startsWith(buffer, Buffer.from('%PDF-', 'ascii'));
+    }
+
+    if (extension === 'png') {
+      return startsWith(buffer, PNG_HEADER);
+    }
+
+    if (extension === 'jpeg') {
+      return buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+    }
+
+    if (ZIP_EXTENSIONS.has(extension)) {
+      return looksLikeZip(buffer);
+    }
+
+    if (OLE_EXTENSIONS.has(extension)) {
+      return startsWith(buffer, OLE_HEADER);
+    }
+
+    if (TEXT_EXTENSIONS.has(extension)) {
+      return this.isValidTextContent(buffer, extension);
+    }
+
+    return false;
+  }
+
+  private isValidTextContent(buffer: Buffer, extension: string): boolean {
+    if (!looksLikeText(buffer)) return false;
+
+    const text = decodeText(buffer);
+
+    if (extension === 'json') {
+      try {
+        JSON.parse(text);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    if (extension === 'xml') {
+      return text.startsWith('<?xml') || text.startsWith('<');
+    }
+
+    if (extension === 'html') {
+      return /^(<!doctype\s+html\b|<html\b|<head\b|<body\b|<meta\b|<title\b|<div\b|<section\b|<p\b)/i.test(
+        text,
+      );
+    }
+
+    return true;
   }
 }

@@ -62,20 +62,39 @@ class ExtractionService:
         return text[: self.max_text_chars]
 
     def _extract_pdf(self, file_bytes: bytes, _: str) -> str:
+        import fitz
+
+        document = fitz.open(stream=file_bytes, filetype="pdf")
+        pages: list[str] = []
+
+        for index, page in enumerate(document, start=1):
+            text = page.get_text("text").strip()
+
+            if text:
+                pages.append(f"--- Page {index} ---\n{text}")
+
+        if pages:
+            return "\n\n".join(pages)
+
         import pymupdf4llm
 
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=True) as temp_file:
             temp_file.write(file_bytes)
             temp_file.flush()
-            return pymupdf4llm.to_markdown(temp_file.name)
+            return f"--- Page 1 ---\n{pymupdf4llm.to_markdown(temp_file.name)}"
 
     def _extract_docx(self, file_bytes: bytes, _: str = "docx") -> str:
         from docx import Document
 
         document = Document(io.BytesIO(file_bytes))
-        parts = [paragraph.text for paragraph in document.paragraphs if paragraph.text.strip()]
+        parts = [
+            f"--- Paragraph {index} ---\n{paragraph.text.strip()}"
+            for index, paragraph in enumerate(document.paragraphs, start=1)
+            if paragraph.text.strip()
+        ]
 
-        for table in document.tables:
+        for table_index, table in enumerate(document.tables, start=1):
+            parts.append(f"--- Table {table_index} ---")
             for row in table.rows:
                 cells = [cell.text.strip() for cell in row.cells if cell.text.strip()]
                 if cells:
@@ -194,12 +213,12 @@ class ExtractionService:
                 text = page.get_text("text", textpage=text_page)
 
             if text.strip():
-                return text
+                return f"--- Image OCR text ---\n{text}"
         except Exception as exc:
             pymupdf_error = exc
 
         try:
-            return self._extract_image_with_tesseract(file_bytes, normalized_extension)
+            return f"--- Image OCR text ---\n{self._extract_image_with_tesseract(file_bytes, normalized_extension)}"
         except Exception as exc:
             details = str(exc).strip() or "OCR could not read this image."
 

@@ -25,5 +25,6 @@ import { RagOrchestratorService } from './rag-orchestrator.service';
     DocumentsService,
     RagOrchestratorService,
   ],
+  exports: [DocumentStorageService, DocumentsService, RagOrchestratorService],
 })
 export class DocumentsModule {}

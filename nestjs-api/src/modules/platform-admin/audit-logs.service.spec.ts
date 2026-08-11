@@ -145,4 +145,49 @@ describe('AuditLogsService', () => {
       name: 'Ahmed Khan',
     });
   });
+
+  it('exports filtered audit logs as readable text', async () => {
+    const log = {
+      id: 'audit-log-2',
+      actorUserId: 'a2f0b4fe-0204-40c3-9a31-21f81c50fd4c',
+      actorName: 'Ahmed Khan',
+      actorEmail: 'ahmed@example.com',
+      organizationId,
+      action: 'PATCH /api/organizations/member',
+      method: 'PATCH',
+      path: '/api/organizations/member',
+      resource: 'organization.members',
+      statusCode: 200,
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest',
+      metadata: {
+        reason: 'Role updated',
+        oldRole: 'Employee',
+        newRole: 'Manager',
+      },
+      createdAt: new Date('2026-08-05T08:30:00.000Z'),
+      actor: null,
+      organization: {
+        id: organizationId,
+        name: 'Acme Finance',
+        slug: 'acme-finance',
+      },
+    };
+    auditLogFindMany.mockResolvedValue([log]);
+
+    const result = await service.exportAuditLogs({ organizationId }, principal);
+
+    expect(result.filename).toMatch(/^audit-logs-organization-/);
+    expect(result.count).toBe(1);
+    expect(result.truncated).toBe(false);
+    expect(result.content).toContain('DOCUMIND Audit Logs');
+    expect(result.content).toContain('Ahmed Khan <ahmed@example.com>');
+    expect(result.content).toContain('PATCH /api/organizations/member');
+    expect(result.content).toContain('Role changed from Employee to Manager.');
+    expect(auditLogFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 5001,
+      }),
+    );
+  });
 });

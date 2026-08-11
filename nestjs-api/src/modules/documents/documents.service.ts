@@ -26,9 +26,14 @@ import {
   takeWhile,
 } from 'rxjs';
 import {
+  formatSafeLogEvent,
+  safeErrorFields,
+} from '../../common/logging/safe-log.util';
+import {
   AccessScope,
   DocumentAccessLevel,
   DocumentRagIndexStatus,
+  RagChatMessageRole,
   DocumentStagedFileStatus,
   DocumentStatus,
   DocumentUploadSessionStatus,
@@ -57,6 +62,7 @@ import {
 } from './document-validation.service';
 import {
   DocumentUploadJobPatch,
+  DocumentUploadQueueSummary,
   DocumentUploadJobsService,
   DocumentUploadJobView,
 } from './document-upload-jobs.service';
@@ -73,6 +79,90 @@ import {
   RagOrchestratorService,
   RagSearchResponse,
 } from './rag-orchestrator.service';
+
+export interface RagQueueSummary {
+  pending: number;
+  indexing: number;
+  indexed: number;
+  failed: number;
+  noContent: number;
+}
+
+const ragChatSessionSelect = {
+  id: true,
+  organizationId: true,
+  createdByUserId: true,
+  title: true,
+  createdAt: true,
+  updatedAt: true,
+  selectedDocuments: {
+    select: {
+      documentId: true,
+      document: {
+        select: {
+          id: true,
+          name: true,
+          originalFilename: true,
+          extension: true,
+        },
+      },
+    },
+  },
+  messages: {
+    orderBy: { createdAt: 'desc' },
+    take: 1,
+    select: {
+      id: true,
+      role: true,
+      content: true,
+      createdAt: true,
+    },
+  },
+} as const satisfies Prisma.RagChatSessionSelect;
+
+const ragChatDetailSelect = {
+  id: true,
+  organizationId: true,
+  createdByUserId: true,
+  title: true,
+  createdAt: true,
+  updatedAt: true,
+  selectedDocuments: {
+    select: {
+      documentId: true,
+      document: {
+        select: {
+          id: true,
+          name: true,
+          originalFilename: true,
+          extension: true,
+        },
+      },
+    },
+  },
+  messages: {
+    orderBy: { createdAt: 'asc' },
+    select: {
+      id: true,
+      role: true,
+      content: true,
+      summary: true,
+      metadata: true,
+      createdAt: true,
+      sources: {
+        orderBy: { createdAt: 'asc' },
+      },
+    },
+  },
+} as const satisfies Prisma.RagChatSessionSelect;
+
+type RagChatSessionRecord = Prisma.RagChatSessionGetPayload<{
+  select: typeof ragChatSessionSelect;
+}>;
+
+type RagChatDetailRecord = Prisma.RagChatSessionGetPayload<{
+  select: typeof ragChatDetailSelect;
+}>;
 
 const documentSelect = {
   id: true,
@@ -327,6 +417,66 @@ export interface RagSearchView extends RagSearchResponse {
 
 export interface RagAskView extends RagAskResponse {
   allowedDocumentIds: string[];
+  chatSession: RagChatSessionView | null;
+  chatMessages: RagChatMessageView[];
+}
+
+export interface RagChatSourceView {
+  id: string;
+  documentId: string | null;
+  documentName: string;
+  fileType: string | null;
+  versionNumber: number;
+  chunkIndex: number;
+  pageNumber: number | null;
+  slideNumber: number | null;
+  sheetName: string | null;
+  lineStart: number | null;
+  lineEnd: number | null;
+  sectionTitle: string | null;
+  locationLabel: string | null;
+  score: number | null;
+  metadata: Prisma.JsonValue | null;
+}
+
+export interface RagChatMessageView {
+  id: string;
+  role: 'USER' | 'ASSISTANT';
+  content: string;
+  summary: string | null;
+  createdAt: Date;
+  sources: RagChatSourceView[];
+}
+
+export interface RagChatSessionView {
+  id: string;
+  title: string;
+  organizationId: string;
+  createdByUserId: string;
+  selectedDocumentIds: string[];
+  selectedDocuments: Array<{
+    id: string;
+    name: string;
+    originalFilename: string;
+    extension: string;
+  }>;
+  lastMessage: {
+    id: string;
+    role: 'USER' | 'ASSISTANT';
+    content: string;
+    createdAt: Date;
+  } | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface RagChatSessionListResult {
+  chats: RagChatSessionView[];
+}
+
+export interface RagChatDetailView {
+  chat: RagChatSessionView;
+  messages: RagChatMessageView[];
 }
 
 export interface DocumentVersionView {
@@ -499,11 +649,13 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     this.uploadWorkerActive = true;
+    this.logger.log(formatSafeLogEvent('upload_worker_loop_started'));
     void this.processUploadJobs();
   }
 
   onModuleDestroy(): void {
     this.uploadWorkerActive = false;
+    this.logger.log(formatSafeLogEvent('upload_worker_loop_stopping'));
   }
 
   private async processUploadJobs(): Promise<void> {
@@ -519,9 +671,9 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       } catch (error: unknown) {
         if (this.uploadWorkerActive) {
           this.logger.error(
-            error instanceof Error
-              ? (error.stack ?? error.message)
-              : 'Upload job worker failed unexpectedly.',
+            formatSafeLogEvent('upload_worker_loop_failed', {
+              ...safeErrorFields(error),
+            }),
           );
           await delay(1000);
         }
@@ -530,6 +682,17 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async processUploadJob(job: DocumentUploadJobView): Promise<void> {
+    const startedAt = Date.now();
+
+    this.logger.log(
+      formatSafeLogEvent('upload_job_processing_started', {
+        jobId: job.id,
+        organizationId: job.organizationId,
+        sessionId: job.sessionId,
+        totalFiles: job.totalFiles,
+      }),
+    );
+
     await this.uploadJobsService.updateJob(job.id, {
       status: 'PROCESSING',
       stage: 'validating',
@@ -555,9 +718,71 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
         })),
         warnings: result.warnings,
       });
+
+      this.logger.log(
+        formatSafeLogEvent('upload_job_processing_finished', {
+          jobId: job.id,
+          organizationId: job.organizationId,
+          sessionId: job.sessionId,
+          processedFiles: result.documents.length,
+          warnings: result.warnings.length,
+          durationMs: Date.now() - startedAt,
+        }),
+      );
     } catch (error: unknown) {
       await this.uploadJobsService.failJob(job.id, error);
     }
+  }
+
+  async getUploadQueueSummary(): Promise<DocumentUploadQueueSummary> {
+    return this.uploadJobsService.getQueueSummary();
+  }
+
+  async getRagQueueSummary(): Promise<RagQueueSummary> {
+    const groups = await this.prisma.documentRagIndex.groupBy({
+      by: ['status'],
+      where: {
+        document: {
+          status: DocumentStatus.ACTIVE,
+        },
+      },
+      _count: {
+        _all: true,
+      },
+    });
+    const summary: RagQueueSummary = {
+      pending: 0,
+      indexing: 0,
+      indexed: 0,
+      failed: 0,
+      noContent: 0,
+    };
+
+    for (const group of groups) {
+      const count = group._count._all;
+
+      if (group.status === DocumentRagIndexStatus.PENDING) {
+        summary.pending = count;
+      }
+
+      if (group.status === DocumentRagIndexStatus.INDEXING) {
+        summary.indexing = count;
+      }
+
+      if (group.status === DocumentRagIndexStatus.INDEXED) {
+        summary.indexed = count;
+      }
+
+      if (group.status === DocumentRagIndexStatus.FAILED) {
+        summary.failed = count;
+      }
+
+      if (group.status === DocumentRagIndexStatus.NO_CONTENT) {
+        summary.noContent = count;
+      }
+    }
+
+    return summary;
   }
 
   getZipManifest(archive: Express.Multer.File): ZipManifestView {
@@ -1167,11 +1392,95 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
         search_type: dto.searchType ?? 'hybrid',
       }),
     );
+    const savedChat = await this.saveRagChatExchange({
+      allowedDocumentIds,
+      organizationId,
+      principal,
+      query: dto.query,
+      response,
+      selectedDocumentIds:
+        (dto.scope ?? RagDocumentScope.ALL) === RagDocumentScope.SELECTED
+          ? [...new Set(dto.documentIds ?? [])]
+          : [],
+      chatSessionId: dto.chatSessionId,
+    });
 
     return {
       ...response,
       allowedDocumentIds,
+      chatSession: savedChat.chat,
+      chatMessages: savedChat.messages,
     };
+  }
+
+  async listRagChatSessions(
+    organizationId: string,
+    principal: AuthenticatedPrincipal,
+  ): Promise<RagChatSessionListResult> {
+    await this.resolveOrganizationAccessOrThrow(principal.userId, organizationId);
+
+    const chats = await this.prisma.ragChatSession.findMany({
+      where: {
+        organizationId,
+        createdByUserId: principal.userId,
+        deletedAt: null,
+      },
+      select: ragChatSessionSelect,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+      take: 50,
+    });
+
+    return {
+      chats: chats.map((chat) => this.toRagChatSessionView(chat)),
+    };
+  }
+
+  async getRagChatSession(
+    organizationId: string,
+    chatSessionId: string,
+    principal: AuthenticatedPrincipal,
+  ): Promise<RagChatDetailView> {
+    await this.resolveOrganizationAccessOrThrow(principal.userId, organizationId);
+
+    const chat = await this.prisma.ragChatSession.findFirst({
+      where: {
+        id: chatSessionId,
+        organizationId,
+        createdByUserId: principal.userId,
+        deletedAt: null,
+      },
+      select: ragChatDetailSelect,
+    });
+
+    if (!chat) {
+      throw new NotFoundException('Chat not found.');
+    }
+
+    return this.toRagChatDetailView(chat);
+  }
+
+  async deleteRagChatSession(
+    organizationId: string,
+    chatSessionId: string,
+    principal: AuthenticatedPrincipal,
+  ): Promise<void> {
+    await this.resolveOrganizationAccessOrThrow(principal.userId, organizationId);
+
+    const result = await this.prisma.ragChatSession.updateMany({
+      where: {
+        id: chatSessionId,
+        organizationId,
+        createdByUserId: principal.userId,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    if (result.count === 0) {
+      throw new NotFoundException('Chat not found.');
+    }
   }
 
   async listRagStatuses(
@@ -1938,6 +2247,246 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     return this.toDocumentView(updatedDocument);
   }
 
+  private async saveRagChatExchange(input: {
+    allowedDocumentIds: string[];
+    organizationId: string;
+    principal: AuthenticatedPrincipal;
+    query: string;
+    response: RagAskResponse;
+    selectedDocumentIds: string[];
+    chatSessionId?: string;
+  }): Promise<{ chat: RagChatSessionView; messages: RagChatMessageView[] }> {
+    const chat = input.chatSessionId
+      ? await this.findOwnedRagChatSession(
+          input.organizationId,
+          input.chatSessionId,
+          input.principal.userId,
+        )
+      : await this.prisma.ragChatSession.create({
+          data: {
+            organizationId: input.organizationId,
+            createdByUserId: input.principal.userId,
+            title: this.buildRagChatTitle(input.query),
+          },
+          select: {
+            id: true,
+          },
+        });
+
+    const validSelectedDocumentIds = input.selectedDocumentIds.filter(
+      (documentId) => input.allowedDocumentIds.includes(documentId),
+    );
+
+    const detail = await this.prisma.$transaction(async (tx) => {
+      await tx.ragChatSelectedDocument.deleteMany({
+        where: { chatSessionId: chat.id },
+      });
+
+      if (validSelectedDocumentIds.length > 0) {
+        await tx.ragChatSelectedDocument.createMany({
+          data: validSelectedDocumentIds.map((documentId) => ({
+            chatSessionId: chat.id,
+            documentId,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      await tx.ragChatMessage.create({
+        data: {
+          chatSessionId: chat.id,
+          role: RagChatMessageRole.USER,
+          content: input.query,
+          summary: this.buildRagMessageSummary(input.query),
+        },
+      });
+
+      const assistantMessage = await tx.ragChatMessage.create({
+        data: {
+          chatSessionId: chat.id,
+          role: RagChatMessageRole.ASSISTANT,
+          content: input.response.answer,
+          summary: this.buildRagMessageSummary(input.response.answer),
+          metadata: {
+            llmModel: input.response.llm_model ?? null,
+            llmAvailable: input.response.llm_available,
+            processingTimeMs: input.response.processing_time_ms,
+          },
+        },
+        select: { id: true },
+      });
+      const sourceData = input.response.sources
+        .filter((source) =>
+          input.allowedDocumentIds.includes(source.document_id),
+        )
+        .slice(0, 20)
+        .map((source) => ({
+          messageId: assistantMessage.id,
+          documentId: source.document_id,
+          documentName: source.document_name || 'Document',
+          fileType: source.file_type ?? null,
+          versionNumber: source.version_number,
+          chunkIndex: source.chunk_index,
+          pageNumber: this.toNullableInteger(source.page_number),
+          slideNumber: this.toNullableInteger(source.slide_number),
+          sheetName: this.truncateNullable(source.sheet_name, 120),
+          lineStart: this.toNullableInteger(source.line_start),
+          lineEnd: this.toNullableInteger(source.line_end),
+          sectionTitle: this.truncateNullable(source.section_title, 255),
+          locationLabel: this.truncateNullable(source.location_label, 255),
+          score:
+            typeof source.score === 'number' && Number.isFinite(source.score)
+              ? source.score
+              : null,
+          metadata: (source.metadata ?? {}) as Prisma.InputJsonValue,
+        }));
+
+      if (sourceData.length > 0) {
+        await tx.ragChatMessageSource.createMany({ data: sourceData });
+      }
+
+      return tx.ragChatSession.update({
+        where: { id: chat.id },
+        data: {
+          updatedAt: new Date(),
+        },
+        select: ragChatDetailSelect,
+      });
+    });
+
+    const view = this.toRagChatDetailView(detail);
+
+    return {
+      chat: view.chat,
+      messages: view.messages.slice(-2),
+    };
+  }
+
+  private async findOwnedRagChatSession(
+    organizationId: string,
+    chatSessionId: string,
+    userId: string,
+  ): Promise<{ id: string }> {
+    const chat = await this.prisma.ragChatSession.findFirst({
+      where: {
+        id: chatSessionId,
+        organizationId,
+        createdByUserId: userId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!chat) {
+      throw new NotFoundException('Chat not found.');
+    }
+
+    return chat;
+  }
+
+  private toRagChatDetailView(chat: RagChatDetailRecord): RagChatDetailView {
+    return {
+      chat: this.toRagChatSessionView(chat),
+      messages: chat.messages.map((message) => ({
+        id: message.id,
+        role: message.role,
+        content: message.content,
+        summary: message.summary,
+        createdAt: message.createdAt,
+        sources: message.sources.map((source) => ({
+          id: source.id,
+          documentId: source.documentId,
+          documentName: source.documentName,
+          fileType: source.fileType,
+          versionNumber: source.versionNumber,
+          chunkIndex: source.chunkIndex,
+          pageNumber: source.pageNumber,
+          slideNumber: source.slideNumber,
+          sheetName: source.sheetName,
+          lineStart: source.lineStart,
+          lineEnd: source.lineEnd,
+          sectionTitle: source.sectionTitle,
+          locationLabel: source.locationLabel,
+          score: source.score,
+          metadata: source.metadata,
+        })),
+      })),
+    };
+  }
+
+  private toRagChatSessionView(
+    chat: RagChatSessionRecord | RagChatDetailRecord,
+  ): RagChatSessionView {
+    const selectedDocuments = chat.selectedDocuments
+      .map((item) => item.document)
+      .filter(Boolean);
+    const lastMessage =
+      [...chat.messages].sort(
+        (left, right) => right.createdAt.getTime() - left.createdAt.getTime(),
+      )[0] ?? null;
+
+    return {
+      id: chat.id,
+      title: chat.title,
+      organizationId: chat.organizationId,
+      createdByUserId: chat.createdByUserId,
+      selectedDocumentIds: chat.selectedDocuments.map((item) => item.documentId),
+      selectedDocuments: selectedDocuments.map((document) => ({
+        id: document.id,
+        name: document.name,
+        originalFilename: document.originalFilename,
+        extension: document.extension,
+      })),
+      lastMessage: lastMessage
+        ? {
+            id: lastMessage.id,
+            role: lastMessage.role,
+            content: lastMessage.content,
+            createdAt: lastMessage.createdAt,
+          }
+        : null,
+      createdAt: chat.createdAt,
+      updatedAt: chat.updatedAt,
+    };
+  }
+
+  private buildRagChatTitle(query: string): string {
+    const normalized = query.replace(/\s+/g, ' ').trim();
+
+    if (!normalized) return 'New document chat';
+
+    return normalized.length > 72 ? `${normalized.slice(0, 72)}...` : normalized;
+  }
+
+  private buildRagMessageSummary(value: string): string {
+    const normalized = value.replace(/\s+/g, ' ').trim();
+
+    return normalized.length > 280 ? `${normalized.slice(0, 280)}...` : normalized;
+  }
+
+  private toNullableInteger(value: unknown): number | null {
+    const parsedValue = Number(value);
+
+    return Number.isSafeInteger(parsedValue) ? parsedValue : null;
+  }
+
+  private truncateNullable(
+    value: string | null | undefined,
+    maxLength: number,
+  ): string | null {
+    if (typeof value !== 'string') return null;
+
+    const normalized = value.trim();
+
+    if (!normalized) return null;
+
+    return normalized.length > maxLength
+      ? normalized.slice(0, maxLength)
+      : normalized;
+  }
+
   private assertRagConfigured(): void {
     if (!this.ragOrchestrator.isConfigured()) {
       throw new ServiceUnavailableException(
@@ -2040,7 +2589,21 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
   private async scheduleRagIngestion(document: DocumentRecord): Promise<void> {
     await this.markRagIndexPending(document).catch(() => undefined);
 
+    this.logger.log(
+      formatSafeLogEvent('rag_prepare_queued', {
+        documentId: document.id,
+        organizationId: document.organizationId,
+        versionNumber: document.versions[0]?.versionNumber ?? 1,
+      }),
+    );
+
     if (!this.ragOrchestrator.isConfigured()) {
+      this.logger.warn(
+        formatSafeLogEvent('rag_prepare_skipped_unconfigured', {
+          documentId: document.id,
+          organizationId: document.organizationId,
+        }),
+      );
       return;
     }
 
@@ -2054,18 +2617,47 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       })
       .catch(() => undefined);
 
+    const startedAt = Date.now();
+
+    this.logger.log(
+      formatSafeLogEvent('rag_prepare_started', {
+        documentId: document.id,
+        organizationId: document.organizationId,
+        fileType: document.extension,
+      }),
+    );
+
     try {
       const result = await this.ragOrchestrator.ingest(
         this.toRagIngestPayload(document),
       );
 
-      if (!result) return;
+      if (!result) {
+        this.logger.warn(
+          formatSafeLogEvent('rag_prepare_no_result', {
+            documentId: document.id,
+            organizationId: document.organizationId,
+            durationMs: Date.now() - startedAt,
+          }),
+        );
+        return;
+      }
 
       await this.applyRagIngestResult(
         result.document_id,
         result.status,
         result.chunks_created,
         result.error_message ?? null,
+      );
+
+      this.logger.log(
+        formatSafeLogEvent('rag_prepare_completed', {
+          documentId: document.id,
+          organizationId: document.organizationId,
+          status: result.status,
+          chunksCreated: result.chunks_created,
+          durationMs: Date.now() - startedAt,
+        }),
       );
     } catch (error: unknown) {
       await this.applyRagIngestResult(
@@ -2074,7 +2666,134 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
         0,
         String(error).slice(0, 1000),
       ).catch(() => undefined);
+
+      this.logger.warn(
+        formatSafeLogEvent('rag_prepare_failed', {
+          documentId: document.id,
+          organizationId: document.organizationId,
+          durationMs: Date.now() - startedAt,
+          retryAfterMs: 2 * 60 * 1000,
+          ...safeErrorFields(error),
+        }),
+      );
     }
+  }
+
+  async recoverRagIndexes(options?: {
+    batchSize?: number;
+    failedRetryAfterMs?: number;
+    staleIndexingAfterMs?: number;
+  }): Promise<{
+    queued: number;
+    pendingQueued: number;
+    failedRetryQueued: number;
+    staleReset: number;
+  }> {
+    if (!this.ragOrchestrator.isConfigured()) {
+      return {
+        queued: 0,
+        pendingQueued: 0,
+        failedRetryQueued: 0,
+        staleReset: 0,
+      };
+    }
+
+    const batchSize = Math.max(1, Math.min(options?.batchSize ?? 3, 10));
+    const failedRetryAfterMs = Math.max(
+      options?.failedRetryAfterMs ?? 2 * 60 * 1000,
+      60 * 1000,
+    );
+    const staleIndexingAfterMs = Math.max(
+      options?.staleIndexingAfterMs ?? 35 * 60 * 1000,
+      5 * 60 * 1000,
+    );
+    const now = Date.now();
+    const staleIndexingCutoff = new Date(now - staleIndexingAfterMs);
+    const failedRetryCutoff = new Date(now - failedRetryAfterMs);
+
+    const staleReset = await this.prisma.documentRagIndex.updateMany({
+      where: {
+        status: DocumentRagIndexStatus.INDEXING,
+        updatedAt: { lt: staleIndexingCutoff },
+      },
+      data: {
+        status: DocumentRagIndexStatus.PENDING,
+        errorMessage:
+          'Previous document preparation took too long and was queued again.',
+      },
+    });
+
+    if (staleReset.count > 0) {
+      this.logger.warn(
+        formatSafeLogEvent('rag_stale_processing_reset', {
+          count: staleReset.count,
+          staleIndexingAfterMs,
+        }),
+      );
+    }
+
+    const candidates = await this.prisma.documentRagIndex.findMany({
+      where: {
+        document: { status: DocumentStatus.ACTIVE },
+        OR: [
+          { status: DocumentRagIndexStatus.PENDING },
+          {
+            status: DocumentRagIndexStatus.FAILED,
+            updatedAt: { lt: failedRetryCutoff },
+          },
+        ],
+      },
+      select: {
+        status: true,
+        document: {
+          select: documentSelect,
+        },
+      },
+      orderBy: [{ updatedAt: 'asc' }, { id: 'asc' }],
+      take: batchSize,
+    });
+    const documents = candidates.map((candidate) => candidate.document);
+    const failedRetryQueued = candidates.filter(
+      (candidate) => candidate.status === DocumentRagIndexStatus.FAILED,
+    ).length;
+    const pendingQueued = candidates.filter(
+      (candidate) => candidate.status === DocumentRagIndexStatus.PENDING,
+    ).length;
+
+    if (documents.length === 0) {
+      return {
+        queued: 0,
+        pendingQueued: 0,
+        failedRetryQueued: 0,
+        staleReset: staleReset.count,
+      };
+    }
+
+    await Promise.all(
+      documents.map((document) => this.markRagIndexing(document)),
+    );
+
+    void this.runRagReindexInBackground(
+      documents.map((document) => this.toRagIngestPayload(document)),
+    );
+
+    this.logger.log(
+      formatSafeLogEvent('rag_recovery_queued', {
+        queued: documents.length,
+        pendingQueued,
+        failedRetryQueued,
+        failedRetryAfterMs,
+        staleReset: staleReset.count,
+        documentIds: documents.map((document) => document.id),
+      }),
+    );
+
+    return {
+      queued: documents.length,
+      pendingQueued,
+      failedRetryQueued,
+      staleReset: staleReset.count,
+    };
   }
 
   private async markRagIndexPending(document: DocumentRecord): Promise<void> {
@@ -2136,10 +2855,28 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
   ): Promise<void> {
     const startedAt = Date.now();
 
+    this.logger.log(
+      formatSafeLogEvent('rag_reindex_batch_started', {
+        documents: payloads.length,
+        documentIds: payloads.map((payload) => payload.document_id),
+        organizationIds: [
+          ...new Set(payloads.map((payload) => payload.organization_id)),
+        ],
+      }),
+    );
+
     try {
       const results = await this.ragOrchestrator.reindex(payloads);
 
-      if (!results) return;
+      if (!results) {
+        this.logger.warn(
+          formatSafeLogEvent('rag_reindex_batch_no_result', {
+            documents: payloads.length,
+            durationMs: Date.now() - startedAt,
+          }),
+        );
+        return;
+      }
 
       await Promise.all(
         results.map((result) =>
@@ -2152,16 +2889,34 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
         ),
       );
       this.logger.log(
-        `Background RAG reindex completed for ${
-          results.length
-        } document(s) in ${Date.now() - startedAt}ms.`,
+        formatSafeLogEvent('rag_reindex_batch_completed', {
+          documents: results.length,
+          indexed: results.filter(
+            (result) => result.status === DocumentRagIndexStatus.INDEXED,
+          ).length,
+          failed: results.filter(
+            (result) => result.status === DocumentRagIndexStatus.FAILED,
+          ).length,
+          noContent: results.filter(
+            (result) => result.status === DocumentRagIndexStatus.NO_CONTENT,
+          ).length,
+          totalChunks: results.reduce(
+            (sum, result) => sum + (result.chunks_created ?? 0),
+            0,
+          ),
+          durationMs: Date.now() - startedAt,
+        }),
       );
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Document AI reindex failed.';
 
       this.logger.warn(
-        `Background RAG reindex failed for ${payloads.length} document(s): ${message}`,
+        formatSafeLogEvent('rag_reindex_batch_failed', {
+          documents: payloads.length,
+          durationMs: Date.now() - startedAt,
+          ...safeErrorFields(error),
+        }),
       );
       await Promise.all(
         payloads.map((payload) =>

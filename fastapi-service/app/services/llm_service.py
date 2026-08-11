@@ -197,11 +197,12 @@ class LlmService:
         excerpts = []
 
         for index, result in enumerate(results, start=1):
+            location = self._source_location_label(result)
             excerpts.append(
                 "\n".join(
                     [
                         f'Source [{index}] "{result.document_name}" '
-                        f"(version {result.version_number}, chunk {result.chunk_index + 1}):",
+                        f"(version {result.version_number}, {location}):",
                         result.text,
                     ]
                 )
@@ -220,7 +221,7 @@ class LlmService:
                 "- Leave a blank line before and after bullet lists.",
                 "- Use bold only for short labels inside bullets, for example '- **Requirement:** ...'.",
                 "- Cite evidence naturally using source numbers like [1] or [2].",
-                "- Do not mention chunk numbers unless the user asks for technical trace details.",
+                "- Do not mention chunk numbers. Use the source numbers and available page/slide/line locations.",
                 "- If excerpts disagree, explain the conflict and cite both sources.",
                 "- If the excerpts are weak or incomplete, say exactly what is missing.",
                 "- If the answer is not present in the excerpts, say: \"I could not find this in the selected documents.\"",
@@ -239,3 +240,31 @@ class LlmService:
                 "Final answer:",
             ]
         )
+
+    def _source_location_label(self, result: RagSearchResult) -> str:
+        metadata = result.metadata or {}
+        location_label = metadata.get("location_label")
+
+        if isinstance(location_label, str) and location_label.strip():
+            return location_label.strip()
+
+        page_number = self._safe_int(metadata.get("page_number"))
+        if page_number is not None:
+            return f"Page {page_number}"
+
+        slide_number = self._safe_int(metadata.get("slide_number"))
+        if slide_number is not None:
+            return f"Slide {slide_number}"
+
+        line_start = self._safe_int(metadata.get("line_start"))
+        line_end = self._safe_int(metadata.get("line_end"))
+        if line_start is not None and line_end is not None:
+            return f"Lines {line_start}-{line_end}" if line_start != line_end else f"Line {line_start}"
+
+        return "source location available"
+
+    def _safe_int(self, value: object) -> int | None:
+        try:
+            return int(value) if value is not None else None
+        except (TypeError, ValueError):
+            return None

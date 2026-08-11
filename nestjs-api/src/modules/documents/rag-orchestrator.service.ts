@@ -55,6 +55,16 @@ export interface RagAskResponse {
     document_name: string;
     chunk_index: number;
     version_number: number;
+    file_type?: string | null;
+    score?: number | null;
+    page_number?: number | null;
+    slide_number?: number | null;
+    sheet_name?: string | null;
+    line_start?: number | null;
+    line_end?: number | null;
+    section_title?: string | null;
+    location_label?: string | null;
+    metadata?: Record<string, unknown>;
   }>;
   search_results: RagSearchResult[];
   llm_model?: string | null;

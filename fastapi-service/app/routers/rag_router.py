@@ -45,6 +45,24 @@ def _llm_service(request: Request) -> LlmService:
     return request.app.state.llm_service
 
 
+def _metadata_int(metadata: dict[str, object], key: str) -> int | None:
+    value = metadata.get(key)
+
+    try:
+        return int(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _metadata_str(metadata: dict[str, object], key: str) -> str | None:
+    value = metadata.get(key)
+
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+
+    return None
+
+
 @router.post(
     "/ingest",
     response_model=IngestDocumentResponse,
@@ -97,6 +115,16 @@ def ask_documents(payload: RagQueryRequest, request: Request) -> RagAskResponse:
             document_name=result.document_name,
             chunk_index=result.chunk_index,
             version_number=result.version_number,
+            file_type=result.file_type,
+            score=result.score,
+            page_number=_metadata_int(result.metadata, "page_number"),
+            slide_number=_metadata_int(result.metadata, "slide_number"),
+            sheet_name=_metadata_str(result.metadata, "sheet_name"),
+            line_start=_metadata_int(result.metadata, "line_start"),
+            line_end=_metadata_int(result.metadata, "line_end"),
+            section_title=_metadata_str(result.metadata, "section_title"),
+            location_label=_metadata_str(result.metadata, "location_label"),
+            metadata=result.metadata,
         )
         for result in search_response.results
     ]

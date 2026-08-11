@@ -225,6 +225,7 @@ export type UserWhereInput = {
   joinRequestsReviewed?: Prisma.JoinRequestListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   documentsCreated?: Prisma.DocumentListRelationFilter
+  ragChatSessions?: Prisma.RagChatSessionListRelationFilter
   documentVersionsCreated?: Prisma.DocumentVersionListRelationFilter
   documentUserDeletions?: Prisma.DocumentListRelationFilter
   documentOrgDeletions?: Prisma.DocumentListRelationFilter
@@ -260,6 +261,7 @@ export type UserOrderByWithRelationInput = {
   joinRequestsReviewed?: Prisma.JoinRequestOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   documentsCreated?: Prisma.DocumentOrderByRelationAggregateInput
+  ragChatSessions?: Prisma.RagChatSessionOrderByRelationAggregateInput
   documentVersionsCreated?: Prisma.DocumentVersionOrderByRelationAggregateInput
   documentUserDeletions?: Prisma.DocumentOrderByRelationAggregateInput
   documentOrgDeletions?: Prisma.DocumentOrderByRelationAggregateInput
@@ -298,6 +300,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   joinRequestsReviewed?: Prisma.JoinRequestListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   documentsCreated?: Prisma.DocumentListRelationFilter
+  ragChatSessions?: Prisma.RagChatSessionListRelationFilter
   documentVersionsCreated?: Prisma.DocumentVersionListRelationFilter
   documentUserDeletions?: Prisma.DocumentListRelationFilter
   documentOrgDeletions?: Prisma.DocumentListRelationFilter
@@ -363,6 +366,7 @@ export type UserCreateInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -398,6 +402,7 @@ export type UserUncheckedCreateInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -433,6 +438,7 @@ export type UserUpdateInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -468,6 +474,7 @@ export type UserUncheckedUpdateInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -874,6 +881,20 @@ export type UserUpdateOneWithoutDocumentPurgesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentPurgesInput, Prisma.UserUpdateWithoutDocumentPurgesInput>, Prisma.UserUncheckedUpdateWithoutDocumentPurgesInput>
 }
 
+export type UserCreateNestedOneWithoutRagChatSessionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRagChatSessionsInput, Prisma.UserUncheckedCreateWithoutRagChatSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRagChatSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutRagChatSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRagChatSessionsInput, Prisma.UserUncheckedCreateWithoutRagChatSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRagChatSessionsInput
+  upsert?: Prisma.UserUpsertWithoutRagChatSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRagChatSessionsInput, Prisma.UserUpdateWithoutRagChatSessionsInput>, Prisma.UserUncheckedUpdateWithoutRagChatSessionsInput>
+}
+
 export type UserCreateNestedOneWithoutDocumentVersionsCreatedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentVersionsCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentVersionsCreatedInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentVersionsCreatedInput
@@ -950,6 +971,7 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -984,6 +1006,7 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -1034,6 +1057,7 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -1068,6 +1092,7 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -1102,6 +1127,7 @@ export type UserCreateWithoutPasswordResetAuthorizationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -1136,6 +1162,7 @@ export type UserUncheckedCreateWithoutPasswordResetAuthorizationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -1186,6 +1213,7 @@ export type UserUpdateWithoutPasswordResetAuthorizationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -1220,6 +1248,7 @@ export type UserUncheckedUpdateWithoutPasswordResetAuthorizationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -1254,6 +1283,7 @@ export type UserCreateWithoutSessionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -1288,6 +1318,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -1338,6 +1369,7 @@ export type UserUpdateWithoutSessionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -1372,6 +1404,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -1406,6 +1439,7 @@ export type UserCreateWithoutCreatedOrganizationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -1440,6 +1474,7 @@ export type UserUncheckedCreateWithoutCreatedOrganizationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -1490,6 +1525,7 @@ export type UserUpdateWithoutCreatedOrganizationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -1524,6 +1560,7 @@ export type UserUncheckedUpdateWithoutCreatedOrganizationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -1558,6 +1595,7 @@ export type UserCreateWithoutOrganizationMembershipsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -1592,6 +1630,7 @@ export type UserUncheckedCreateWithoutOrganizationMembershipsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -1642,6 +1681,7 @@ export type UserUpdateWithoutOrganizationMembershipsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -1676,6 +1716,7 @@ export type UserUncheckedUpdateWithoutOrganizationMembershipsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -1711,6 +1752,7 @@ export type UserCreateWithoutRolePermissionGrantsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -1745,6 +1787,7 @@ export type UserUncheckedCreateWithoutRolePermissionGrantsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -1795,6 +1838,7 @@ export type UserUpdateWithoutRolePermissionGrantsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -1829,6 +1873,7 @@ export type UserUncheckedUpdateWithoutRolePermissionGrantsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -1863,6 +1908,7 @@ export type UserCreateWithoutMembershipRoleAssignmentsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -1897,6 +1943,7 @@ export type UserUncheckedCreateWithoutMembershipRoleAssignmentsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -1947,6 +1994,7 @@ export type UserUpdateWithoutMembershipRoleAssignmentsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -1981,6 +2029,7 @@ export type UserUncheckedUpdateWithoutMembershipRoleAssignmentsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -2015,6 +2064,7 @@ export type UserCreateWithoutPlatformRoleAssignmentsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -2049,6 +2099,7 @@ export type UserUncheckedCreateWithoutPlatformRoleAssignmentsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -2088,6 +2139,7 @@ export type UserCreateWithoutPlatformRoleAssignmentsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -2122,6 +2174,7 @@ export type UserUncheckedCreateWithoutPlatformRoleAssignmentsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -2172,6 +2225,7 @@ export type UserUpdateWithoutPlatformRoleAssignmentsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -2206,6 +2260,7 @@ export type UserUncheckedUpdateWithoutPlatformRoleAssignmentsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -2251,6 +2306,7 @@ export type UserUpdateWithoutPlatformRoleAssignmentsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -2285,6 +2341,7 @@ export type UserUncheckedUpdateWithoutPlatformRoleAssignmentsMadeInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -2318,6 +2375,7 @@ export type UserCreateWithoutOrganizationInvitesSentInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -2352,6 +2410,7 @@ export type UserUncheckedCreateWithoutOrganizationInvitesSentInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -2391,6 +2450,7 @@ export type UserCreateWithoutOrganizationInvitesAcceptedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -2425,6 +2485,7 @@ export type UserUncheckedCreateWithoutOrganizationInvitesAcceptedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -2475,6 +2536,7 @@ export type UserUpdateWithoutOrganizationInvitesSentInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -2509,6 +2571,7 @@ export type UserUncheckedUpdateWithoutOrganizationInvitesSentInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -2554,6 +2617,7 @@ export type UserUpdateWithoutOrganizationInvitesAcceptedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -2588,6 +2652,7 @@ export type UserUncheckedUpdateWithoutOrganizationInvitesAcceptedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -2622,6 +2687,7 @@ export type UserCreateWithoutJoinRequestsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -2656,6 +2722,7 @@ export type UserUncheckedCreateWithoutJoinRequestsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -2695,6 +2762,7 @@ export type UserCreateWithoutJoinRequestsReviewedInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -2729,6 +2797,7 @@ export type UserUncheckedCreateWithoutJoinRequestsReviewedInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -2779,6 +2848,7 @@ export type UserUpdateWithoutJoinRequestsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -2813,6 +2883,7 @@ export type UserUncheckedUpdateWithoutJoinRequestsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -2858,6 +2929,7 @@ export type UserUpdateWithoutJoinRequestsReviewedInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -2892,6 +2964,7 @@ export type UserUncheckedUpdateWithoutJoinRequestsReviewedInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -2926,6 +2999,7 @@ export type UserCreateWithoutAuditLogsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -2960,6 +3034,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -3010,6 +3085,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -3044,6 +3120,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -3078,6 +3155,7 @@ export type UserCreateWithoutDocumentsCreatedInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -3112,6 +3190,7 @@ export type UserUncheckedCreateWithoutDocumentsCreatedInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -3152,6 +3231,7 @@ export type UserCreateWithoutDocumentUserDeletionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
   documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
@@ -3186,6 +3266,7 @@ export type UserUncheckedCreateWithoutDocumentUserDeletionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
   documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
@@ -3225,6 +3306,7 @@ export type UserCreateWithoutDocumentOrgDeletionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
@@ -3259,6 +3341,7 @@ export type UserUncheckedCreateWithoutDocumentOrgDeletionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
@@ -3298,6 +3381,7 @@ export type UserCreateWithoutDocumentRestorationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -3332,6 +3416,7 @@ export type UserUncheckedCreateWithoutDocumentRestorationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -3371,6 +3456,7 @@ export type UserCreateWithoutDocumentPurgesInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -3405,6 +3491,7 @@ export type UserUncheckedCreateWithoutDocumentPurgesInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -3454,6 +3541,7 @@ export type UserUpdateWithoutDocumentsCreatedInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -3488,6 +3576,7 @@ export type UserUncheckedUpdateWithoutDocumentsCreatedInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -3534,6 +3623,7 @@ export type UserUpdateWithoutDocumentUserDeletionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
   documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
@@ -3568,6 +3658,7 @@ export type UserUncheckedUpdateWithoutDocumentUserDeletionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
   documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
@@ -3613,6 +3704,7 @@ export type UserUpdateWithoutDocumentOrgDeletionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
@@ -3647,6 +3739,7 @@ export type UserUncheckedUpdateWithoutDocumentOrgDeletionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
@@ -3692,6 +3785,7 @@ export type UserUpdateWithoutDocumentRestorationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -3726,6 +3820,7 @@ export type UserUncheckedUpdateWithoutDocumentRestorationsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -3771,6 +3866,7 @@ export type UserUpdateWithoutDocumentPurgesInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -3805,10 +3901,167 @@ export type UserUncheckedUpdateWithoutDocumentPurgesInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
   documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserCreateWithoutRagChatSessionsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserUncheckedCreateWithoutRagChatSessionsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  passwordHash: string
+  isVerified?: boolean
+  isActive?: boolean
+  deactivatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedCreateNestedManyWithoutUserInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  createdOrganizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutCreatedByInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutAcceptedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
+  documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
+  documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
+  documentPurges?: Prisma.DocumentUncheckedCreateNestedManyWithoutPurgedByInput
+  documentAccessGrants?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutUserInput
+  documentAccessGranted?: Prisma.DocumentAccessUncheckedCreateNestedManyWithoutGrantedByInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutCreatedByInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutUserInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUncheckedCreateNestedManyWithoutAssignedByInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUncheckedCreateNestedManyWithoutGrantedByInput
+}
+
+export type UserCreateOrConnectWithoutRagChatSessionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRagChatSessionsInput, Prisma.UserUncheckedCreateWithoutRagChatSessionsInput>
+}
+
+export type UserUpsertWithoutRagChatSessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRagChatSessionsInput, Prisma.UserUncheckedUpdateWithoutRagChatSessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRagChatSessionsInput, Prisma.UserUncheckedCreateWithoutRagChatSessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutRagChatSessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRagChatSessionsInput, Prisma.UserUncheckedUpdateWithoutRagChatSessionsInput>
+}
+
+export type UserUpdateWithoutRagChatSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUpdateManyWithoutPurgedByNestedInput
+  documentAccessGrants?: Prisma.DocumentAccessUpdateManyWithoutUserNestedInput
+  documentAccessGranted?: Prisma.DocumentAccessUpdateManyWithoutGrantedByNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutCreatedByNestedInput
+  platformRoleAssignments?: Prisma.PlatformUserRoleUpdateManyWithoutUserNestedInput
+  platformRoleAssignmentsMade?: Prisma.PlatformUserRoleUpdateManyWithoutAssignedByNestedInput
+  membershipRoleAssignmentsMade?: Prisma.MembershipRoleUpdateManyWithoutAssignedByNestedInput
+  rolePermissionGrantsMade?: Prisma.RolePermissionUpdateManyWithoutGrantedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutRagChatSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deactivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetAuthorizations?: Prisma.PasswordResetAuthorizationUncheckedUpdateManyWithoutUserNestedInput
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  createdOrganizations?: Prisma.OrganizationUncheckedUpdateManyWithoutCreatedByNestedInput
+  organizationInvitesSent?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  organizationInvitesAccepted?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutAcceptedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
+  documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
+  documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
+  documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
+  documentPurges?: Prisma.DocumentUncheckedUpdateManyWithoutPurgedByNestedInput
   documentAccessGrants?: Prisma.DocumentAccessUncheckedUpdateManyWithoutUserNestedInput
   documentAccessGranted?: Prisma.DocumentAccessUncheckedUpdateManyWithoutGrantedByNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -3839,6 +4092,7 @@ export type UserCreateWithoutDocumentVersionsCreatedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
   documentRestorations?: Prisma.DocumentCreateNestedManyWithoutRestoredByInput
@@ -3873,6 +4127,7 @@ export type UserUncheckedCreateWithoutDocumentVersionsCreatedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
   documentRestorations?: Prisma.DocumentUncheckedCreateNestedManyWithoutRestoredByInput
@@ -3923,6 +4178,7 @@ export type UserUpdateWithoutDocumentVersionsCreatedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
   documentRestorations?: Prisma.DocumentUpdateManyWithoutRestoredByNestedInput
@@ -3957,6 +4213,7 @@ export type UserUncheckedUpdateWithoutDocumentVersionsCreatedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
   documentRestorations?: Prisma.DocumentUncheckedUpdateManyWithoutRestoredByNestedInput
@@ -3991,6 +4248,7 @@ export type UserCreateWithoutDocumentAccessGrantsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -4025,6 +4283,7 @@ export type UserUncheckedCreateWithoutDocumentAccessGrantsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -4064,6 +4323,7 @@ export type UserCreateWithoutDocumentAccessGrantedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -4098,6 +4358,7 @@ export type UserUncheckedCreateWithoutDocumentAccessGrantedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -4148,6 +4409,7 @@ export type UserUpdateWithoutDocumentAccessGrantsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -4182,6 +4444,7 @@ export type UserUncheckedUpdateWithoutDocumentAccessGrantsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -4227,6 +4490,7 @@ export type UserUpdateWithoutDocumentAccessGrantedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -4261,6 +4525,7 @@ export type UserUncheckedUpdateWithoutDocumentAccessGrantedInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -4295,6 +4560,7 @@ export type UserCreateWithoutDocumentUploadSessionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentCreateNestedManyWithoutOrgDeletedByInput
@@ -4329,6 +4595,7 @@ export type UserUncheckedCreateWithoutDocumentUploadSessionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutReviewedByInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   documentsCreated?: Prisma.DocumentUncheckedCreateNestedManyWithoutCreatedByInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutCreatedByInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutCreatedByInput
   documentUserDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserDeletedByInput
   documentOrgDeletions?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrgDeletedByInput
@@ -4379,6 +4646,7 @@ export type UserUpdateWithoutDocumentUploadSessionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUpdateManyWithoutOrgDeletedByNestedInput
@@ -4413,6 +4681,7 @@ export type UserUncheckedUpdateWithoutDocumentUploadSessionsInput = {
   joinRequestsReviewed?: Prisma.JoinRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   documentsCreated?: Prisma.DocumentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentVersionsCreated?: Prisma.DocumentVersionUncheckedUpdateManyWithoutCreatedByNestedInput
   documentUserDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutUserDeletedByNestedInput
   documentOrgDeletions?: Prisma.DocumentUncheckedUpdateManyWithoutOrgDeletedByNestedInput
@@ -4443,6 +4712,7 @@ export type UserCountOutputType = {
   joinRequestsReviewed: number
   auditLogs: number
   documentsCreated: number
+  ragChatSessions: number
   documentVersionsCreated: number
   documentUserDeletions: number
   documentOrgDeletions: number
@@ -4469,6 +4739,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   joinRequestsReviewed?: boolean | UserCountOutputTypeCountJoinRequestsReviewedArgs
   auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
   documentsCreated?: boolean | UserCountOutputTypeCountDocumentsCreatedArgs
+  ragChatSessions?: boolean | UserCountOutputTypeCountRagChatSessionsArgs
   documentVersionsCreated?: boolean | UserCountOutputTypeCountDocumentVersionsCreatedArgs
   documentUserDeletions?: boolean | UserCountOutputTypeCountDocumentUserDeletionsArgs
   documentOrgDeletions?: boolean | UserCountOutputTypeCountDocumentOrgDeletionsArgs
@@ -4568,6 +4839,13 @@ export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.
  */
 export type UserCountOutputTypeCountDocumentsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRagChatSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RagChatSessionWhereInput
 }
 
 /**
@@ -4676,6 +4954,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   joinRequestsReviewed?: boolean | Prisma.User$joinRequestsReviewedArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   documentsCreated?: boolean | Prisma.User$documentsCreatedArgs<ExtArgs>
+  ragChatSessions?: boolean | Prisma.User$ragChatSessionsArgs<ExtArgs>
   documentVersionsCreated?: boolean | Prisma.User$documentVersionsCreatedArgs<ExtArgs>
   documentUserDeletions?: boolean | Prisma.User$documentUserDeletionsArgs<ExtArgs>
   documentOrgDeletions?: boolean | Prisma.User$documentOrgDeletionsArgs<ExtArgs>
@@ -4740,6 +5019,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   joinRequestsReviewed?: boolean | Prisma.User$joinRequestsReviewedArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   documentsCreated?: boolean | Prisma.User$documentsCreatedArgs<ExtArgs>
+  ragChatSessions?: boolean | Prisma.User$ragChatSessionsArgs<ExtArgs>
   documentVersionsCreated?: boolean | Prisma.User$documentVersionsCreatedArgs<ExtArgs>
   documentUserDeletions?: boolean | Prisma.User$documentUserDeletionsArgs<ExtArgs>
   documentOrgDeletions?: boolean | Prisma.User$documentOrgDeletionsArgs<ExtArgs>
@@ -4771,6 +5051,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     joinRequestsReviewed: Prisma.$JoinRequestPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     documentsCreated: Prisma.$DocumentPayload<ExtArgs>[]
+    ragChatSessions: Prisma.$RagChatSessionPayload<ExtArgs>[]
     documentVersionsCreated: Prisma.$DocumentVersionPayload<ExtArgs>[]
     documentUserDeletions: Prisma.$DocumentPayload<ExtArgs>[]
     documentOrgDeletions: Prisma.$DocumentPayload<ExtArgs>[]
@@ -5199,6 +5480,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   joinRequestsReviewed<T extends Prisma.User$joinRequestsReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$joinRequestsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentsCreated<T extends Prisma.User$documentsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ragChatSessions<T extends Prisma.User$ragChatSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ragChatSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RagChatSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentVersionsCreated<T extends Prisma.User$documentVersionsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentVersionsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentUserDeletions<T extends Prisma.User$documentUserDeletionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentUserDeletionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentOrgDeletions<T extends Prisma.User$documentOrgDeletionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentOrgDeletionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5903,6 +6185,30 @@ export type User$documentsCreatedArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * User.ragChatSessions
+ */
+export type User$ragChatSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RagChatSession
+   */
+  select?: Prisma.RagChatSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RagChatSession
+   */
+  omit?: Prisma.RagChatSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RagChatSessionInclude<ExtArgs> | null
+  where?: Prisma.RagChatSessionWhereInput
+  orderBy?: Prisma.RagChatSessionOrderByWithRelationInput | Prisma.RagChatSessionOrderByWithRelationInput[]
+  cursor?: Prisma.RagChatSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RagChatSessionScalarFieldEnum | Prisma.RagChatSessionScalarFieldEnum[]
 }
 
 /**

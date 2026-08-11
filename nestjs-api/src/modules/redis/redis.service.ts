@@ -69,6 +69,8 @@ const emailVerificationRateLimitKey = (identifier: string): string =>
   `email-verification-rate:${createHash('sha256').update(identifier).digest('hex')}`;
 const emailVerificationCooldownKey = (email: string): string =>
   `email-verification-cooldown:${createHash('sha256').update(email).digest('hex')}`;
+const genericRateLimitKey = (namespace: string, identifier: string): string =>
+  `rate-limit:${namespace}:${createHash('sha256').update(identifier).digest('hex')}`;
 
 export interface LoginFailureState {
   attempts: number;
@@ -237,6 +239,22 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async releaseEmailVerificationCooldown(email: string): Promise<void> {
     await this.client.del(emailVerificationCooldownKey(email));
+  }
+
+  async recordRateLimitAttempt(
+    namespace: string,
+    identifier: string,
+    windowSeconds: number,
+  ): Promise<LoginFailureState> {
+    if (!/^[a-z0-9:-]+$/i.test(namespace)) {
+      throw new TypeError('Rate-limit namespace contains unsafe characters.');
+    }
+
+    return this.recordWindowAttempt(
+      genericRateLimitKey(namespace, identifier),
+      windowSeconds,
+      'API rate-limit window',
+    );
   }
 
   async storePasswordResetOtp(
