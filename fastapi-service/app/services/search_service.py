@@ -1,3 +1,4 @@
+import logging
 import re
 import time
 
@@ -14,24 +15,63 @@ from app.services.reranker_service import RerankerService
 
 
 TOKEN_PATTERN = re.compile(r"[a-z0-9]+", re.IGNORECASE)
+logger = logging.getLogger(__name__)
 
 
 class SearchService:
-    def __init__(self) -> None:
-        self.embedding_service = EmbeddingService()
-        self.qdrant_service = QdrantService()
-        self.reranker_service = RerankerService()
+    def __init__(
+        self,
+        *,
+        embedding_service: EmbeddingService | None = None,
+        qdrant_service: QdrantService | None = None,
+        reranker_service: RerankerService | None = None,
+    ) -> None:
+        self.embedding_service = embedding_service or EmbeddingService()
+        self.qdrant_service = qdrant_service or QdrantService()
+        self.reranker_service = reranker_service or RerankerService()
 
     def search(self, request: RagQueryRequest) -> RagSearchResponse:
         started = time.perf_counter()
         candidate_k = self._candidate_k()
+        logger.info(
+            "RAG search started organization_id=%s allowed_documents=%s search_type=%s candidate_k=%s",
+            request.organization_id,
+            len(request.allowed_document_ids),
+            request.search_type,
+            candidate_k,
+        )
+        stage_started = time.perf_counter()
         candidates = self._retrieve_candidates(request, candidate_k)
+        logger.info(
+            "RAG search retrieved candidates=%s elapsed_ms=%s",
+            len(candidates),
+            int((time.perf_counter() - stage_started) * 1000),
+        )
+        stage_started = time.perf_counter()
         relevant_candidates = self._filter_relevant_candidates(candidates)
+        logger.info(
+            "RAG search relevance filtered candidates=%s elapsed_ms=%s",
+            len(relevant_candidates),
+            int((time.perf_counter() - stage_started) * 1000),
+        )
+        stage_started = time.perf_counter()
         reranked_candidates = self.reranker_service.rerank(
             request.query,
             relevant_candidates,
         )
+        logger.info(
+            "RAG search reranked candidates=%s elapsed_ms=%s",
+            len(reranked_candidates),
+            int((time.perf_counter() - stage_started) * 1000),
+        )
+        stage_started = time.perf_counter()
         selected_results = self._select_context_chunks(reranked_candidates)
+        logger.info(
+            "RAG search selected final_chunks=%s elapsed_ms=%s total_elapsed_ms=%s",
+            len(selected_results),
+            int((time.perf_counter() - stage_started) * 1000),
+            int((time.perf_counter() - started) * 1000),
+        )
 
         return RagSearchResponse(
             results=selected_results,

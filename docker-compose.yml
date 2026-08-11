@@ -77,8 +77,13 @@ services:
     environment:
       MINIO_ENDPOINT: minio:9000
       QDRANT_HOST: qdrant
+      HF_HOME: /models/huggingface
+      SENTENCE_TRANSFORMERS_HOME: /models/sentence-transformers
+      TRANSFORMERS_CACHE: /models/huggingface
     ports:
       - "127.0.0.1:${FASTAPI_PORT:-8000}:8000"
+    volumes:
+      - rag_model_cache:/models
     depends_on:
       - minio
       - qdrant
@@ -88,3 +93,4 @@ volumes:
   redis_data:
   minio_data:
   qdrant_data:
+  rag_model_cache:

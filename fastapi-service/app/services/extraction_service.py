@@ -7,12 +7,6 @@ from html.parser import HTMLParser
 from pathlib import Path
 from xml.etree import ElementTree
 
-import fitz
-import pymupdf4llm
-from docx import Document
-from openpyxl import load_workbook
-from pptx import Presentation
-
 
 class _HtmlTextExtractor(HTMLParser):
     skip_tags = {"script", "style", "nav", "footer", "header"}
@@ -67,12 +61,16 @@ class ExtractionService:
         return text[: self.max_text_chars]
 
     def _extract_pdf(self, file_bytes: bytes, _: str) -> str:
+        import pymupdf4llm
+
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=True) as temp_file:
             temp_file.write(file_bytes)
             temp_file.flush()
             return pymupdf4llm.to_markdown(temp_file.name)
 
     def _extract_docx(self, file_bytes: bytes, _: str = "docx") -> str:
+        from docx import Document
+
         document = Document(io.BytesIO(file_bytes))
         parts = [paragraph.text for paragraph in document.paragraphs if paragraph.text.strip()]
 
@@ -88,6 +86,8 @@ class ExtractionService:
         return self._extract_docx(self._convert_legacy_office(file_bytes, extension, "docx"))
 
     def _extract_pptx(self, file_bytes: bytes, _: str = "pptx") -> str:
+        from pptx import Presentation
+
         presentation = Presentation(io.BytesIO(file_bytes))
         slides: list[str] = []
 
@@ -108,6 +108,8 @@ class ExtractionService:
         return self._extract_pptx(self._convert_legacy_office(file_bytes, extension, "pptx"))
 
     def _extract_xlsx(self, file_bytes: bytes, _: str) -> str:
+        from openpyxl import load_workbook
+
         workbook = load_workbook(io.BytesIO(file_bytes), read_only=True, data_only=True)
         output: list[str] = []
 
@@ -176,6 +178,8 @@ class ExtractionService:
         return "\n".join(flattened)
 
     def _extract_image(self, file_bytes: bytes, extension: str) -> str:
+        import fitz
+
         document = fitz.open(stream=file_bytes, filetype=extension)
         page = document[0]
         text = page.get_text("text")

@@ -37,6 +37,7 @@ import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-pr
 import { ORGANIZATION_PERMISSIONS } from './rbac.constants';
 import { AddOrganizationMemberDto } from './dto/add-organization-member.dto';
 import { ListMembersQueryDto } from './dto/list-members-query.dto';
+import { ListPeopleAccessQueryDto } from './dto/list-people-access-query.dto';
 import { OrganizationIdDto } from './dto/organization-id.dto';
 import { OrganizationMemberParamsDto } from './dto/organization-member-params.dto';
 import { ReplaceMemberRolesDto } from './dto/replace-member-roles.dto';
@@ -45,6 +46,7 @@ import {
   OrganizationMembersService,
   OrganizationMemberListResult,
   OrganizationMemberView,
+  PeopleAccessListResult,
 } from './organization-members.service';
 
 interface MemberListResult {
@@ -52,6 +54,10 @@ interface MemberListResult {
     members: OrganizationMemberView[];
     pagination: OrganizationMemberListResult['pagination'];
   };
+}
+
+interface PeopleAccessResult {
+  data: PeopleAccessListResult;
 }
 
 interface MemberResult {
@@ -124,6 +130,34 @@ export class OrganizationMembersController {
         members: result.members,
         pagination: result.pagination,
       },
+    };
+  }
+
+  @Get('people-access')
+  @HttpCode(HttpStatus.OK)
+  @RequireAnyOrganizationPermission(
+    ORGANIZATION_PERMISSIONS.membersManage,
+    ORGANIZATION_PERMISSIONS.analyticsView,
+    ORGANIZATION_PERMISSIONS.documentsRead,
+  )
+  @ApiOperation({
+    summary:
+      'List organization members, invitations, and access requests as one paginated table',
+  })
+  @ApiOkResponse({
+    description: 'Paginated organization people access rows',
+  })
+  async listPeopleAccess(
+    @Param() params: OrganizationIdDto,
+    @Query() query: ListPeopleAccessQueryDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Promise<PeopleAccessResult> {
+    return {
+      data: await this.organizationMembersService.listPeopleAccess(
+        params.organizationId,
+        principal.userId,
+        query,
+      ),
     };
   }
 
