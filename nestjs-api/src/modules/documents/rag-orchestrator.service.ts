@@ -57,6 +57,7 @@ export interface RagAskResponse {
     version_number: number;
     file_type?: string | null;
     score?: number | null;
+    text?: string | null;
     page_number?: number | null;
     slide_number?: number | null;
     sheet_name?: string | null;

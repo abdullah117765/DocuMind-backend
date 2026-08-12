@@ -80,6 +80,8 @@ import {
   RagSearchResponse,
 } from './rag-orchestrator.service';
 
+type RagAskSource = RagAskResponse['sources'][number];
+
 export interface RagQueueSummary {
   pending: number;
   indexing: number;
@@ -1645,6 +1647,25 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     return this.toStreamResult(document);
   }
 
+  async getPlatformDocumentPreview(
+    documentId: string,
+  ): Promise<Prisma.JsonValue | null> {
+    const document = await this.findPlatformDocumentRecord(documentId);
+
+    if (document.status === DocumentStatus.PURGED) {
+      throw new NotFoundException('Document content has been purged.');
+    }
+
+    const preview = await this.resolveLatestDocumentPreview(document);
+
+    if (!preview) return null;
+
+    return {
+      ...(preview as Record<string, unknown>),
+      contentPath: `/platform/documents/${documentId}/content`,
+    };
+  }
+
   async getDocument(
     organizationId: string,
     documentId: string,
@@ -1670,15 +1691,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       principal,
     );
 
-    const latestVersion = document.versions[0] ?? null;
-
-    let preview = latestVersion?.preview ?? null;
-
-    if (latestVersion && this.shouldRefreshPreview(document, preview)) {
-      preview = await this.refreshLatestDocumentPreview(document).catch(
-        () => preview,
-      );
-    }
+    const preview = await this.resolveLatestDocumentPreview(document);
 
     if (!preview) return null;
 
@@ -1686,6 +1699,24 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       ...(preview as Record<string, unknown>),
       contentPath: `/organizations/${organizationId}/documents/${documentId}/content`,
     };
+  }
+
+  private async resolveLatestDocumentPreview(
+    document: DocumentRecord,
+  ): Promise<Prisma.JsonValue | null> {
+    const latestVersion = document.versions[0] ?? null;
+
+    if (!latestVersion) return null;
+
+    let preview = latestVersion.preview ?? null;
+
+    if (this.shouldRefreshPreview(document, preview)) {
+      preview = await this.refreshLatestDocumentPreview(document).catch(
+        () => preview,
+      );
+    }
+
+    return preview;
   }
 
   async getDocumentContent(
@@ -1717,8 +1748,17 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     const previewRecord = preview as Record<string, unknown>;
     const kind = String(previewRecord.kind ?? '');
     const message = String(previewRecord.message ?? '').toLowerCase();
+    const previewAttemptedAt = previewRecord.previewAttemptedAt;
 
-    return kind === 'legacy-office' || message.includes('libreoffice');
+    if (kind === 'legacy-office' || message.includes('libreoffice')) {
+      return true;
+    }
+
+    return (
+      previewRecord.previewAvailable === false &&
+      !previewAttemptedAt &&
+      message.includes('could not prepare')
+    );
   }
 
   private async refreshLatestDocumentPreview(
@@ -2320,26 +2360,82 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
           input.allowedDocumentIds.includes(source.document_id),
         )
         .slice(0, 20)
-        .map((source) => ({
-          messageId: assistantMessage.id,
-          documentId: source.document_id,
-          documentName: source.document_name || 'Document',
-          fileType: source.file_type ?? null,
-          versionNumber: source.version_number,
-          chunkIndex: source.chunk_index,
-          pageNumber: this.toNullableInteger(source.page_number),
-          slideNumber: this.toNullableInteger(source.slide_number),
-          sheetName: this.truncateNullable(source.sheet_name, 120),
-          lineStart: this.toNullableInteger(source.line_start),
-          lineEnd: this.toNullableInteger(source.line_end),
-          sectionTitle: this.truncateNullable(source.section_title, 255),
-          locationLabel: this.truncateNullable(source.location_label, 255),
-          score:
-            typeof source.score === 'number' && Number.isFinite(source.score)
-              ? source.score
-              : null,
-          metadata: (source.metadata ?? {}) as Prisma.InputJsonValue,
-        }));
+        .map((source) => {
+          const metadata = this.getRagSourceMetadata(source);
+          const pageNumber = this.getRagSourceInteger(
+            source.page_number,
+            metadata,
+            'page_number',
+          );
+          const slideNumber = this.getRagSourceInteger(
+            source.slide_number,
+            metadata,
+            'slide_number',
+          );
+          const sheetName = this.getRagSourceString(
+            source.sheet_name,
+            metadata,
+            'sheet_name',
+            120,
+          );
+          const lineStart = this.getRagSourceInteger(
+            source.line_start,
+            metadata,
+            'line_start',
+          );
+          const lineEnd = this.getRagSourceInteger(
+            source.line_end,
+            metadata,
+            'line_end',
+          );
+          const sectionTitle = this.getRagSourceString(
+            source.section_title,
+            metadata,
+            'section_title',
+            255,
+          );
+          const sourceExcerpt =
+            this.getRagSourceString(source.text, metadata, 'text', 1200) ??
+            this.getRagSourceString(undefined, metadata, 'excerpt', 1200);
+          const sourceMetadata: Record<string, unknown> = { ...metadata };
+
+          if (sourceExcerpt) {
+            sourceMetadata.excerpt = sourceExcerpt;
+
+            if (!sourceMetadata.text) {
+              sourceMetadata.text = sourceExcerpt;
+            }
+          }
+
+          return {
+            messageId: assistantMessage.id,
+            documentId: source.document_id,
+            documentName: source.document_name || 'Document',
+            fileType: source.file_type ?? null,
+            versionNumber: source.version_number,
+            chunkIndex: source.chunk_index,
+            pageNumber,
+            slideNumber,
+            sheetName,
+            lineStart,
+            lineEnd,
+            sectionTitle,
+            locationLabel: this.getRagSourceLocationLabel(source, {
+              pageNumber,
+              slideNumber,
+              sheetName,
+              lineStart,
+              lineEnd,
+              sectionTitle,
+              metadata,
+            }),
+            score:
+              typeof source.score === 'number' && Number.isFinite(source.score)
+                ? source.score
+                : null,
+            metadata: sourceMetadata as Prisma.InputJsonValue,
+          };
+        });
 
       if (sourceData.length > 0) {
         await tx.ragChatMessageSource.createMany({ data: sourceData });
@@ -2466,14 +2562,104 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     return normalized.length > 280 ? `${normalized.slice(0, 280)}...` : normalized;
   }
 
+  private getRagSourceMetadata(source: RagAskSource): Record<string, unknown> {
+    const metadata = source.metadata;
+
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+      return {};
+    }
+
+    return metadata;
+  }
+
+  private getRagSourceString(
+    directValue: unknown,
+    metadata: Record<string, unknown>,
+    metadataKey: string,
+    maxLength: number,
+  ): string | null {
+    return (
+      this.truncateNullable(directValue, maxLength) ??
+      this.truncateNullable(metadata[metadataKey], maxLength) ??
+      this.truncateNullable(metadata[this.toCamelCase(metadataKey)], maxLength)
+    );
+  }
+
+  private getRagSourceInteger(
+    directValue: unknown,
+    metadata: Record<string, unknown>,
+    metadataKey: string,
+  ): number | null {
+    return (
+      this.toNullableInteger(directValue) ??
+      this.toNullableInteger(metadata[metadataKey]) ??
+      this.toNullableInteger(metadata[this.toCamelCase(metadataKey)])
+    );
+  }
+
+  private getRagSourceLocationLabel(
+    source: RagAskSource,
+    input: {
+      pageNumber: number | null;
+      slideNumber: number | null;
+      sheetName: string | null;
+      lineStart: number | null;
+      lineEnd: number | null;
+      sectionTitle: string | null;
+      metadata: Record<string, unknown>;
+    },
+  ): string | null {
+    const directLabel = this.getRagSourceString(
+      source.location_label,
+      input.metadata,
+      'location_label',
+      255,
+    );
+
+    if (directLabel) return directLabel;
+
+    if (input.pageNumber !== null) return `Page ${input.pageNumber}`;
+    if (input.slideNumber !== null) return `Slide ${input.slideNumber}`;
+    if (input.sectionTitle) return input.sectionTitle;
+
+    if (
+      input.sheetName &&
+      input.lineStart !== null &&
+      input.lineEnd !== null
+    ) {
+      return `${input.sheetName}, lines ${input.lineStart}-${input.lineEnd}`;
+    }
+
+    if (input.lineStart !== null && input.lineEnd !== null) {
+      return input.lineStart === input.lineEnd
+        ? `Line ${input.lineStart}`
+        : `Lines ${input.lineStart}-${input.lineEnd}`;
+    }
+
+    const chunkIndex = this.toNullableInteger(source.chunk_index);
+    if (chunkIndex !== null && chunkIndex >= 0) {
+      return `Passage ${chunkIndex + 1}`;
+    }
+
+    return null;
+  }
+
+  private toCamelCase(value: string): string {
+    return value.replace(/_([a-z])/g, (_, letter: string) =>
+      letter.toUpperCase(),
+    );
+  }
+
   private toNullableInteger(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') return null;
+
     const parsedValue = Number(value);
 
     return Number.isSafeInteger(parsedValue) ? parsedValue : null;
   }
 
   private truncateNullable(
-    value: string | null | undefined,
+    value: unknown,
     maxLength: number,
   ): string | null {
     if (typeof value !== 'string') return null;
@@ -3255,7 +3441,68 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       filters.push({ updatedAt });
     }
 
+    if (query.ragStatus) {
+      const ragStatusWhere = this.resolveDocumentRagStatusFilter(
+        query.ragStatus,
+      );
+
+      if (ragStatusWhere) {
+        filters.push(ragStatusWhere);
+      }
+    }
+
     return { AND: filters };
+  }
+
+  private resolveDocumentRagStatusFilter(
+    ragStatus: NonNullable<ListDocumentsQueryDto['ragStatus']>,
+  ): Prisma.DocumentWhereInput | null {
+    if (ragStatus === 'ready') {
+      return {
+        ragIndex: {
+          is: {
+            status: DocumentRagIndexStatus.INDEXED,
+          },
+        },
+      };
+    }
+
+    if (ragStatus === 'preparing') {
+      return {
+        ragIndex: {
+          is: {
+            status: {
+              in: [
+                DocumentRagIndexStatus.PENDING,
+                DocumentRagIndexStatus.INDEXING,
+              ],
+            },
+          },
+        },
+      };
+    }
+
+    if (ragStatus === 'needs_attention') {
+      return {
+        ragIndex: {
+          is: {
+            status: DocumentRagIndexStatus.FAILED,
+          },
+        },
+      };
+    }
+
+    if (ragStatus === 'no_readable_text') {
+      return {
+        ragIndex: {
+          is: {
+            status: DocumentRagIndexStatus.NO_CONTENT,
+          },
+        },
+      };
+    }
+
+    return null;
   }
 
   private buildPlatformDocumentWhere(

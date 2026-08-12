@@ -76,6 +76,7 @@ class RagSource(BaseModel):
     version_number: int
     file_type: str | None = None
     score: float | None = None
+    text: str | None = None
     page_number: int | None = None
     slide_number: int | None = None
     sheet_name: str | None = None

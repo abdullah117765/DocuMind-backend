@@ -19,7 +19,6 @@ import {
   LEGACY_PERMISSIONS,
   ORGANIZATION_PERMISSIONS,
   ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
-  ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
   ORGANIZATION_ROLE_KEYS,
 } from './rbac.constants';
 import { EnvSuperAdminService } from '../auth/env-super-admin.service';
@@ -770,9 +769,7 @@ export class RoleManagementService {
       );
     }
 
-    return !role.permissions.some(({ permission }) =>
-      ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
-    );
+    return true;
   }
 
   private toRoleView(role: RoleRecord, canAssign = true): RoleView {

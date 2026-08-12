@@ -63,6 +63,42 @@ def _metadata_str(metadata: dict[str, object], key: str) -> str | None:
     return None
 
 
+def _source_location_label(result: object) -> str:
+    metadata = getattr(result, "metadata", {}) or {}
+    direct_label = _metadata_str(metadata, "location_label")
+
+    if direct_label:
+        return direct_label
+
+    page_number = _metadata_int(metadata, "page_number")
+    if page_number is not None:
+        return f"Page {page_number}"
+
+    slide_number = _metadata_int(metadata, "slide_number")
+    if slide_number is not None:
+        return f"Slide {slide_number}"
+
+    section_title = _metadata_str(metadata, "section_title")
+    if section_title:
+        return section_title
+
+    sheet_name = _metadata_str(metadata, "sheet_name")
+    line_start = _metadata_int(metadata, "line_start")
+    line_end = _metadata_int(metadata, "line_end")
+
+    if sheet_name and line_start is not None and line_end is not None:
+        return f'{sheet_name}, lines {line_start}-{line_end}'
+
+    if line_start is not None and line_end is not None:
+        return f"Line {line_start}" if line_start == line_end else f"Lines {line_start}-{line_end}"
+
+    chunk_index = getattr(result, "chunk_index", None)
+    if isinstance(chunk_index, int) and chunk_index >= 0:
+        return f"Passage {chunk_index + 1}"
+
+    return "Selected passage"
+
+
 @router.post(
     "/ingest",
     response_model=IngestDocumentResponse,
@@ -117,13 +153,14 @@ def ask_documents(payload: RagQueryRequest, request: Request) -> RagAskResponse:
             version_number=result.version_number,
             file_type=result.file_type,
             score=result.score,
+            text=result.text,
             page_number=_metadata_int(result.metadata, "page_number"),
             slide_number=_metadata_int(result.metadata, "slide_number"),
             sheet_name=_metadata_str(result.metadata, "sheet_name"),
             line_start=_metadata_int(result.metadata, "line_start"),
             line_end=_metadata_int(result.metadata, "line_end"),
             section_title=_metadata_str(result.metadata, "section_title"),
-            location_label=_metadata_str(result.metadata, "location_label"),
+            location_label=_source_location_label(result),
             metadata=result.metadata,
         )
         for result in search_response.results

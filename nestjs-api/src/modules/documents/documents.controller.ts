@@ -888,6 +888,21 @@ export class PlatformDocumentsController {
     );
   }
 
+  @Get(':documentId/preview')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get extracted preview data for Super Admin review' })
+  async getPlatformDocumentPreview(
+    @Param() params: PlatformDocumentIdDto,
+  ): Promise<PreviewResponse> {
+    return {
+      data: {
+        preview: await this.documentsService.getPlatformDocumentPreview(
+          params.documentId,
+        ),
+      },
+    };
+  }
+
   @Post(':documentId/restore')
   @HttpCode(HttpStatus.OK)
   @UseGuards(CsrfGuard)

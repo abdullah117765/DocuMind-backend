@@ -183,7 +183,7 @@ describe('RoleManagementService', () => {
     });
   });
 
-  it('marks protected roles as not assignable for organization admins', async () => {
+  it('allows organization admins to assign custom roles but not protected system roles', async () => {
     isConfiguredSuperAdminUserId.mockResolvedValue(false);
     roleFindMany.mockResolvedValue([
       systemRole,
@@ -208,7 +208,7 @@ describe('RoleManagementService', () => {
       }),
       expect.objectContaining({
         id: customUserManagerRole.id,
-        canAssign: false,
+        canAssign: true,
       }),
       expect.objectContaining({
         systemKey: 'manager',

@@ -419,6 +419,7 @@ export class DocumentPreviewService {
         kind: 'office-text',
         previewAvailable: Boolean(textPreview.content),
         ...textPreview,
+        previewAttemptedAt: new Date().toISOString(),
         message: textPreview.content
           ? 'Preview is ready.'
           : 'No readable text was found in this file.',
@@ -428,6 +429,7 @@ export class DocumentPreviewService {
         kind: 'office-text',
         previewAvailable: false,
         mimeType: file.mimeType,
+        previewAttemptedAt: new Date().toISOString(),
         message:
           'We could not prepare a preview for this file. Download it to view the full document.',
       };

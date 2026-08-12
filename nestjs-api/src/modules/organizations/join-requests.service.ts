@@ -16,7 +16,6 @@ import {
 import { AccessControlService } from '../access-control/access-control.service';
 import {
   ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
-  ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
   ORGANIZATION_ROLE_KEYS,
 } from '../access-control/rbac.constants';
 import { EnvSuperAdminService } from '../auth/env-super-admin.service';
@@ -648,7 +647,7 @@ export class JoinRequestsService {
     if (blockedRoles.length > 0) {
       throw new ForbiddenException({
         message:
-          'Organization Admins can accept join requests only as Manager, Employee, or non-admin custom roles.',
+          'Organization Admins can accept join requests only as Manager, Employee, or custom organization roles.',
         details: {
           blockedRoleIds: blockedRoles.map((role) => role.id),
         },
@@ -669,9 +668,7 @@ export class JoinRequestsService {
       );
     }
 
-    return !role.permissions.some(({ permission }) =>
-      ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
-    );
+    return true;
   }
 
   private toView(request: JoinRequestRecord): JoinRequestView {
