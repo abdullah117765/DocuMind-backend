@@ -1562,6 +1562,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     const byDocumentId = new Map(
       indexes.map((index) => [index.documentId, index]),
     );
+    const shouldForceSelectedDocuments = Boolean(dto.documentIds?.length);
     const documentsToIndex = documents.filter((document) => {
       const index = byDocumentId.get(document.id);
 
@@ -1572,6 +1573,8 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       ) {
         return false;
       }
+
+      if (shouldForceSelectedDocuments) return true;
 
       return !this.isRagIndexCurrent(document, index);
     });
@@ -2360,7 +2363,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
           input.allowedDocumentIds.includes(source.document_id),
         )
         .slice(0, 20)
-        .map((source) => {
+        .map((source, index) => {
           const metadata = this.getRagSourceMetadata(source);
           const pageNumber = this.getRagSourceInteger(
             source.page_number,
@@ -2406,6 +2409,9 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
               sourceMetadata.text = sourceExcerpt;
             }
           }
+
+          sourceMetadata.sourceNumber = index + 1;
+          sourceMetadata.citationNumber = index + 1;
 
           return {
             messageId: assistantMessage.id,
