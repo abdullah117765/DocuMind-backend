@@ -213,6 +213,11 @@ export type OrganizationWhereInput = {
   joinRequests?: Prisma.JoinRequestListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   documents?: Prisma.DocumentListRelationFilter
+  knowledgeBases?: Prisma.KnowledgeBaseListRelationFilter
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderListRelationFilter
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionListRelationFilter
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryListRelationFilter
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagListRelationFilter
   documentRagIndexes?: Prisma.DocumentRagIndexListRelationFilter
   ragChatSessions?: Prisma.RagChatSessionListRelationFilter
   documentUploadSessions?: Prisma.DocumentUploadSessionListRelationFilter
@@ -236,6 +241,11 @@ export type OrganizationOrderByWithRelationInput = {
   joinRequests?: Prisma.JoinRequestOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   documents?: Prisma.DocumentOrderByRelationAggregateInput
+  knowledgeBases?: Prisma.KnowledgeBaseOrderByRelationAggregateInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderOrderByRelationAggregateInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionOrderByRelationAggregateInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryOrderByRelationAggregateInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagOrderByRelationAggregateInput
   documentRagIndexes?: Prisma.DocumentRagIndexOrderByRelationAggregateInput
   ragChatSessions?: Prisma.RagChatSessionOrderByRelationAggregateInput
   documentUploadSessions?: Prisma.DocumentUploadSessionOrderByRelationAggregateInput
@@ -262,6 +272,11 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   joinRequests?: Prisma.JoinRequestListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   documents?: Prisma.DocumentListRelationFilter
+  knowledgeBases?: Prisma.KnowledgeBaseListRelationFilter
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderListRelationFilter
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionListRelationFilter
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryListRelationFilter
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagListRelationFilter
   documentRagIndexes?: Prisma.DocumentRagIndexListRelationFilter
   ragChatSessions?: Prisma.RagChatSessionListRelationFilter
   documentUploadSessions?: Prisma.DocumentUploadSessionListRelationFilter
@@ -312,6 +327,11 @@ export type OrganizationCreateInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -334,6 +354,11 @@ export type OrganizationUncheckedCreateInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -356,6 +381,11 @@ export type OrganizationUpdateInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -378,6 +408,11 @@ export type OrganizationUncheckedUpdateInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -632,6 +667,76 @@ export type OrganizationUpdateOneRequiredWithoutDocumentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutDocumentsInput, Prisma.OrganizationUpdateWithoutDocumentsInput>, Prisma.OrganizationUncheckedUpdateWithoutDocumentsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutKnowledgeBasesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBasesInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBasesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBasesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutKnowledgeBasesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBasesInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBasesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBasesInput
+  upsert?: Prisma.OrganizationUpsertWithoutKnowledgeBasesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutKnowledgeBasesInput, Prisma.OrganizationUpdateWithoutKnowledgeBasesInput>, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBasesInput>
+}
+
+export type OrganizationCreateNestedOneWithoutKnowledgeBaseFoldersInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseFoldersInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseFoldersInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBaseFoldersInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutKnowledgeBaseFoldersNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseFoldersInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseFoldersInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBaseFoldersInput
+  upsert?: Prisma.OrganizationUpsertWithoutKnowledgeBaseFoldersInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutKnowledgeBaseFoldersInput, Prisma.OrganizationUpdateWithoutKnowledgeBaseFoldersInput>, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseFoldersInput>
+}
+
+export type OrganizationCreateNestedOneWithoutKnowledgeBaseCollectionsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseCollectionsInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseCollectionsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBaseCollectionsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutKnowledgeBaseCollectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseCollectionsInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseCollectionsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBaseCollectionsInput
+  upsert?: Prisma.OrganizationUpsertWithoutKnowledgeBaseCollectionsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutKnowledgeBaseCollectionsInput, Prisma.OrganizationUpdateWithoutKnowledgeBaseCollectionsInput>, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseCollectionsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutKnowledgeBaseCategoriesInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseCategoriesInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseCategoriesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBaseCategoriesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutKnowledgeBaseCategoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseCategoriesInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseCategoriesInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBaseCategoriesInput
+  upsert?: Prisma.OrganizationUpsertWithoutKnowledgeBaseCategoriesInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutKnowledgeBaseCategoriesInput, Prisma.OrganizationUpdateWithoutKnowledgeBaseCategoriesInput>, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseCategoriesInput>
+}
+
+export type OrganizationCreateNestedOneWithoutKnowledgeBaseTagsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseTagsInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseTagsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBaseTagsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutKnowledgeBaseTagsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseTagsInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseTagsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutKnowledgeBaseTagsInput
+  upsert?: Prisma.OrganizationUpsertWithoutKnowledgeBaseTagsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutKnowledgeBaseTagsInput, Prisma.OrganizationUpdateWithoutKnowledgeBaseTagsInput>, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseTagsInput>
+}
+
 export type OrganizationCreateNestedOneWithoutDocumentRagIndexesInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutDocumentRagIndexesInput, Prisma.OrganizationUncheckedCreateWithoutDocumentRagIndexesInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutDocumentRagIndexesInput
@@ -688,6 +793,11 @@ export type OrganizationCreateWithoutCreatedByInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -709,6 +819,11 @@ export type OrganizationUncheckedCreateWithoutCreatedByInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -770,6 +885,11 @@ export type OrganizationCreateWithoutMembershipsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -791,6 +911,11 @@ export type OrganizationUncheckedCreateWithoutMembershipsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -828,6 +953,11 @@ export type OrganizationUpdateWithoutMembershipsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -849,6 +979,11 @@ export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -870,6 +1005,11 @@ export type OrganizationCreateWithoutRolesInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -891,6 +1031,11 @@ export type OrganizationUncheckedCreateWithoutRolesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -928,6 +1073,11 @@ export type OrganizationUpdateWithoutRolesInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -949,6 +1099,11 @@ export type OrganizationUncheckedUpdateWithoutRolesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -970,6 +1125,11 @@ export type OrganizationCreateWithoutInvitesInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -991,6 +1151,11 @@ export type OrganizationUncheckedCreateWithoutInvitesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1028,6 +1193,11 @@ export type OrganizationUpdateWithoutInvitesInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -1049,6 +1219,11 @@ export type OrganizationUncheckedUpdateWithoutInvitesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1071,6 +1246,11 @@ export type OrganizationCreateWithoutSubscriptionInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -1092,6 +1272,11 @@ export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1129,6 +1314,11 @@ export type OrganizationUpdateWithoutSubscriptionInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -1150,6 +1340,11 @@ export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1171,6 +1366,11 @@ export type OrganizationCreateWithoutLimitsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -1192,6 +1392,11 @@ export type OrganizationUncheckedCreateWithoutLimitsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1229,6 +1434,11 @@ export type OrganizationUpdateWithoutLimitsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -1250,6 +1460,11 @@ export type OrganizationUncheckedUpdateWithoutLimitsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1270,6 +1485,11 @@ export type OrganizationCreateWithoutJoinRequestsInput = {
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -1291,6 +1511,11 @@ export type OrganizationUncheckedCreateWithoutJoinRequestsInput = {
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1328,6 +1553,11 @@ export type OrganizationUpdateWithoutJoinRequestsInput = {
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -1349,6 +1579,11 @@ export type OrganizationUncheckedUpdateWithoutJoinRequestsInput = {
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1370,6 +1605,11 @@ export type OrganizationCreateWithoutAuditLogsInput = {
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -1391,6 +1631,11 @@ export type OrganizationUncheckedCreateWithoutAuditLogsInput = {
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1428,6 +1673,11 @@ export type OrganizationUpdateWithoutAuditLogsInput = {
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -1449,6 +1699,11 @@ export type OrganizationUncheckedUpdateWithoutAuditLogsInput = {
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1470,6 +1725,11 @@ export type OrganizationCreateWithoutDocumentsInput = {
   invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
@@ -1491,6 +1751,11 @@ export type OrganizationUncheckedCreateWithoutDocumentsInput = {
   invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1528,6 +1793,11 @@ export type OrganizationUpdateWithoutDocumentsInput = {
   invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -1549,6 +1819,611 @@ export type OrganizationUncheckedUpdateWithoutDocumentsInput = {
   invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutKnowledgeBasesInput = {
+  id?: string
+  name: string
+  slug: string
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutKnowledgeBasesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutKnowledgeBasesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBasesInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBasesInput>
+}
+
+export type OrganizationUpsertWithoutKnowledgeBasesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBasesInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBasesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBasesInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBasesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutKnowledgeBasesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBasesInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBasesInput>
+}
+
+export type OrganizationUpdateWithoutKnowledgeBasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutKnowledgeBasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutKnowledgeBaseFoldersInput = {
+  id?: string
+  name: string
+  slug: string
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutKnowledgeBaseFoldersInput = {
+  id?: string
+  name: string
+  slug: string
+  createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutKnowledgeBaseFoldersInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseFoldersInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseFoldersInput>
+}
+
+export type OrganizationUpsertWithoutKnowledgeBaseFoldersInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBaseFoldersInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseFoldersInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseFoldersInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseFoldersInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutKnowledgeBaseFoldersInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBaseFoldersInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseFoldersInput>
+}
+
+export type OrganizationUpdateWithoutKnowledgeBaseFoldersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutKnowledgeBaseFoldersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutKnowledgeBaseCollectionsInput = {
+  id?: string
+  name: string
+  slug: string
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutKnowledgeBaseCollectionsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutKnowledgeBaseCollectionsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseCollectionsInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseCollectionsInput>
+}
+
+export type OrganizationUpsertWithoutKnowledgeBaseCollectionsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBaseCollectionsInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseCollectionsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseCollectionsInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseCollectionsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutKnowledgeBaseCollectionsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBaseCollectionsInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseCollectionsInput>
+}
+
+export type OrganizationUpdateWithoutKnowledgeBaseCollectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutKnowledgeBaseCollectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutKnowledgeBaseCategoriesInput = {
+  id?: string
+  name: string
+  slug: string
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutKnowledgeBaseCategoriesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutKnowledgeBaseCategoriesInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseCategoriesInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseCategoriesInput>
+}
+
+export type OrganizationUpsertWithoutKnowledgeBaseCategoriesInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBaseCategoriesInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseCategoriesInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseCategoriesInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseCategoriesInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutKnowledgeBaseCategoriesInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBaseCategoriesInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseCategoriesInput>
+}
+
+export type OrganizationUpdateWithoutKnowledgeBaseCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutKnowledgeBaseCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUncheckedUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutKnowledgeBaseTagsInput = {
+  id?: string
+  name: string
+  slug: string
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdBy?: Prisma.UserCreateNestedOneWithoutCreatedOrganizationsInput
+  memberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutKnowledgeBaseTagsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdByUserId?: string | null
+  status?: $Enums.OrganizationStatus
+  allowJoinRequests?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutOrganizationInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutOrganizationInput
+  invites?: Prisma.OrganizationInviteUncheckedCreateNestedManyWithoutOrganizationInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
+  ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  limits?: Prisma.OrganizationLimitUncheckedCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutKnowledgeBaseTagsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseTagsInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseTagsInput>
+}
+
+export type OrganizationUpsertWithoutKnowledgeBaseTagsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBaseTagsInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseTagsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutKnowledgeBaseTagsInput, Prisma.OrganizationUncheckedCreateWithoutKnowledgeBaseTagsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutKnowledgeBaseTagsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutKnowledgeBaseTagsInput, Prisma.OrganizationUncheckedUpdateWithoutKnowledgeBaseTagsInput>
+}
+
+export type OrganizationUpdateWithoutKnowledgeBaseTagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneWithoutCreatedOrganizationsNestedInput
+  memberships?: Prisma.OrganizationMembershipUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
+  ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
+  documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
+  subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
+  limits?: Prisma.OrganizationLimitUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutKnowledgeBaseTagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
+  allowJoinRequests?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+  invites?: Prisma.OrganizationInviteUncheckedUpdateManyWithoutOrganizationNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1571,6 +2446,11 @@ export type OrganizationCreateWithoutDocumentRagIndexesInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
@@ -1592,6 +2472,11 @@ export type OrganizationUncheckedCreateWithoutDocumentRagIndexesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
@@ -1629,6 +2514,11 @@ export type OrganizationUpdateWithoutDocumentRagIndexesInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
@@ -1650,6 +2540,11 @@ export type OrganizationUncheckedUpdateWithoutDocumentRagIndexesInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -1671,6 +2566,11 @@ export type OrganizationCreateWithoutRagChatSessionsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
@@ -1692,6 +2592,11 @@ export type OrganizationUncheckedCreateWithoutRagChatSessionsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
@@ -1729,6 +2634,11 @@ export type OrganizationUpdateWithoutRagChatSessionsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
@@ -1750,6 +2660,11 @@ export type OrganizationUncheckedUpdateWithoutRagChatSessionsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -1771,6 +2686,11 @@ export type OrganizationCreateWithoutDocumentUploadSessionsInput = {
   joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionCreateNestedOneWithoutOrganizationInput
@@ -1792,6 +2712,11 @@ export type OrganizationUncheckedCreateWithoutDocumentUploadSessionsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutOrganizationInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedCreateNestedManyWithoutOrganizationInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedCreateNestedManyWithoutOrganizationInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedCreateNestedManyWithoutOrganizationInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedCreateNestedManyWithoutOrganizationInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
@@ -1829,6 +2754,11 @@ export type OrganizationUpdateWithoutDocumentUploadSessionsInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUpdateOneWithoutOrganizationNestedInput
@@ -1850,6 +2780,11 @@ export type OrganizationUncheckedUpdateWithoutDocumentUploadSessionsInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   subscription?: Prisma.OrganizationSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
@@ -1880,6 +2815,11 @@ export type OrganizationUpdateWithoutCreatedByInput = {
   joinRequests?: Prisma.JoinRequestUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUpdateManyWithoutOrganizationNestedInput
@@ -1901,6 +2841,11 @@ export type OrganizationUncheckedUpdateWithoutCreatedByInput = {
   joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutOrganizationNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBases?: Prisma.KnowledgeBaseUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseFolders?: Prisma.KnowledgeBaseFolderUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCollections?: Prisma.KnowledgeBaseCollectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseCategories?: Prisma.KnowledgeBaseCategoryUncheckedUpdateManyWithoutOrganizationNestedInput
+  knowledgeBaseTags?: Prisma.KnowledgeBaseTagUncheckedUpdateManyWithoutOrganizationNestedInput
   documentRagIndexes?: Prisma.DocumentRagIndexUncheckedUpdateManyWithoutOrganizationNestedInput
   ragChatSessions?: Prisma.RagChatSessionUncheckedUpdateManyWithoutOrganizationNestedInput
   documentUploadSessions?: Prisma.DocumentUploadSessionUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1930,6 +2875,11 @@ export type OrganizationCountOutputType = {
   joinRequests: number
   auditLogs: number
   documents: number
+  knowledgeBases: number
+  knowledgeBaseFolders: number
+  knowledgeBaseCollections: number
+  knowledgeBaseCategories: number
+  knowledgeBaseTags: number
   documentRagIndexes: number
   ragChatSessions: number
   documentUploadSessions: number
@@ -1942,6 +2892,11 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   joinRequests?: boolean | OrganizationCountOutputTypeCountJoinRequestsArgs
   auditLogs?: boolean | OrganizationCountOutputTypeCountAuditLogsArgs
   documents?: boolean | OrganizationCountOutputTypeCountDocumentsArgs
+  knowledgeBases?: boolean | OrganizationCountOutputTypeCountKnowledgeBasesArgs
+  knowledgeBaseFolders?: boolean | OrganizationCountOutputTypeCountKnowledgeBaseFoldersArgs
+  knowledgeBaseCollections?: boolean | OrganizationCountOutputTypeCountKnowledgeBaseCollectionsArgs
+  knowledgeBaseCategories?: boolean | OrganizationCountOutputTypeCountKnowledgeBaseCategoriesArgs
+  knowledgeBaseTags?: boolean | OrganizationCountOutputTypeCountKnowledgeBaseTagsArgs
   documentRagIndexes?: boolean | OrganizationCountOutputTypeCountDocumentRagIndexesArgs
   ragChatSessions?: boolean | OrganizationCountOutputTypeCountRagChatSessionsArgs
   documentUploadSessions?: boolean | OrganizationCountOutputTypeCountDocumentUploadSessionsArgs
@@ -2002,6 +2957,41 @@ export type OrganizationCountOutputTypeCountDocumentsArgs<ExtArgs extends runtim
 /**
  * OrganizationCountOutputType without action
  */
+export type OrganizationCountOutputTypeCountKnowledgeBasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KnowledgeBaseWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountKnowledgeBaseFoldersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KnowledgeBaseFolderWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountKnowledgeBaseCollectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KnowledgeBaseCollectionWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountKnowledgeBaseCategoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KnowledgeBaseCategoryWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountKnowledgeBaseTagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KnowledgeBaseTagWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
 export type OrganizationCountOutputTypeCountDocumentRagIndexesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.DocumentRagIndexWhereInput
 }
@@ -2037,6 +3027,11 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   joinRequests?: boolean | Prisma.Organization$joinRequestsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>
   documents?: boolean | Prisma.Organization$documentsArgs<ExtArgs>
+  knowledgeBases?: boolean | Prisma.Organization$knowledgeBasesArgs<ExtArgs>
+  knowledgeBaseFolders?: boolean | Prisma.Organization$knowledgeBaseFoldersArgs<ExtArgs>
+  knowledgeBaseCollections?: boolean | Prisma.Organization$knowledgeBaseCollectionsArgs<ExtArgs>
+  knowledgeBaseCategories?: boolean | Prisma.Organization$knowledgeBaseCategoriesArgs<ExtArgs>
+  knowledgeBaseTags?: boolean | Prisma.Organization$knowledgeBaseTagsArgs<ExtArgs>
   documentRagIndexes?: boolean | Prisma.Organization$documentRagIndexesArgs<ExtArgs>
   ragChatSessions?: boolean | Prisma.Organization$ragChatSessionsArgs<ExtArgs>
   documentUploadSessions?: boolean | Prisma.Organization$documentUploadSessionsArgs<ExtArgs>
@@ -2089,6 +3084,11 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   joinRequests?: boolean | Prisma.Organization$joinRequestsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>
   documents?: boolean | Prisma.Organization$documentsArgs<ExtArgs>
+  knowledgeBases?: boolean | Prisma.Organization$knowledgeBasesArgs<ExtArgs>
+  knowledgeBaseFolders?: boolean | Prisma.Organization$knowledgeBaseFoldersArgs<ExtArgs>
+  knowledgeBaseCollections?: boolean | Prisma.Organization$knowledgeBaseCollectionsArgs<ExtArgs>
+  knowledgeBaseCategories?: boolean | Prisma.Organization$knowledgeBaseCategoriesArgs<ExtArgs>
+  knowledgeBaseTags?: boolean | Prisma.Organization$knowledgeBaseTagsArgs<ExtArgs>
   documentRagIndexes?: boolean | Prisma.Organization$documentRagIndexesArgs<ExtArgs>
   ragChatSessions?: boolean | Prisma.Organization$ragChatSessionsArgs<ExtArgs>
   documentUploadSessions?: boolean | Prisma.Organization$documentUploadSessionsArgs<ExtArgs>
@@ -2113,6 +3113,11 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     joinRequests: Prisma.$JoinRequestPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     documents: Prisma.$DocumentPayload<ExtArgs>[]
+    knowledgeBases: Prisma.$KnowledgeBasePayload<ExtArgs>[]
+    knowledgeBaseFolders: Prisma.$KnowledgeBaseFolderPayload<ExtArgs>[]
+    knowledgeBaseCollections: Prisma.$KnowledgeBaseCollectionPayload<ExtArgs>[]
+    knowledgeBaseCategories: Prisma.$KnowledgeBaseCategoryPayload<ExtArgs>[]
+    knowledgeBaseTags: Prisma.$KnowledgeBaseTagPayload<ExtArgs>[]
     documentRagIndexes: Prisma.$DocumentRagIndexPayload<ExtArgs>[]
     ragChatSessions: Prisma.$RagChatSessionPayload<ExtArgs>[]
     documentUploadSessions: Prisma.$DocumentUploadSessionPayload<ExtArgs>[]
@@ -2529,6 +3534,11 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   joinRequests<T extends Prisma.Organization$joinRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$joinRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Organization$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documents<T extends Prisma.Organization$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  knowledgeBases<T extends Prisma.Organization$knowledgeBasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$knowledgeBasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeBasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  knowledgeBaseFolders<T extends Prisma.Organization$knowledgeBaseFoldersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$knowledgeBaseFoldersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeBaseFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  knowledgeBaseCollections<T extends Prisma.Organization$knowledgeBaseCollectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$knowledgeBaseCollectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeBaseCollectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  knowledgeBaseCategories<T extends Prisma.Organization$knowledgeBaseCategoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$knowledgeBaseCategoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeBaseCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  knowledgeBaseTags<T extends Prisma.Organization$knowledgeBaseTagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$knowledgeBaseTagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeBaseTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentRagIndexes<T extends Prisma.Organization$documentRagIndexesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$documentRagIndexesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentRagIndexPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ragChatSessions<T extends Prisma.Organization$ragChatSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$ragChatSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RagChatSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentUploadSessions<T extends Prisma.Organization$documentUploadSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$documentUploadSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentUploadSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3132,6 +4142,126 @@ export type Organization$documentsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * Organization.knowledgeBases
+ */
+export type Organization$knowledgeBasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeBase
+   */
+  select?: Prisma.KnowledgeBaseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeBase
+   */
+  omit?: Prisma.KnowledgeBaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeBaseInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeBaseWhereInput
+  orderBy?: Prisma.KnowledgeBaseOrderByWithRelationInput | Prisma.KnowledgeBaseOrderByWithRelationInput[]
+  cursor?: Prisma.KnowledgeBaseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KnowledgeBaseScalarFieldEnum | Prisma.KnowledgeBaseScalarFieldEnum[]
+}
+
+/**
+ * Organization.knowledgeBaseFolders
+ */
+export type Organization$knowledgeBaseFoldersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeBaseFolder
+   */
+  select?: Prisma.KnowledgeBaseFolderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeBaseFolder
+   */
+  omit?: Prisma.KnowledgeBaseFolderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeBaseFolderInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeBaseFolderWhereInput
+  orderBy?: Prisma.KnowledgeBaseFolderOrderByWithRelationInput | Prisma.KnowledgeBaseFolderOrderByWithRelationInput[]
+  cursor?: Prisma.KnowledgeBaseFolderWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KnowledgeBaseFolderScalarFieldEnum | Prisma.KnowledgeBaseFolderScalarFieldEnum[]
+}
+
+/**
+ * Organization.knowledgeBaseCollections
+ */
+export type Organization$knowledgeBaseCollectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeBaseCollection
+   */
+  select?: Prisma.KnowledgeBaseCollectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeBaseCollection
+   */
+  omit?: Prisma.KnowledgeBaseCollectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeBaseCollectionInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeBaseCollectionWhereInput
+  orderBy?: Prisma.KnowledgeBaseCollectionOrderByWithRelationInput | Prisma.KnowledgeBaseCollectionOrderByWithRelationInput[]
+  cursor?: Prisma.KnowledgeBaseCollectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KnowledgeBaseCollectionScalarFieldEnum | Prisma.KnowledgeBaseCollectionScalarFieldEnum[]
+}
+
+/**
+ * Organization.knowledgeBaseCategories
+ */
+export type Organization$knowledgeBaseCategoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeBaseCategory
+   */
+  select?: Prisma.KnowledgeBaseCategorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeBaseCategory
+   */
+  omit?: Prisma.KnowledgeBaseCategoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeBaseCategoryInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeBaseCategoryWhereInput
+  orderBy?: Prisma.KnowledgeBaseCategoryOrderByWithRelationInput | Prisma.KnowledgeBaseCategoryOrderByWithRelationInput[]
+  cursor?: Prisma.KnowledgeBaseCategoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KnowledgeBaseCategoryScalarFieldEnum | Prisma.KnowledgeBaseCategoryScalarFieldEnum[]
+}
+
+/**
+ * Organization.knowledgeBaseTags
+ */
+export type Organization$knowledgeBaseTagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeBaseTag
+   */
+  select?: Prisma.KnowledgeBaseTagSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeBaseTag
+   */
+  omit?: Prisma.KnowledgeBaseTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeBaseTagInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeBaseTagWhereInput
+  orderBy?: Prisma.KnowledgeBaseTagOrderByWithRelationInput | Prisma.KnowledgeBaseTagOrderByWithRelationInput[]
+  cursor?: Prisma.KnowledgeBaseTagWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KnowledgeBaseTagScalarFieldEnum | Prisma.KnowledgeBaseTagScalarFieldEnum[]
 }
 
 /**

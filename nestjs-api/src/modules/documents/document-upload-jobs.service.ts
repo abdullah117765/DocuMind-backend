@@ -50,6 +50,11 @@ export interface DocumentUploadJobView {
   totalFiles: number;
   processedFiles: number;
   currentFileName: string | null;
+  knowledgeBaseIds?: string[];
+  folderId?: string | null;
+  collectionIds?: string[];
+  categoryId?: string | null;
+  tagIds?: string[];
   documents: DocumentUploadJobDocument[];
   warnings: DocumentUploadJobWarning[];
   error: string | null;
@@ -220,6 +225,11 @@ export class DocumentUploadJobsService
     sessionId: string;
     createdByUserId: string;
     totalFiles: number;
+    knowledgeBaseIds?: string[];
+    folderId?: string | null;
+    collectionIds?: string[];
+    categoryId?: string | null;
+    tagIds?: string[];
   }): Promise<DocumentUploadJobView> {
     const sessionKey = sessionJobKey(input.organizationId, input.sessionId);
     const existingJobId = await this.client.get(sessionKey);
@@ -251,6 +261,11 @@ export class DocumentUploadJobsService
       totalFiles: input.totalFiles,
       processedFiles: 0,
       currentFileName: null,
+      knowledgeBaseIds: input.knowledgeBaseIds,
+      folderId: input.folderId ?? null,
+      collectionIds: input.collectionIds,
+      categoryId: input.categoryId ?? null,
+      tagIds: input.tagIds,
       documents: [],
       warnings: [],
       error: null,

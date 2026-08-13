@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AccessControlModule } from '../access-control/access-control.module';
+import { KnowledgeBasesModule } from '../knowledge-bases/knowledge-bases.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { DocumentArchiveService } from './document-archive.service';
 import { DocumentPreviewService } from './document-preview.service';
@@ -14,7 +15,7 @@ import { DocumentsService } from './documents.service';
 import { RagOrchestratorService } from './rag-orchestrator.service';
 
 @Module({
-  imports: [AccessControlModule, PrismaModule],
+  imports: [AccessControlModule, KnowledgeBasesModule, PrismaModule],
   controllers: [OrganizationDocumentsController, PlatformDocumentsController],
   providers: [
     DocumentArchiveService,

@@ -443,6 +443,23 @@ export type EnumDocumentStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
 }
 
+export type EnumKnowledgeBaseStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeBaseStatus | Prisma.EnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeBaseStatus[] | Prisma.ListEnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeBaseStatus[] | Prisma.ListEnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeBaseStatusFilter<$PrismaModel> | $Enums.KnowledgeBaseStatus
+}
+
+export type EnumKnowledgeBaseStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeBaseStatus | Prisma.EnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeBaseStatus[] | Prisma.ListEnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeBaseStatus[] | Prisma.ListEnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeBaseStatusWithAggregatesFilter<$PrismaModel> | $Enums.KnowledgeBaseStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumKnowledgeBaseStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumKnowledgeBaseStatusFilter<$PrismaModel>
+}
+
 export type EnumDocumentRagIndexStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.DocumentRagIndexStatus | Prisma.EnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
   in?: $Enums.DocumentRagIndexStatus[] | Prisma.ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel>
@@ -964,6 +981,23 @@ export type NestedEnumDocumentStatusWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDocumentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumKnowledgeBaseStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeBaseStatus | Prisma.EnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeBaseStatus[] | Prisma.ListEnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeBaseStatus[] | Prisma.ListEnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeBaseStatusFilter<$PrismaModel> | $Enums.KnowledgeBaseStatus
+}
+
+export type NestedEnumKnowledgeBaseStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.KnowledgeBaseStatus | Prisma.EnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.KnowledgeBaseStatus[] | Prisma.ListEnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.KnowledgeBaseStatus[] | Prisma.ListEnumKnowledgeBaseStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumKnowledgeBaseStatusWithAggregatesFilter<$PrismaModel> | $Enums.KnowledgeBaseStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumKnowledgeBaseStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumKnowledgeBaseStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumDocumentRagIndexStatusFilter<$PrismaModel = never> = {

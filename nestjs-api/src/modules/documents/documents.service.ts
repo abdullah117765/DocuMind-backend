@@ -37,6 +37,7 @@ import {
   DocumentStagedFileStatus,
   DocumentStatus,
   DocumentUploadSessionStatus,
+  KnowledgeBaseStatus,
   OrganizationMembershipStatus,
   Prisma,
 } from '../../generated/prisma/client';
@@ -48,6 +49,7 @@ import {
 } from '../access-control/rbac.constants';
 import { EnvSuperAdminService } from '../auth/env-super-admin.service';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
+import { KnowledgeBasesService } from '../knowledge-bases/knowledge-bases.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { ZipManifestView } from './document-archive.service';
 import { DocumentArchiveService } from './document-archive.service';
@@ -67,6 +69,7 @@ import {
   DocumentUploadJobView,
 } from './document-upload-jobs.service';
 import { ListDocumentsQueryDto } from './dto/list-documents-query.dto';
+import { CommitUploadSessionDto } from './dto/commit-upload-session.dto';
 import { ListPlatformDocumentsQueryDto } from './dto/list-platform-documents-query.dto';
 import {
   RagDocumentScope,
@@ -283,6 +286,70 @@ const documentSelect = {
       createdAt: 'desc',
     },
   },
+  knowledgeBases: {
+    select: {
+      knowledgeBase: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+      folder: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  },
+  collections: {
+    select: {
+      collection: {
+        select: {
+          id: true,
+          knowledgeBaseId: true,
+          name: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  },
+  categoryLinks: {
+    select: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  },
+  tags: {
+    select: {
+      tag: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  },
 } as const satisfies Prisma.DocumentSelect;
 
 const documentVersionSelect = {
@@ -388,6 +455,20 @@ export interface DocumentView {
   updatedAt: Date;
   latestVersion: DocumentVersionView | null;
   accessGrants: DocumentAccessGrantView[];
+  knowledgeBases: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    folder: { id: string; name: string; slug: string } | null;
+  }>;
+  collections: Array<{
+    id: string;
+    knowledgeBaseId: string;
+    name: string;
+    slug: string;
+  }>;
+  category: { id: string; name: string; slug: string } | null;
+  tags: Array<{ id: string; name: string; slug: string }>;
 }
 
 export interface RagDocumentStatusView {
@@ -647,6 +728,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     private readonly envSuperAdminService: EnvSuperAdminService,
     private readonly ragOrchestrator: RagOrchestratorService,
     private readonly uploadJobsService: DocumentUploadJobsService,
+    private readonly knowledgeBasesService: KnowledgeBasesService,
   ) {}
 
   onModuleInit(): void {
@@ -708,6 +790,13 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
         job.organizationId,
         job.sessionId,
         job.createdByUserId,
+        {
+          knowledgeBaseIds: job.knowledgeBaseIds,
+          folderId: job.folderId ?? undefined,
+          collectionIds: job.collectionIds,
+          categoryId: job.categoryId ?? undefined,
+          tagIds: job.tagIds,
+        },
         (patch) =>
           this.uploadJobsService.updateJob(job.id, patch).then(() => undefined),
       );
@@ -937,6 +1026,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     organizationId: string,
     sessionId: string,
     principal: AuthenticatedPrincipal,
+    dto: CommitUploadSessionDto = {},
   ): Promise<DocumentUploadJobView> {
     const existingJob = await this.uploadJobsService.getJobForSession(
       organizationId,
@@ -982,6 +1072,12 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       throw new ConflictException('There are no staged files to commit.');
     }
 
+    const assignment =
+      await this.knowledgeBasesService.validateDocumentAssignment(
+        organizationId,
+        dto,
+      );
+
     await this.prisma.documentUploadSession.update({
       where: { id: session.id },
       data: {
@@ -996,6 +1092,11 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       sessionId,
       createdByUserId: principal.userId,
       totalFiles: readyFiles.length,
+      knowledgeBaseIds: assignment.knowledgeBaseIds,
+      folderId: assignment.folderId,
+      collectionIds: assignment.collectionIds,
+      categoryId: assignment.categoryId,
+      tagIds: assignment.tagIds,
     });
   }
 
@@ -1108,6 +1209,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     organizationId: string,
     sessionId: string,
     userId: string,
+    assignmentInput: Partial<CommitUploadSessionDto> = {},
     reportProgress?: UploadProgressReporter,
   ): Promise<CommitUploadSessionResult> {
     const session = await this.findOwnedUploadSession(
@@ -1131,6 +1233,12 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     if (readyFiles.length === 0) {
       throw new ConflictException('There are no staged files to commit.');
     }
+
+    const assignment =
+      await this.knowledgeBasesService.validateDocumentAssignment(
+        organizationId,
+        assignmentInput,
+      );
 
     await reportProgress?.({
       status: 'PROCESSING',
@@ -1206,6 +1314,39 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
             storageBucket: storedObject.bucket,
             storageKey: storedObject.key,
             createdByUserId: userId,
+            knowledgeBases: {
+              create: assignment.knowledgeBaseIds.map((knowledgeBaseId) => ({
+                knowledgeBaseId,
+                folderId: assignment.folderId,
+              })),
+            },
+            ...(assignment.collectionIds.length > 0
+              ? {
+                  collections: {
+                    create: assignment.collectionIds.map((collectionId) => ({
+                      collectionId,
+                    })),
+                  },
+                }
+              : {}),
+            ...(assignment.categoryId
+              ? {
+                  categoryLinks: {
+                    create: {
+                      categoryId: assignment.categoryId,
+                    },
+                  },
+                }
+              : {}),
+            ...(assignment.tagIds.length > 0
+              ? {
+                  tags: {
+                    create: assignment.tagIds.map((tagId) => ({
+                      tagId,
+                    })),
+                  },
+                }
+              : {}),
             versions: {
               create: {
                 id: versionId,
@@ -2764,6 +2905,110 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
         .filter((document): document is DocumentRecord => Boolean(document));
     }
 
+    if (scope === RagDocumentScope.KNOWLEDGE_BASE) {
+      const knowledgeBaseIds = [...new Set(dto.knowledgeBaseIds ?? [])];
+
+      if (knowledgeBaseIds.length === 0) {
+        throw new BadRequestException('Select at least one Knowledge Base.');
+      }
+
+      const knowledgeBaseCount = await this.prisma.knowledgeBase.count({
+        where: {
+          id: { in: knowledgeBaseIds },
+          organizationId,
+          status: KnowledgeBaseStatus.ACTIVE,
+        },
+      });
+
+      if (knowledgeBaseCount !== knowledgeBaseIds.length) {
+        throw new NotFoundException('Knowledge Base not found.');
+      }
+
+      const where = await this.buildOrganizationDocumentWhere(
+        organizationId,
+        principal.userId,
+        access,
+        {},
+      );
+
+      return this.prisma.document.findMany({
+        where: {
+          AND: [
+            where,
+            {
+              knowledgeBases: {
+                some: {
+                  knowledgeBaseId: { in: knowledgeBaseIds },
+                },
+              },
+            },
+          ],
+        },
+        select: documentSelect,
+        orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+      });
+    }
+
+    if (scope === RagDocumentScope.COLLECTION) {
+      const knowledgeBaseIds = [...new Set(dto.knowledgeBaseIds ?? [])];
+      const collectionIds = [...new Set(dto.collectionIds ?? [])];
+
+      if (knowledgeBaseIds.length === 0) {
+        throw new BadRequestException('Select at least one Knowledge Base.');
+      }
+
+      if (collectionIds.length === 0) {
+        throw new BadRequestException('Select at least one Collection.');
+      }
+
+      const collections = await this.prisma.knowledgeBaseCollection.findMany({
+        where: {
+          id: { in: collectionIds },
+          organizationId,
+          knowledgeBaseId: { in: knowledgeBaseIds },
+          knowledgeBase: {
+            status: KnowledgeBaseStatus.ACTIVE,
+          },
+        },
+        select: { id: true },
+      });
+
+      if (collections.length !== collectionIds.length) {
+        throw new NotFoundException('Collection not found.');
+      }
+
+      const where = await this.buildOrganizationDocumentWhere(
+        organizationId,
+        principal.userId,
+        access,
+        {},
+      );
+
+      return this.prisma.document.findMany({
+        where: {
+          AND: [
+            where,
+            {
+              collections: {
+                some: {
+                  collectionId: { in: collectionIds },
+                },
+              },
+            },
+            {
+              knowledgeBases: {
+                some: {
+                  knowledgeBaseId: { in: knowledgeBaseIds },
+                },
+              },
+            },
+          ],
+        },
+        select: documentSelect,
+        orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+      });
+    }
+
     const where = await this.buildOrganizationDocumentWhere(
       organizationId,
       principal.userId,
@@ -3457,6 +3702,59 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
+    if (query.knowledgeBaseId) {
+      filters.push({
+        knowledgeBases: {
+          some: {
+            knowledgeBaseId: query.knowledgeBaseId,
+            knowledgeBase: {
+              organizationId,
+              status: KnowledgeBaseStatus.ACTIVE,
+            },
+          },
+        },
+      });
+    }
+
+    if (query.collectionId) {
+      filters.push({
+        collections: {
+          some: {
+            collectionId: query.collectionId,
+            collection: {
+              organizationId,
+            },
+          },
+        },
+      });
+    }
+
+    if (query.categoryId) {
+      filters.push({
+        categoryLinks: {
+          some: {
+            categoryId: query.categoryId,
+            category: {
+              organizationId,
+            },
+          },
+        },
+      });
+    }
+
+    if (query.tagId) {
+      filters.push({
+        tags: {
+          some: {
+            tagId: query.tagId,
+            tag: {
+              organizationId,
+            },
+          },
+        },
+      });
+    }
+
     return { AND: filters };
   }
 
@@ -4140,6 +4438,15 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       accessGrants: document.accessGrants.map((grant) =>
         this.toAccessGrantView(grant),
       ),
+      knowledgeBases: document.knowledgeBases.map((link) => ({
+        id: link.knowledgeBase.id,
+        name: link.knowledgeBase.name,
+        slug: link.knowledgeBase.slug,
+        folder: link.folder,
+      })),
+      collections: document.collections.map((link) => link.collection),
+      category: document.categoryLinks[0]?.category ?? null,
+      tags: document.tags.map((link) => link.tag),
     };
   }
 

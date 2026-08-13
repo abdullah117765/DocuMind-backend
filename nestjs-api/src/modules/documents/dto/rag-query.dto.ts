@@ -19,6 +19,8 @@ import {
 export enum RagDocumentScope {
   ALL = 'all',
   SELECTED = 'selected',
+  KNOWLEDGE_BASE = 'knowledge_base',
+  COLLECTION = 'collection',
 }
 
 export enum RagSearchType {
@@ -57,6 +59,34 @@ export class RagQueryDto {
   @ArrayMaxSize(50)
   @IsUUID('4', { each: true })
   documentIds?: string[];
+
+  @ApiPropertyOptional({
+    description:
+      'Required when scope is knowledge_base or collection. Backend resolves accessible documents inside these Knowledge Bases.',
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+  })
+  @ValidateIf((dto: RagQueryDto) =>
+    [RagDocumentScope.KNOWLEDGE_BASE, RagDocumentScope.COLLECTION].includes(
+      dto.scope as RagDocumentScope,
+    ),
+  )
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(20)
+  @IsUUID('4', { each: true })
+  knowledgeBaseIds?: string[];
+
+  @ApiPropertyOptional({
+    description:
+      'Required when scope is collection. Collections must belong to selected Knowledge Bases.',
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+  })
+  @ValidateIf((dto: RagQueryDto) => dto.scope === RagDocumentScope.COLLECTION)
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(50)
+  @IsUUID('4', { each: true })
+  collectionIds?: string[];
 
   @ApiPropertyOptional({
     enum: RagSearchType,

@@ -113,6 +113,51 @@ export type AuditLog = Prisma.AuditLogModel
  */
 export type Document = Prisma.DocumentModel
 /**
+ * Model KnowledgeBase
+ * 
+ */
+export type KnowledgeBase = Prisma.KnowledgeBaseModel
+/**
+ * Model KnowledgeBaseFolder
+ * 
+ */
+export type KnowledgeBaseFolder = Prisma.KnowledgeBaseFolderModel
+/**
+ * Model KnowledgeBaseCollection
+ * 
+ */
+export type KnowledgeBaseCollection = Prisma.KnowledgeBaseCollectionModel
+/**
+ * Model KnowledgeBaseCategory
+ * 
+ */
+export type KnowledgeBaseCategory = Prisma.KnowledgeBaseCategoryModel
+/**
+ * Model KnowledgeBaseTag
+ * 
+ */
+export type KnowledgeBaseTag = Prisma.KnowledgeBaseTagModel
+/**
+ * Model DocumentKnowledgeBase
+ * 
+ */
+export type DocumentKnowledgeBase = Prisma.DocumentKnowledgeBaseModel
+/**
+ * Model DocumentCollection
+ * 
+ */
+export type DocumentCollection = Prisma.DocumentCollectionModel
+/**
+ * Model DocumentCategory
+ * 
+ */
+export type DocumentCategory = Prisma.DocumentCategoryModel
+/**
+ * Model DocumentTag
+ * 
+ */
+export type DocumentTag = Prisma.DocumentTagModel
+/**
  * Model DocumentRagIndex
  * 
  */

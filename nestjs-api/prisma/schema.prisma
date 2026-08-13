@@ -90,6 +90,11 @@ enum RagChatMessageRole {
   ASSISTANT
 }
 
+enum KnowledgeBaseStatus {
+  ACTIVE
+  ARCHIVED
+}
+
 model User {
   id                            String                   @id @default(uuid()) @db.Uuid
   name                          String?                  @db.VarChar(150)
@@ -120,6 +125,11 @@ model User {
   documentAccessGrants          DocumentAccess[]         @relation("DocumentAccessUser")
   documentAccessGranted         DocumentAccess[]         @relation("DocumentAccessGranter")
   documentUploadSessions        DocumentUploadSession[]  @relation("DocumentUploadSessionCreator")
+  knowledgeBasesCreated         KnowledgeBase[]          @relation("KnowledgeBaseCreator")
+  knowledgeBaseFoldersCreated   KnowledgeBaseFolder[]    @relation("KnowledgeBaseFolderCreator")
+  knowledgeBaseCollectionsCreated KnowledgeBaseCollection[] @relation("KnowledgeBaseCollectionCreator")
+  knowledgeBaseCategoriesCreated KnowledgeBaseCategory[] @relation("KnowledgeBaseCategoryCreator")
+  knowledgeBaseTagsCreated      KnowledgeBaseTag[]       @relation("KnowledgeBaseTagCreator")
   platformRoleAssignments       PlatformUserRole[]       @relation("PlatformRoleAssignee")
   platformRoleAssignmentsMade   PlatformUserRole[]       @relation("PlatformRoleAssigner")
   membershipRoleAssignmentsMade MembershipRole[]         @relation("MembershipRoleAssigner")
@@ -211,6 +221,11 @@ model Organization {
   joinRequests    JoinRequest[]
   auditLogs       AuditLog[]
   documents       Document[]
+  knowledgeBases  KnowledgeBase[]
+  knowledgeBaseFolders KnowledgeBaseFolder[]
+  knowledgeBaseCollections KnowledgeBaseCollection[]
+  knowledgeBaseCategories KnowledgeBaseCategory[]
+  knowledgeBaseTags KnowledgeBaseTag[]
   documentRagIndexes DocumentRagIndex[]
   ragChatSessions RagChatSession[]
   documentUploadSessions DocumentUploadSession[]
@@ -479,6 +494,10 @@ model Document {
   purgedBy        User?          @relation("DocumentPurger", fields: [purgedByUserId], references: [id], onDelete: SetNull)
   versions        DocumentVersion[]
   accessGrants    DocumentAccess[]
+  knowledgeBases  DocumentKnowledgeBase[]
+  collections     DocumentCollection[]
+  tags            DocumentTag[]
+  categoryLinks   DocumentCategory[]
   ragIndex        DocumentRagIndex?
   ragChatSelectedDocuments RagChatSelectedDocument[]
   ragChatMessageSources RagChatMessageSource[]
@@ -487,6 +506,172 @@ model Document {
   @@index([createdByUserId, status, updatedAt])
   @@index([checksumSha256])
   @@map("documents")
+}
+
+model KnowledgeBase {
+  id              String              @id @default(uuid()) @db.Uuid
+  organizationId  String              @map("organization_id") @db.Uuid
+  name            String              @db.VarChar(120)
+  normalizedName  String              @map("normalized_name") @db.VarChar(120)
+  slug            String              @db.VarChar(120)
+  description     String?             @db.VarChar(500)
+  status          KnowledgeBaseStatus @default(ACTIVE)
+  isDefault       Boolean             @default(false) @map("is_default")
+  createdByUserId String?             @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  organization    Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy       User?               @relation("KnowledgeBaseCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  folders         KnowledgeBaseFolder[]
+  collections     KnowledgeBaseCollection[]
+  documents       DocumentKnowledgeBase[]
+
+  @@unique([organizationId, normalizedName])
+  @@unique([organizationId, slug])
+  @@index([organizationId, status, updatedAt])
+  @@index([organizationId, isDefault])
+  @@map("knowledge_bases")
+}
+
+model KnowledgeBaseFolder {
+  id              String                @id @default(uuid()) @db.Uuid
+  organizationId  String                @map("organization_id") @db.Uuid
+  knowledgeBaseId String                @map("knowledge_base_id") @db.Uuid
+  parentId        String?               @map("parent_id") @db.Uuid
+  name            String                @db.VarChar(120)
+  normalizedName  String                @map("normalized_name") @db.VarChar(120)
+  slug            String                @db.VarChar(120)
+  createdByUserId String?               @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+
+  organization    Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  knowledgeBase   KnowledgeBase         @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+  parent          KnowledgeBaseFolder?   @relation("KnowledgeBaseFolderTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children        KnowledgeBaseFolder[]  @relation("KnowledgeBaseFolderTree")
+  createdBy       User?                 @relation("KnowledgeBaseFolderCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  documents       DocumentKnowledgeBase[]
+
+  @@unique([knowledgeBaseId, parentId, normalizedName])
+  @@index([organizationId, knowledgeBaseId])
+  @@index([parentId])
+  @@map("knowledge_base_folders")
+}
+
+model KnowledgeBaseCollection {
+  id              String                @id @default(uuid()) @db.Uuid
+  organizationId  String                @map("organization_id") @db.Uuid
+  knowledgeBaseId String                @map("knowledge_base_id") @db.Uuid
+  name            String                @db.VarChar(120)
+  normalizedName  String                @map("normalized_name") @db.VarChar(120)
+  slug            String                @db.VarChar(120)
+  description     String?               @db.VarChar(500)
+  createdByUserId String?               @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+
+  organization    Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  knowledgeBase   KnowledgeBase         @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+  createdBy       User?                 @relation("KnowledgeBaseCollectionCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  documents       DocumentCollection[]
+
+  @@unique([knowledgeBaseId, normalizedName])
+  @@index([organizationId, knowledgeBaseId])
+  @@map("knowledge_base_collections")
+}
+
+model KnowledgeBaseCategory {
+  id              String             @id @default(uuid()) @db.Uuid
+  organizationId  String             @map("organization_id") @db.Uuid
+  name            String             @db.VarChar(80)
+  normalizedName  String             @map("normalized_name") @db.VarChar(80)
+  slug            String             @db.VarChar(80)
+  createdByUserId String?            @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy       User?              @relation("KnowledgeBaseCategoryCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  documents       DocumentCategory[]
+
+  @@unique([organizationId, normalizedName])
+  @@index([organizationId, updatedAt])
+  @@map("knowledge_base_categories")
+}
+
+model KnowledgeBaseTag {
+  id              String        @id @default(uuid()) @db.Uuid
+  organizationId  String        @map("organization_id") @db.Uuid
+  name            String        @db.VarChar(60)
+  normalizedName  String        @map("normalized_name") @db.VarChar(60)
+  slug            String        @db.VarChar(60)
+  createdByUserId String?       @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy       User?         @relation("KnowledgeBaseTagCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  documents       DocumentTag[]
+
+  @@unique([organizationId, normalizedName])
+  @@index([organizationId, updatedAt])
+  @@map("knowledge_base_tags")
+}
+
+model DocumentKnowledgeBase {
+  documentId      String                @map("document_id") @db.Uuid
+  knowledgeBaseId String                @map("knowledge_base_id") @db.Uuid
+  folderId        String?               @map("folder_id") @db.Uuid
+  createdAt       DateTime              @default(now()) @map("created_at")
+
+  document        Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  knowledgeBase   KnowledgeBase         @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+  folder          KnowledgeBaseFolder?   @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  @@id([documentId, knowledgeBaseId])
+  @@index([knowledgeBaseId])
+  @@index([folderId])
+  @@map("document_knowledge_bases")
+}
+
+model DocumentCollection {
+  documentId      String                  @map("document_id") @db.Uuid
+  collectionId    String                  @map("collection_id") @db.Uuid
+  createdAt       DateTime                @default(now()) @map("created_at")
+
+  document        Document                @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  collection      KnowledgeBaseCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@id([documentId, collectionId])
+  @@index([collectionId])
+  @@map("document_collections")
+}
+
+model DocumentCategory {
+  documentId      String                @map("document_id") @db.Uuid
+  categoryId      String                @map("category_id") @db.Uuid
+  createdAt       DateTime              @default(now()) @map("created_at")
+
+  document        Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  category        KnowledgeBaseCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([documentId, categoryId])
+  @@index([categoryId])
+  @@map("document_categories")
+}
+
+model DocumentTag {
+  documentId      String           @map("document_id") @db.Uuid
+  tagId           String           @map("tag_id") @db.Uuid
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  document        Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  tag             KnowledgeBaseTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([documentId, tagId])
+  @@index([tagId])
+  @@map("document_tags")
 }
 
 model DocumentRagIndex {
