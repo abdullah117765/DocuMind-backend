@@ -70,6 +70,15 @@ export const ModelName = {
   JoinRequest: 'JoinRequest',
   AuditLog: 'AuditLog',
   Document: 'Document',
+  KnowledgeBase: 'KnowledgeBase',
+  KnowledgeBaseFolder: 'KnowledgeBaseFolder',
+  KnowledgeBaseCollection: 'KnowledgeBaseCollection',
+  KnowledgeBaseCategory: 'KnowledgeBaseCategory',
+  KnowledgeBaseTag: 'KnowledgeBaseTag',
+  DocumentKnowledgeBase: 'DocumentKnowledgeBase',
+  DocumentCollection: 'DocumentCollection',
+  DocumentCategory: 'DocumentCategory',
+  DocumentTag: 'DocumentTag',
   DocumentRagIndex: 'DocumentRagIndex',
   RagChatSession: 'RagChatSession',
   RagChatMessage: 'RagChatMessage',
@@ -383,6 +392,120 @@ export const DocumentScalarFieldEnum = {
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const KnowledgeBaseScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  normalizedName: 'normalizedName',
+  slug: 'slug',
+  description: 'description',
+  status: 'status',
+  isDefault: 'isDefault',
+  createdByUserId: 'createdByUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeBaseScalarFieldEnum = (typeof KnowledgeBaseScalarFieldEnum)[keyof typeof KnowledgeBaseScalarFieldEnum]
+
+
+export const KnowledgeBaseFolderScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  knowledgeBaseId: 'knowledgeBaseId',
+  parentId: 'parentId',
+  name: 'name',
+  normalizedName: 'normalizedName',
+  slug: 'slug',
+  createdByUserId: 'createdByUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeBaseFolderScalarFieldEnum = (typeof KnowledgeBaseFolderScalarFieldEnum)[keyof typeof KnowledgeBaseFolderScalarFieldEnum]
+
+
+export const KnowledgeBaseCollectionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  knowledgeBaseId: 'knowledgeBaseId',
+  name: 'name',
+  normalizedName: 'normalizedName',
+  slug: 'slug',
+  description: 'description',
+  createdByUserId: 'createdByUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeBaseCollectionScalarFieldEnum = (typeof KnowledgeBaseCollectionScalarFieldEnum)[keyof typeof KnowledgeBaseCollectionScalarFieldEnum]
+
+
+export const KnowledgeBaseCategoryScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  normalizedName: 'normalizedName',
+  slug: 'slug',
+  createdByUserId: 'createdByUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeBaseCategoryScalarFieldEnum = (typeof KnowledgeBaseCategoryScalarFieldEnum)[keyof typeof KnowledgeBaseCategoryScalarFieldEnum]
+
+
+export const KnowledgeBaseTagScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  normalizedName: 'normalizedName',
+  slug: 'slug',
+  createdByUserId: 'createdByUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeBaseTagScalarFieldEnum = (typeof KnowledgeBaseTagScalarFieldEnum)[keyof typeof KnowledgeBaseTagScalarFieldEnum]
+
+
+export const DocumentKnowledgeBaseScalarFieldEnum = {
+  documentId: 'documentId',
+  knowledgeBaseId: 'knowledgeBaseId',
+  folderId: 'folderId',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentKnowledgeBaseScalarFieldEnum = (typeof DocumentKnowledgeBaseScalarFieldEnum)[keyof typeof DocumentKnowledgeBaseScalarFieldEnum]
+
+
+export const DocumentCollectionScalarFieldEnum = {
+  documentId: 'documentId',
+  collectionId: 'collectionId',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentCollectionScalarFieldEnum = (typeof DocumentCollectionScalarFieldEnum)[keyof typeof DocumentCollectionScalarFieldEnum]
+
+
+export const DocumentCategoryScalarFieldEnum = {
+  documentId: 'documentId',
+  categoryId: 'categoryId',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentCategoryScalarFieldEnum = (typeof DocumentCategoryScalarFieldEnum)[keyof typeof DocumentCategoryScalarFieldEnum]
+
+
+export const DocumentTagScalarFieldEnum = {
+  documentId: 'documentId',
+  tagId: 'tagId',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentTagScalarFieldEnum = (typeof DocumentTagScalarFieldEnum)[keyof typeof DocumentTagScalarFieldEnum]
 
 
 export const DocumentRagIndexScalarFieldEnum = {

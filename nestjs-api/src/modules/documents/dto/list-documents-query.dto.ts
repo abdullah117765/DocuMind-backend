@@ -5,6 +5,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -64,6 +65,38 @@ export class ListDocumentsQueryDto {
       'AI status must be ready, preparing, needs_attention, or no_readable_text',
   })
   ragStatus?: 'ready' | 'preparing' | 'needs_attention' | 'no_readable_text';
+
+  @ApiPropertyOptional({
+    description: 'Filter by Knowledge Base',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'Knowledge Base ID must be a valid UUID' })
+  knowledgeBaseId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filter by Collection',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'Collection ID must be a valid UUID' })
+  collectionId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filter by Category',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'Category ID must be a valid UUID' })
+  categoryId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filter by Tag',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'Tag ID must be a valid UUID' })
+  tagId?: string;
 
   @ApiPropertyOptional({ default: 1, minimum: 1 })
   @IsOptional()

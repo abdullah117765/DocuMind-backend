@@ -42,6 +42,7 @@ import { OrganizationIdDto } from '../access-control/dto/organization-id.dto';
 import { ORGANIZATION_PERMISSIONS } from '../access-control/rbac.constants';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { DocumentAccessIdDto } from './dto/document-access-id.dto';
+import { CommitUploadSessionDto } from './dto/commit-upload-session.dto';
 import { DocumentIdDto } from './dto/document-id.dto';
 import { DocumentStagedFileIdDto } from './dto/document-staged-file-id.dto';
 import { DocumentUploadSessionIdDto } from './dto/document-upload-session-id.dto';
@@ -383,6 +384,7 @@ export class OrganizationDocumentsController {
   async commitUploadSession(
     @Param() params: DocumentUploadSessionIdDto,
     @CurrentUser() principal: AuthenticatedPrincipal,
+    @Body() dto: CommitUploadSessionDto,
   ): Promise<CommitUploadSessionResponse> {
     return {
       data: {
@@ -390,6 +392,7 @@ export class OrganizationDocumentsController {
           params.organizationId,
           params.sessionId,
           principal,
+          dto,
         ),
       },
     };

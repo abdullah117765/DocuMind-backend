@@ -25,6 +25,7 @@ import { PlatformAdminModule } from './modules/platform-admin/platform-admin.mod
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { KnowledgeBasesModule } from './modules/knowledge-bases/knowledge-bases.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
     MailModule,
     AuthModule,
     AccessControlModule,
+    KnowledgeBasesModule,
     DocumentsModule,
     OrganizationsModule,
     PlatformAdminModule,

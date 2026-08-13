@@ -127,3 +127,11 @@ export const RagChatMessageRole = {
 } as const
 
 export type RagChatMessageRole = (typeof RagChatMessageRole)[keyof typeof RagChatMessageRole]
+
+
+export const KnowledgeBaseStatus = {
+  ACTIVE: 'ACTIVE',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type KnowledgeBaseStatus = (typeof KnowledgeBaseStatus)[keyof typeof KnowledgeBaseStatus]
