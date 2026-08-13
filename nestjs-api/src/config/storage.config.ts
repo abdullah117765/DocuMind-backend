@@ -75,7 +75,7 @@ export default registerAs('storage', (): StorageConfiguration => {
       ),
       stagingTtlSeconds: getIntegerEnvironmentValue(
         'DOCUMENT_STAGING_TTL_SECONDS',
-        3600,
+        24 * 60 * 60,
       ),
       maxZipExpandedBytes: getIntegerEnvironmentValue(
         'DOCUMENT_ZIP_MAX_EXPANDED_BYTES',

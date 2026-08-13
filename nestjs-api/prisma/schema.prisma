@@ -85,6 +85,11 @@ enum DocumentRagIndexStatus {
   NO_CONTENT
 }
 
+enum RagChatMessageRole {
+  USER
+  ASSISTANT
+}
+
 model User {
   id                            String                   @id @default(uuid()) @db.Uuid
   name                          String?                  @db.VarChar(150)
@@ -106,6 +111,7 @@ model User {
   joinRequestsReviewed          JoinRequest[]            @relation("JoinRequestReviewer")
   auditLogs                     AuditLog[]               @relation("AuditLogActor")
   documentsCreated              Document[]               @relation("DocumentCreator")
+  ragChatSessions               RagChatSession[]         @relation("RagChatSessionCreator")
   documentVersionsCreated       DocumentVersion[]        @relation("DocumentVersionCreator")
   documentUserDeletions         Document[]               @relation("DocumentUserDeleter")
   documentOrgDeletions          Document[]               @relation("DocumentOrgDeleter")
@@ -206,6 +212,7 @@ model Organization {
   auditLogs       AuditLog[]
   documents       Document[]
   documentRagIndexes DocumentRagIndex[]
+  ragChatSessions RagChatSession[]
   documentUploadSessions DocumentUploadSession[]
   subscription    OrganizationSubscription?
   limits          OrganizationLimit?
@@ -473,6 +480,8 @@ model Document {
   versions        DocumentVersion[]
   accessGrants    DocumentAccess[]
   ragIndex        DocumentRagIndex?
+  ragChatSelectedDocuments RagChatSelectedDocument[]
+  ragChatMessageSources RagChatMessageSource[]
 
   @@index([organizationId, status, updatedAt])
   @@index([createdByUserId, status, updatedAt])
@@ -500,6 +509,81 @@ model DocumentRagIndex {
   @@index([organizationId, status])
   @@index([documentId, versionNumber])
   @@map("document_rag_indexes")
+}
+
+model RagChatSession {
+  id              String                    @id @default(uuid()) @db.Uuid
+  organizationId  String                    @map("organization_id") @db.Uuid
+  createdByUserId String                    @map("created_by_user_id") @db.Uuid
+  title           String                    @db.VarChar(160)
+  deletedAt       DateTime?                 @map("deleted_at")
+  createdAt       DateTime                  @default(now()) @map("created_at")
+  updatedAt       DateTime                  @updatedAt @map("updated_at")
+
+  organization    Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy       User                      @relation("RagChatSessionCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  messages        RagChatMessage[]
+  selectedDocuments RagChatSelectedDocument[]
+
+  @@index([organizationId, createdByUserId, deletedAt, updatedAt])
+  @@index([createdByUserId, updatedAt])
+  @@map("rag_chat_sessions")
+}
+
+model RagChatMessage {
+  id            String                    @id @default(uuid()) @db.Uuid
+  chatSessionId String                    @map("chat_session_id") @db.Uuid
+  role          RagChatMessageRole
+  content       String                    @db.Text
+  summary       String?                   @db.Text
+  metadata      Json?
+  createdAt     DateTime                  @default(now()) @map("created_at")
+
+  chatSession   RagChatSession            @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  sources       RagChatMessageSource[]
+
+  @@index([chatSessionId, createdAt])
+  @@map("rag_chat_messages")
+}
+
+model RagChatMessageSource {
+  id            String         @id @default(uuid()) @db.Uuid
+  messageId     String         @map("message_id") @db.Uuid
+  documentId    String?        @map("document_id") @db.Uuid
+  documentName  String         @map("document_name") @db.VarChar(255)
+  fileType      String?        @map("file_type") @db.VarChar(32)
+  versionNumber Int            @map("version_number")
+  chunkIndex    Int            @map("chunk_index")
+  pageNumber    Int?           @map("page_number")
+  slideNumber   Int?           @map("slide_number")
+  sheetName     String?        @map("sheet_name") @db.VarChar(120)
+  lineStart     Int?           @map("line_start")
+  lineEnd       Int?           @map("line_end")
+  sectionTitle  String?        @map("section_title") @db.VarChar(255)
+  locationLabel String?        @map("location_label") @db.VarChar(255)
+  score         Float?
+  metadata      Json?
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  message       RagChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  document      Document?      @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([messageId])
+  @@index([documentId])
+  @@map("rag_chat_message_sources")
+}
+
+model RagChatSelectedDocument {
+  chatSessionId String         @map("chat_session_id") @db.Uuid
+  documentId    String         @map("document_id") @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  chatSession   RagChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  document      Document       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@id([chatSessionId, documentId])
+  @@index([documentId])
+  @@map("rag_chat_selected_documents")
 }
 
 model DocumentVersion {

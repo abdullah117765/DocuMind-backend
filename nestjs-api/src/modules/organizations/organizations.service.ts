@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import {
   OrganizationMembershipStatus,
@@ -10,6 +11,10 @@ import {
   Prisma,
 } from '../../generated/prisma/client';
 import { AccessControlService } from '../access-control/access-control.service';
+import {
+  DocumentStorageService,
+  StoredObjectReference,
+} from '../documents/document-storage.service';
 import { RagOrchestratorService } from '../documents/rag-orchestrator.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
@@ -105,6 +110,7 @@ export class OrganizationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accessControlService: AccessControlService,
+    private readonly storageService: DocumentStorageService,
     private readonly ragOrchestrator: RagOrchestratorService,
   ) {}
 
@@ -234,7 +240,46 @@ export class OrganizationsService {
     return this.updateOrganization(organizationId, dto);
   }
 
-  async deleteOrganization(organizationId: string): Promise<void> {
+  async deleteOrganization(
+    organizationId: string,
+    confirmation: string,
+  ): Promise<void> {
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+    });
+
+    if (!organization) {
+      throw new NotFoundException('Organization not found');
+    }
+
+    const normalizedConfirmation = confirmation.trim().toLowerCase();
+    const matchesName =
+      normalizedConfirmation === organization.name.trim().toLowerCase();
+    const matchesSlug = normalizedConfirmation === organization.slug;
+
+    if (!matchesName && !matchesSlug) {
+      throw new BadRequestException(
+        'Type the organization name or URL name to confirm deletion',
+      );
+    }
+
+    const objectReferences =
+      await this.collectOrganizationObjectReferences(organizationId);
+
+    if (objectReferences.length > 0) {
+      await this.storageService.removeObjects(objectReferences).catch((error) => {
+        throw new ServiceUnavailableException(
+          'Organization files could not be removed. Try again after document storage is available.',
+          { cause: error },
+        );
+      });
+    }
+
     try {
       await this.prisma.organization.delete({
         where: { id: organizationId },
@@ -251,6 +296,57 @@ export class OrganizationsService {
       organizationId,
     );
     void this.ragOrchestrator.deleteOrganization(organizationId);
+  }
+
+  private async collectOrganizationObjectReferences(
+    organizationId: string,
+  ): Promise<StoredObjectReference[]> {
+    const [documents, stagedFiles] = await Promise.all([
+      this.prisma.document.findMany({
+        where: { organizationId },
+        select: {
+          storageBucket: true,
+          storageKey: true,
+          versions: {
+            select: {
+              storageBucket: true,
+              storageKey: true,
+            },
+          },
+        },
+      }),
+      this.prisma.documentUploadStagedFile.findMany({
+        where: {
+          uploadSession: {
+            is: {
+              organizationId,
+            },
+          },
+        },
+        select: {
+          storageBucket: true,
+          storageKey: true,
+        },
+      }),
+    ]);
+    const references = new Map<string, StoredObjectReference>();
+    const addReference = (bucket: string, key: string): void => {
+      references.set(`${bucket}/${key}`, { bucket, key });
+    };
+
+    for (const document of documents) {
+      addReference(document.storageBucket, document.storageKey);
+
+      for (const version of document.versions) {
+        addReference(version.storageBucket, version.storageKey);
+      }
+    }
+
+    for (const stagedFile of stagedFiles) {
+      addReference(stagedFile.storageBucket, stagedFile.storageKey);
+    }
+
+    return [...references.values()];
   }
 
   private async updateOrganization(

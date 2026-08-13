@@ -5,7 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { hash } from 'bcrypt';
-import { AccessScope, Prisma } from '../../generated/prisma/client';
+import {
+  AccessScope,
+  OrganizationMembershipStatus,
+  Prisma,
+} from '../../generated/prisma/client';
 import { normalizeEmail } from '../../common/validation/email.validation';
 import { AccessControlService } from '../access-control/access-control.service';
 import { EnvSuperAdminService } from '../auth/env-super-admin.service';
@@ -65,6 +69,11 @@ const managedUserSelect = {
     },
   },
   organizationMemberships: {
+    where: {
+      status: {
+        not: OrganizationMembershipStatus.REMOVED,
+      },
+    },
     select: {
       id: true,
       status: true,
@@ -336,6 +345,9 @@ export class UserManagementService {
             organizationMemberships: {
               some: {
                 organizationId: query.organizationId,
+                status: {
+                  not: OrganizationMembershipStatus.REMOVED,
+                },
               },
             },
           }
@@ -343,6 +355,12 @@ export class UserManagementService {
       ...(search
         ? {
             OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
               {
                 email: {
                   contains: search,
@@ -353,6 +371,41 @@ export class UserManagementService {
                 organizationMemberships: {
                   some: {
                     organization: {
+                      is: {
+                        name: {
+                          contains: search,
+                          mode: Prisma.QueryMode.insensitive,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              {
+                organizationMemberships: {
+                  some: {
+                    status: {
+                      not: OrganizationMembershipStatus.REMOVED,
+                    },
+                    roles: {
+                      some: {
+                        role: {
+                          is: {
+                            name: {
+                              contains: search,
+                              mode: Prisma.QueryMode.insensitive,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              {
+                platformRoleAssignments: {
+                  some: {
+                    role: {
                       is: {
                         name: {
                           contains: search,

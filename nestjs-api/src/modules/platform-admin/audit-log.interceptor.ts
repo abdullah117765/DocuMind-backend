@@ -14,6 +14,7 @@ import { PrismaService } from '../prisma/prisma.service';
 const AUDITED_METHODS = new Set(['POST', 'PATCH', 'PUT', 'DELETE']);
 const REDACTED_KEYS = new Set([
   'accessToken',
+  'apiKey',
   'authorization',
   'confirmPassword',
   'cookie',
@@ -64,8 +65,24 @@ function sanitizeValue(value: unknown): unknown {
   return Object.fromEntries(
     Object.entries(value).map(([key, entry]) => [
       key,
-      REDACTED_KEYS.has(key) ? '[REDACTED]' : sanitizeValue(entry),
+      isSensitiveKey(key) ? '[REDACTED]' : sanitizeValue(entry),
     ]),
+  );
+}
+
+function isSensitiveKey(key: string): boolean {
+  if (REDACTED_KEYS.has(key)) return true;
+
+  const normalizedKey = key.toLowerCase().replace(/[\s_-]+/g, '');
+
+  return (
+    normalizedKey.includes('password') ||
+    normalizedKey.includes('token') ||
+    normalizedKey.includes('secret') ||
+    normalizedKey.includes('authorization') ||
+    normalizedKey.includes('cookie') ||
+    normalizedKey.includes('apikey') ||
+    normalizedKey === 'otp'
   );
 }
 

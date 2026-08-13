@@ -74,6 +74,17 @@ class RagSource(BaseModel):
     document_name: str
     chunk_index: int
     version_number: int
+    file_type: str | None = None
+    score: float | None = None
+    text: str | None = None
+    page_number: int | None = None
+    slide_number: int | None = None
+    sheet_name: str | None = None
+    line_start: int | None = None
+    line_end: int | None = None
+    section_title: str | None = None
+    location_label: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class RagAskResponse(BaseModel):

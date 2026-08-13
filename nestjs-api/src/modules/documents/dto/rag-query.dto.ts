@@ -78,6 +78,15 @@ export class RagQueryDto {
   @Min(1)
   @Max(20)
   topK?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Optional chat session to append this question to. Previous messages are stored for history only and are not sent to the LLM.',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'Chat session ID must be a valid UUID' })
+  chatSessionId?: string;
 }
 
 export class RagReindexDto {
@@ -92,4 +101,9 @@ export class RagReindexDto {
   @ArrayMaxSize(100)
   @IsUUID('4', { each: true })
   documentIds?: string[];
+}
+
+export class RagChatSessionIdDto {
+  @IsUUID('4', { message: 'Chat session ID must be a valid UUID' })
+  chatSessionId!: string;
 }

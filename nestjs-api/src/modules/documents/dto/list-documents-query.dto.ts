@@ -54,6 +54,17 @@ export class ListDocumentsQueryDto {
   })
   sort?: 'newest' | 'oldest';
 
+  @ApiPropertyOptional({
+    description: 'Filter by AI preparation status for Ask Documents',
+    enum: ['ready', 'preparing', 'needs_attention', 'no_readable_text'],
+  })
+  @IsOptional()
+  @IsIn(['ready', 'preparing', 'needs_attention', 'no_readable_text'], {
+    message:
+      'AI status must be ready, preparing, needs_attention, or no_readable_text',
+  })
+  ragStatus?: 'ready' | 'preparing' | 'needs_attention' | 'no_readable_text';
+
   @ApiPropertyOptional({ default: 1, minimum: 1 })
   @IsOptional()
   @Type(() => Number)

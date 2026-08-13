@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
-  AccessScope,
   OrganizationMembershipStatus,
   OrganizationStatus,
 } from '../../generated/prisma/client';
@@ -51,7 +50,7 @@ export class CurrentUserAccessService {
   ) {}
 
   async getCurrentUserAccess(userId: string): Promise<CurrentUserAccessView> {
-    const [platform, memberships, globalOrganizationGrant, isEnvSuperAdmin] =
+    const [platform, memberships, isEnvSuperAdmin] =
       await Promise.all([
         this.accessControlService.resolvePlatformAccess(userId),
         this.prisma.organizationMembership.findMany({
@@ -86,38 +85,13 @@ export class CurrentUserAccessService {
             { id: 'asc' },
           ],
         }),
-        this.prisma.platformUserRole.findFirst({
-          where: {
-            userId,
-            role: {
-              is: {
-                organizationId: null,
-                scope: AccessScope.PLATFORM,
-                isActive: true,
-                permissions: {
-                  some: {
-                    permission: {
-                      is: {
-                        scope: AccessScope.ORGANIZATION,
-                        isActive: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          select: {
-            roleId: true,
-          },
-        }),
         this.envSuperAdminService.isConfiguredUserId(userId),
       ]);
     const membershipByOrganizationId = new Map(
       memberships.map((membership) => [membership.organization.id, membership]),
     );
     const organizations =
-      globalOrganizationGrant || isEnvSuperAdmin
+      isEnvSuperAdmin
         ? await this.prisma.organization.findMany({
             where: { status: OrganizationStatus.ACTIVE },
             select: {
@@ -139,8 +113,7 @@ export class CurrentUserAccessService {
 
     return {
       platform,
-      hasGlobalOrganizationAccess:
-        Boolean(globalOrganizationGrant) || isEnvSuperAdmin,
+      hasGlobalOrganizationAccess: isEnvSuperAdmin,
       organizations: organizations.map((organization, index) => {
         const membership = membershipByOrganizationId.get(organization.id);
 

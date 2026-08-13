@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Query,
   Res,
@@ -57,6 +58,8 @@ import {
   DocumentVersionView,
   DocumentsService,
   RagAskView,
+  RagChatDetailView,
+  RagChatSessionListResult,
   RagDocumentStatusView,
   RagSearchView,
   UploadSessionView,
@@ -131,6 +134,14 @@ interface RagAskResponse {
   data: RagAskView;
 }
 
+interface RagChatListResponse {
+  data: RagChatSessionListResult;
+}
+
+interface RagChatDetailResponse {
+  data: RagChatDetailView;
+}
+
 interface RagStatusResponse {
   data: {
     documents: RagDocumentStatusView[];
@@ -147,8 +158,13 @@ function setStreamHeaders(
   disposition: 'inline' | 'attachment',
 ): void {
   const safeFilename = result.filename.replace(/["\\]/g, '_');
+  const safeMimeType =
+    disposition === 'inline' && ['text/html', 'application/xml'].includes(result.mimeType)
+      ? 'text/plain; charset=utf-8'
+      : result.mimeType;
 
-  response.setHeader('Content-Type', result.mimeType);
+  response.setHeader('Content-Type', safeMimeType);
+  response.setHeader('X-Content-Type-Options', 'nosniff');
   response.setHeader('Content-Length', String(result.sizeBytes));
   response.setHeader(
     'Content-Disposition',
@@ -436,10 +452,12 @@ export class OrganizationDocumentsController {
 
   @Post('rag/ask')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
   @RequireOrganizationPermissions(
     ORGANIZATION_PERMISSIONS.documentsRead,
     ORGANIZATION_PERMISSIONS.aiAccess,
   )
+  @ApiHeader(CSRF_HEADER)
   @ApiOperation({
     summary: 'Ask AI from hierarchy-accessible selected documents',
   })
@@ -455,6 +473,77 @@ export class OrganizationDocumentsController {
         dto,
       ),
     };
+  }
+
+  @Get('rag/chats')
+  @HttpCode(HttpStatus.OK)
+  @RequireOrganizationPermissions(
+    ORGANIZATION_PERMISSIONS.documentsRead,
+    ORGANIZATION_PERMISSIONS.aiAccess,
+  )
+  @ApiOperation({
+    summary: 'List current user Ask Documents chat history',
+  })
+  async listRagChatSessions(
+    @Param() params: OrganizationIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Promise<RagChatListResponse> {
+    return {
+      data: await this.documentsService.listRagChatSessions(
+        params.organizationId,
+        principal,
+      ),
+    };
+  }
+
+  @Get('rag/chats/:chatSessionId')
+  @HttpCode(HttpStatus.OK)
+  @RequireOrganizationPermissions(
+    ORGANIZATION_PERMISSIONS.documentsRead,
+    ORGANIZATION_PERMISSIONS.aiAccess,
+  )
+  @ApiOperation({
+    summary: 'Get one Ask Documents chat history',
+  })
+  async getRagChatSession(
+    @Param('organizationId', new ParseUUIDPipe({ version: '4' }))
+    organizationId: string,
+    @Param('chatSessionId', new ParseUUIDPipe({ version: '4' }))
+    chatSessionId: string,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Promise<RagChatDetailResponse> {
+    return {
+      data: await this.documentsService.getRagChatSession(
+        organizationId,
+        chatSessionId,
+        principal,
+      ),
+    };
+  }
+
+  @Delete('rag/chats/:chatSessionId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(CsrfGuard)
+  @RequireOrganizationPermissions(
+    ORGANIZATION_PERMISSIONS.documentsRead,
+    ORGANIZATION_PERMISSIONS.aiAccess,
+  )
+  @ApiHeader(CSRF_HEADER)
+  @ApiOperation({
+    summary: 'Delete one Ask Documents chat history',
+  })
+  async deleteRagChatSession(
+    @Param('organizationId', new ParseUUIDPipe({ version: '4' }))
+    organizationId: string,
+    @Param('chatSessionId', new ParseUUIDPipe({ version: '4' }))
+    chatSessionId: string,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Promise<void> {
+    await this.documentsService.deleteRagChatSession(
+      organizationId,
+      chatSessionId,
+      principal,
+    );
   }
 
   @Get('rag/status')
@@ -797,6 +886,21 @@ export class PlatformDocumentsController {
       await this.documentsService.getPlatformDocumentContent(params.documentId),
       'inline',
     );
+  }
+
+  @Get(':documentId/preview')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get extracted preview data for Super Admin review' })
+  async getPlatformDocumentPreview(
+    @Param() params: PlatformDocumentIdDto,
+  ): Promise<PreviewResponse> {
+    return {
+      data: {
+        preview: await this.documentsService.getPlatformDocumentPreview(
+          params.documentId,
+        ),
+      },
+    };
   }
 
   @Post(':documentId/restore')

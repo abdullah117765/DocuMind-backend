@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     RAG_REDUNDANCY_THRESHOLD: float = 0.88
 
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-3.5-flash"
+    GEMINI_MODEL: str = "gemini-3.1-flash-lite"
     GEMINI_REQUEST_TIMEOUT_MS: int = 20_000
     GEMINI_TOTAL_TIMEOUT_MS: int = 25_000
     GEMINI_MAX_RETRIES: int = 2

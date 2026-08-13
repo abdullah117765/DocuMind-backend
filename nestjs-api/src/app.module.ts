@@ -1,16 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { ApiRateLimitGuard } from './common/guards/api-rate-limit.guard';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { MaintenanceCleanupService } from './common/tasks/maintenance-cleanup.service';
 import accessControlConfig from './config/access-control.config';
 import authConfig from './config/auth.config';
 import cookieConfig from './config/cookie.config';
 import emailVerificationConfig from './config/email-verification.config';
 import mailConfig from './config/mail.config';
 import passwordResetConfig from './config/password-reset.config';
+import rateLimitConfig from './config/rate-limit.config';
 import storageConfig from './config/storage.config';
 import superAdminConfig from './config/super-admin.config';
 import { AccessControlModule } from './modules/access-control/access-control.module';
@@ -36,6 +39,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
         emailVerificationConfig,
         mailConfig,
         passwordResetConfig,
+        rateLimitConfig,
         storageConfig,
         superAdminConfig,
       ],
@@ -52,6 +56,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
   controllers: [AppController],
   providers: [
     AppService,
+    MaintenanceCleanupService,
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
@@ -59,6 +64,10 @@ import { DocumentsModule } from './modules/documents/documents.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ApiRateLimitGuard,
     },
     {
       provide: APP_INTERCEPTOR,

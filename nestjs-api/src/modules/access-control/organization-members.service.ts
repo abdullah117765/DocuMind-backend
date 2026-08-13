@@ -21,7 +21,6 @@ import { ListPeopleAccessQueryDto } from './dto/list-people-access-query.dto';
 import {
   ORGANIZATION_PERMISSIONS,
   ORGANIZATION_ROLE_ASSIGNMENT_LIMITED_SYSTEM_KEYS,
-  ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS,
   ORGANIZATION_ROLE_KEYS,
   PLATFORM_ROLE_KEYS,
 } from './rbac.constants';
@@ -1325,7 +1324,7 @@ export class OrganizationMembersService {
     if (blockedRoles.length > 0) {
       throw new ForbiddenException({
         message:
-          'Organization Admins can assign only Manager, Employee, or non-admin custom roles.',
+          'Organization Admins can assign only Manager, Employee, or custom organization roles.',
         details: {
           blockedRoleIds: blockedRoles.map((role) => role.id),
         },
@@ -1351,7 +1350,7 @@ export class OrganizationMembersService {
     if (protectedRoles.length > 0) {
       throw new ForbiddenException({
         message:
-          'Only Super Admin can manage members with Organization Admin or protected custom roles.',
+          'Only Super Admin can manage members with protected system roles.',
         details: {
           protectedRoleIds: protectedRoles.map((role) => role.id),
         },
@@ -1370,9 +1369,7 @@ export class OrganizationMembersService {
       );
     }
 
-    return !role.permissions.some(({ permission }) =>
-      ORGANIZATION_ROLE_ASSIGNMENT_PROTECTED_PERMISSIONS.has(permission.code),
-    );
+    return true;
   }
 
   private async filterVisibleMembershipsForActor(

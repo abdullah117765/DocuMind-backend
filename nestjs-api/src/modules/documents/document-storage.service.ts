@@ -42,6 +42,10 @@ export class DocumentStorageService {
     return this.bucket;
   }
 
+  async checkHealth(): Promise<void> {
+    await this.ensureBucket();
+  }
+
   buildStagingKey(input: {
     organizationId: string;
     sessionId: string;

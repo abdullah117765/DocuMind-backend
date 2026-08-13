@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBadRequestResponse,
   ApiBody,
   ApiConflictResponse,
   ApiCookieAuth,
@@ -34,6 +35,7 @@ import { OrganizationIdDto } from '../access-control/dto/organization-id.dto';
 import { ORGANIZATION_PERMISSIONS } from '../access-control/rbac.constants';
 import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-principal.interface';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
+import { DeleteOrganizationDto } from './dto/delete-organization.dto';
 import { ListOrganizationsQueryDto } from './dto/list-organizations-query.dto';
 import { UpdateOrganizationSettingsDto } from './dto/update-organization-settings.dto';
 import { UpdatePlatformOrganizationDto } from './dto/update-platform-organization.dto';
@@ -164,10 +166,19 @@ export class OrganizationsController {
   })
   @ApiOperation({ summary: 'Delete a tenant organization as Super Admin' })
   @ApiOkResponse({ description: 'Tenant organization deleted' })
+  @ApiBadRequestResponse({
+    description:
+      'The confirmation value does not match the organization name or URL name',
+  })
+  @ApiBody({ type: DeleteOrganizationDto })
   async deleteOrganization(
     @Param() params: OrganizationIdDto,
+    @Body() dto: DeleteOrganizationDto,
   ): Promise<ActionResult> {
-    await this.organizationsService.deleteOrganization(params.organizationId);
+    await this.organizationsService.deleteOrganization(
+      params.organizationId,
+      dto.confirmation,
+    );
 
     return { message: 'Organization deleted.' };
   }

@@ -53,7 +53,7 @@ class IngestionService:
                 int((time.perf_counter() - stage_started) * 1000),
             )
             stage_started = time.perf_counter()
-            chunks = self.chunking.chunk(text)
+            chunks = self.chunking.chunk(text, request.file_type)
             logger.info(
                 "RAG ingest chunked document_id=%s chunks=%s elapsed_ms=%s",
                 request.document_id,

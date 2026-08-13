@@ -4,8 +4,11 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  Res,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiCookieAuth,
@@ -42,5 +45,33 @@ export class AuditLogsController {
     return {
       data: await this.auditLogsService.listAuditLogs(query, principal),
     };
+  }
+
+  @Get('export')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Download audit logs as a text file' })
+  @ApiOkResponse({ description: 'Audit log text export' })
+  async exportAuditLogs(
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Query() query: ListAuditLogsQueryDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    const exportResult = await this.auditLogsService.exportAuditLogs(
+      query,
+      principal,
+    );
+
+    response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    response.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${exportResult.filename}"`,
+    );
+    response.setHeader('X-Audit-Log-Export-Count', String(exportResult.count));
+    response.setHeader(
+      'X-Audit-Log-Export-Truncated',
+      exportResult.truncated ? 'true' : 'false',
+    );
+
+    return new StreamableFile(Buffer.from(exportResult.content, 'utf8'));
   }
 }

@@ -417,6 +417,10 @@ export const ModelName = {
   AuditLog: 'AuditLog',
   Document: 'Document',
   DocumentRagIndex: 'DocumentRagIndex',
+  RagChatSession: 'RagChatSession',
+  RagChatMessage: 'RagChatMessage',
+  RagChatMessageSource: 'RagChatMessageSource',
+  RagChatSelectedDocument: 'RagChatSelectedDocument',
   DocumentVersion: 'DocumentVersion',
   DocumentAccess: 'DocumentAccess',
   DocumentUploadSession: 'DocumentUploadSession',
@@ -436,7 +440,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "emailVerificationToken" | "passwordResetAuthorization" | "session" | "refreshToken" | "organization" | "organizationMembership" | "role" | "permission" | "rolePermission" | "membershipRole" | "platformUserRole" | "organizationInvite" | "organizationInviteRole" | "organizationSubscription" | "organizationLimit" | "joinRequest" | "auditLog" | "document" | "documentRagIndex" | "documentVersion" | "documentAccess" | "documentUploadSession" | "documentUploadStagedFile"
+    modelProps: "user" | "emailVerificationToken" | "passwordResetAuthorization" | "session" | "refreshToken" | "organization" | "organizationMembership" | "role" | "permission" | "rolePermission" | "membershipRole" | "platformUserRole" | "organizationInvite" | "organizationInviteRole" | "organizationSubscription" | "organizationLimit" | "joinRequest" | "auditLog" | "document" | "documentRagIndex" | "ragChatSession" | "ragChatMessage" | "ragChatMessageSource" | "ragChatSelectedDocument" | "documentVersion" | "documentAccess" | "documentUploadSession" | "documentUploadStagedFile"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1920,6 +1924,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RagChatSession: {
+      payload: Prisma.$RagChatSessionPayload<ExtArgs>
+      fields: Prisma.RagChatSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RagChatSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RagChatSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.RagChatSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RagChatSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload>
+        }
+        findMany: {
+          args: Prisma.RagChatSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload>[]
+        }
+        create: {
+          args: Prisma.RagChatSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload>
+        }
+        createMany: {
+          args: Prisma.RagChatSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RagChatSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.RagChatSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload>
+        }
+        update: {
+          args: Prisma.RagChatSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.RagChatSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RagChatSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RagChatSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.RagChatSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.RagChatSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRagChatSession>
+        }
+        groupBy: {
+          args: Prisma.RagChatSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RagChatSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RagChatSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RagChatSessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    RagChatMessage: {
+      payload: Prisma.$RagChatMessagePayload<ExtArgs>
+      fields: Prisma.RagChatMessageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RagChatMessageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RagChatMessageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload>
+        }
+        findFirst: {
+          args: Prisma.RagChatMessageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RagChatMessageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload>
+        }
+        findMany: {
+          args: Prisma.RagChatMessageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload>[]
+        }
+        create: {
+          args: Prisma.RagChatMessageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload>
+        }
+        createMany: {
+          args: Prisma.RagChatMessageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RagChatMessageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload>[]
+        }
+        delete: {
+          args: Prisma.RagChatMessageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload>
+        }
+        update: {
+          args: Prisma.RagChatMessageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload>
+        }
+        deleteMany: {
+          args: Prisma.RagChatMessageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RagChatMessageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RagChatMessageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload>[]
+        }
+        upsert: {
+          args: Prisma.RagChatMessageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessagePayload>
+        }
+        aggregate: {
+          args: Prisma.RagChatMessageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRagChatMessage>
+        }
+        groupBy: {
+          args: Prisma.RagChatMessageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RagChatMessageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RagChatMessageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RagChatMessageCountAggregateOutputType> | number
+        }
+      }
+    }
+    RagChatMessageSource: {
+      payload: Prisma.$RagChatMessageSourcePayload<ExtArgs>
+      fields: Prisma.RagChatMessageSourceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RagChatMessageSourceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RagChatMessageSourceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload>
+        }
+        findFirst: {
+          args: Prisma.RagChatMessageSourceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RagChatMessageSourceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload>
+        }
+        findMany: {
+          args: Prisma.RagChatMessageSourceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload>[]
+        }
+        create: {
+          args: Prisma.RagChatMessageSourceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload>
+        }
+        createMany: {
+          args: Prisma.RagChatMessageSourceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RagChatMessageSourceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload>[]
+        }
+        delete: {
+          args: Prisma.RagChatMessageSourceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload>
+        }
+        update: {
+          args: Prisma.RagChatMessageSourceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload>
+        }
+        deleteMany: {
+          args: Prisma.RagChatMessageSourceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RagChatMessageSourceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RagChatMessageSourceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload>[]
+        }
+        upsert: {
+          args: Prisma.RagChatMessageSourceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatMessageSourcePayload>
+        }
+        aggregate: {
+          args: Prisma.RagChatMessageSourceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRagChatMessageSource>
+        }
+        groupBy: {
+          args: Prisma.RagChatMessageSourceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RagChatMessageSourceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RagChatMessageSourceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RagChatMessageSourceCountAggregateOutputType> | number
+        }
+      }
+    }
+    RagChatSelectedDocument: {
+      payload: Prisma.$RagChatSelectedDocumentPayload<ExtArgs>
+      fields: Prisma.RagChatSelectedDocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RagChatSelectedDocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RagChatSelectedDocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.RagChatSelectedDocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RagChatSelectedDocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload>
+        }
+        findMany: {
+          args: Prisma.RagChatSelectedDocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload>[]
+        }
+        create: {
+          args: Prisma.RagChatSelectedDocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload>
+        }
+        createMany: {
+          args: Prisma.RagChatSelectedDocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RagChatSelectedDocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.RagChatSelectedDocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload>
+        }
+        update: {
+          args: Prisma.RagChatSelectedDocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.RagChatSelectedDocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RagChatSelectedDocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RagChatSelectedDocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.RagChatSelectedDocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RagChatSelectedDocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.RagChatSelectedDocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRagChatSelectedDocument>
+        }
+        groupBy: {
+          args: Prisma.RagChatSelectedDocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RagChatSelectedDocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RagChatSelectedDocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RagChatSelectedDocumentCountAggregateOutputType> | number
+        }
+      }
+    }
     DocumentVersion: {
       payload: Prisma.$DocumentVersionPayload<ExtArgs>
       fields: Prisma.DocumentVersionFieldRefs
@@ -2561,6 +2861,64 @@ export const DocumentRagIndexScalarFieldEnum = {
 export type DocumentRagIndexScalarFieldEnum = (typeof DocumentRagIndexScalarFieldEnum)[keyof typeof DocumentRagIndexScalarFieldEnum]
 
 
+export const RagChatSessionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  createdByUserId: 'createdByUserId',
+  title: 'title',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RagChatSessionScalarFieldEnum = (typeof RagChatSessionScalarFieldEnum)[keyof typeof RagChatSessionScalarFieldEnum]
+
+
+export const RagChatMessageScalarFieldEnum = {
+  id: 'id',
+  chatSessionId: 'chatSessionId',
+  role: 'role',
+  content: 'content',
+  summary: 'summary',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type RagChatMessageScalarFieldEnum = (typeof RagChatMessageScalarFieldEnum)[keyof typeof RagChatMessageScalarFieldEnum]
+
+
+export const RagChatMessageSourceScalarFieldEnum = {
+  id: 'id',
+  messageId: 'messageId',
+  documentId: 'documentId',
+  documentName: 'documentName',
+  fileType: 'fileType',
+  versionNumber: 'versionNumber',
+  chunkIndex: 'chunkIndex',
+  pageNumber: 'pageNumber',
+  slideNumber: 'slideNumber',
+  sheetName: 'sheetName',
+  lineStart: 'lineStart',
+  lineEnd: 'lineEnd',
+  sectionTitle: 'sectionTitle',
+  locationLabel: 'locationLabel',
+  score: 'score',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type RagChatMessageSourceScalarFieldEnum = (typeof RagChatMessageSourceScalarFieldEnum)[keyof typeof RagChatMessageSourceScalarFieldEnum]
+
+
+export const RagChatSelectedDocumentScalarFieldEnum = {
+  chatSessionId: 'chatSessionId',
+  documentId: 'documentId',
+  createdAt: 'createdAt'
+} as const
+
+export type RagChatSelectedDocumentScalarFieldEnum = (typeof RagChatSelectedDocumentScalarFieldEnum)[keyof typeof RagChatSelectedDocumentScalarFieldEnum]
+
+
 export const DocumentVersionScalarFieldEnum = {
   id: 'id',
   documentId: 'documentId',
@@ -2870,6 +3228,34 @@ export type ListEnumDocumentRagIndexStatusFieldRefInput<$PrismaModel> = FieldRef
 
 
 /**
+ * Reference to a field of type 'RagChatMessageRole'
+ */
+export type EnumRagChatMessageRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RagChatMessageRole'>
+    
+
+
+/**
+ * Reference to a field of type 'RagChatMessageRole[]'
+ */
+export type ListEnumRagChatMessageRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RagChatMessageRole[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
  * Reference to a field of type 'DocumentAccessLevel'
  */
 export type EnumDocumentAccessLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentAccessLevel'>
@@ -2908,20 +3294,6 @@ export type EnumDocumentStagedFileStatusFieldRefInput<$PrismaModel> = FieldRefIn
  * Reference to a field of type 'DocumentStagedFileStatus[]'
  */
 export type ListEnumDocumentStagedFileStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentStagedFileStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**
@@ -3095,6 +3467,10 @@ export type GlobalOmitConfig = {
   auditLog?: Prisma.AuditLogOmit
   document?: Prisma.DocumentOmit
   documentRagIndex?: Prisma.DocumentRagIndexOmit
+  ragChatSession?: Prisma.RagChatSessionOmit
+  ragChatMessage?: Prisma.RagChatMessageOmit
+  ragChatMessageSource?: Prisma.RagChatMessageSourceOmit
+  ragChatSelectedDocument?: Prisma.RagChatSelectedDocumentOmit
   documentVersion?: Prisma.DocumentVersionOmit
   documentAccess?: Prisma.DocumentAccessOmit
   documentUploadSession?: Prisma.DocumentUploadSessionOmit

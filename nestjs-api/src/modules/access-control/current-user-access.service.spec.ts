@@ -13,15 +13,11 @@ describe('CurrentUserAccessService', () => {
   const userId = '7ee81b20-3a9a-4303-b370-89abf77f1bfc';
   const organizationId = '3c84ea89-6b30-4d90-a444-c12ba29777fb';
   const membershipFindMany = jest.fn();
-  const platformRoleFindFirst = jest.fn();
   const organizationFindMany = jest.fn();
   const organizationFindUnique = jest.fn();
   const prisma = {
     organizationMembership: {
       findMany: membershipFindMany,
-    },
-    platformUserRole: {
-      findFirst: platformRoleFindFirst,
     },
     organization: {
       findMany: organizationFindMany,
@@ -52,7 +48,6 @@ describe('CurrentUserAccessService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     membershipFindMany.mockResolvedValue([]);
-    platformRoleFindFirst.mockResolvedValue(null);
     organizationFindMany.mockResolvedValue([]);
     organizationFindUnique.mockResolvedValue({
       id: organizationId,
@@ -109,9 +104,6 @@ describe('CurrentUserAccessService', () => {
         },
       },
     ]);
-    platformRoleFindFirst.mockResolvedValue({
-      roleId: 'platform-role',
-    });
     organizationFindMany.mockResolvedValue([
       {
         id: organizationId,
@@ -150,7 +142,7 @@ describe('CurrentUserAccessService', () => {
 
     expect(result).toEqual({
       platform: platformAccess,
-      hasGlobalOrganizationAccess: true,
+      hasGlobalOrganizationAccess: false,
       organizations: [
         {
           organization: {
@@ -198,22 +190,9 @@ describe('CurrentUserAccessService', () => {
     );
   });
 
-  it('lists every organization for a platform role with global organization permissions', async () => {
+  it('lists every organization for the environment Super Admin', async () => {
     const otherOrganizationId = 'a31fcdfd-9612-450d-bf18-4b4160ba4cc1';
-    membershipFindMany.mockResolvedValue([
-      {
-        id: 'membership-active',
-        status: OrganizationMembershipStatus.ACTIVE,
-        organization: {
-          id: organizationId,
-          name: 'Example Organization',
-          slug: 'example-organization',
-        },
-      },
-    ]);
-    platformRoleFindFirst.mockResolvedValue({
-      roleId: 'platform-role',
-    });
+    isConfiguredSuperAdminUserId.mockResolvedValue(true);
     organizationFindMany.mockResolvedValue([
       {
         id: organizationId,
@@ -230,7 +209,7 @@ describe('CurrentUserAccessService', () => {
       .mockResolvedValueOnce({
         userId,
         organizationId,
-        membershipId: 'membership-active',
+        membershipId: null,
         roles: [],
         permissions: ['users.manage'],
       })
@@ -253,10 +232,7 @@ describe('CurrentUserAccessService', () => {
       organizations: [
         {
           organization: { id: organizationId },
-          membership: {
-            id: 'membership-active',
-            status: OrganizationMembershipStatus.ACTIVE,
-          },
+          membership: null,
           permissions: ['users.manage'],
         },
         {
@@ -274,36 +250,6 @@ describe('CurrentUserAccessService', () => {
       },
       orderBy: [{ name: 'asc' }, { id: 'asc' }],
       where: { status: OrganizationStatus.ACTIVE },
-    });
-  });
-
-  it('detects global organization access through permission relationships', async () => {
-    await service.getCurrentUserAccess(userId);
-
-    expect(platformRoleFindFirst).toHaveBeenCalledWith({
-      where: {
-        userId,
-        role: {
-          is: {
-            organizationId: null,
-            scope: AccessScope.PLATFORM,
-            isActive: true,
-            permissions: {
-              some: {
-                permission: {
-                  is: {
-                    scope: AccessScope.ORGANIZATION,
-                    isActive: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      select: {
-        roleId: true,
-      },
     });
   });
 
@@ -329,7 +275,7 @@ describe('CurrentUserAccessService', () => {
     });
   });
 
-  it('allows platform-granted organization access without a membership', async () => {
+  it('allows Super Admin selected organization access without a membership', async () => {
     const access = {
       userId,
       organizationId,

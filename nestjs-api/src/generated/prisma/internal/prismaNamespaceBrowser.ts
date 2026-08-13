@@ -71,6 +71,10 @@ export const ModelName = {
   AuditLog: 'AuditLog',
   Document: 'Document',
   DocumentRagIndex: 'DocumentRagIndex',
+  RagChatSession: 'RagChatSession',
+  RagChatMessage: 'RagChatMessage',
+  RagChatMessageSource: 'RagChatMessageSource',
+  RagChatSelectedDocument: 'RagChatSelectedDocument',
   DocumentVersion: 'DocumentVersion',
   DocumentAccess: 'DocumentAccess',
   DocumentUploadSession: 'DocumentUploadSession',
@@ -397,6 +401,64 @@ export const DocumentRagIndexScalarFieldEnum = {
 } as const
 
 export type DocumentRagIndexScalarFieldEnum = (typeof DocumentRagIndexScalarFieldEnum)[keyof typeof DocumentRagIndexScalarFieldEnum]
+
+
+export const RagChatSessionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  createdByUserId: 'createdByUserId',
+  title: 'title',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RagChatSessionScalarFieldEnum = (typeof RagChatSessionScalarFieldEnum)[keyof typeof RagChatSessionScalarFieldEnum]
+
+
+export const RagChatMessageScalarFieldEnum = {
+  id: 'id',
+  chatSessionId: 'chatSessionId',
+  role: 'role',
+  content: 'content',
+  summary: 'summary',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type RagChatMessageScalarFieldEnum = (typeof RagChatMessageScalarFieldEnum)[keyof typeof RagChatMessageScalarFieldEnum]
+
+
+export const RagChatMessageSourceScalarFieldEnum = {
+  id: 'id',
+  messageId: 'messageId',
+  documentId: 'documentId',
+  documentName: 'documentName',
+  fileType: 'fileType',
+  versionNumber: 'versionNumber',
+  chunkIndex: 'chunkIndex',
+  pageNumber: 'pageNumber',
+  slideNumber: 'slideNumber',
+  sheetName: 'sheetName',
+  lineStart: 'lineStart',
+  lineEnd: 'lineEnd',
+  sectionTitle: 'sectionTitle',
+  locationLabel: 'locationLabel',
+  score: 'score',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type RagChatMessageSourceScalarFieldEnum = (typeof RagChatMessageSourceScalarFieldEnum)[keyof typeof RagChatMessageSourceScalarFieldEnum]
+
+
+export const RagChatSelectedDocumentScalarFieldEnum = {
+  chatSessionId: 'chatSessionId',
+  documentId: 'documentId',
+  createdAt: 'createdAt'
+} as const
+
+export type RagChatSelectedDocumentScalarFieldEnum = (typeof RagChatSelectedDocumentScalarFieldEnum)[keyof typeof RagChatSelectedDocumentScalarFieldEnum]
 
 
 export const DocumentVersionScalarFieldEnum = {

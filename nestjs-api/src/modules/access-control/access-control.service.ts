@@ -167,87 +167,43 @@ export class AccessControlService {
       return result;
     }
 
-    const [platformAssignments, membership] = await Promise.all([
-      this.prisma.platformUserRole.findMany({
-        where: {
-          userId,
-          role: {
-            is: {
-              organizationId: null,
-              scope: AccessScope.PLATFORM,
-              isActive: true,
-              OR: [
-                { systemKey: null },
-                { systemKey: { not: PLATFORM_ROLE_KEYS.superAdmin } },
-              ],
-            },
-          },
-        },
-        select: {
-          role: {
-            select: {
-              id: true,
-              name: true,
-              scope: true,
-              permissions: {
-                where: {
-                  permission: {
-                    is: {
-                      scope: AccessScope.ORGANIZATION,
-                      isActive: true,
-                    },
-                  },
-                },
-                select: {
-                  permission: {
-                    select: {
-                      code: true,
-                    },
-                  },
-                },
+    const membership = await this.prisma.organizationMembership.findFirst({
+      where: {
+        organizationId,
+        userId,
+        status: OrganizationMembershipStatus.ACTIVE,
+      },
+      select: {
+        id: true,
+        roles: {
+          where: {
+            role: {
+              is: {
+                scope: AccessScope.ORGANIZATION,
+                isActive: true,
+                OR: [{ organizationId: null }, { organizationId }],
               },
             },
           },
-        },
-      }),
-      this.prisma.organizationMembership.findFirst({
-        where: {
-          organizationId,
-          userId,
-          status: OrganizationMembershipStatus.ACTIVE,
-        },
-        select: {
-          id: true,
-          roles: {
-            where: {
-              role: {
-                is: {
-                  scope: AccessScope.ORGANIZATION,
-                  isActive: true,
-                  OR: [{ organizationId: null }, { organizationId }],
-                },
-              },
-            },
-            select: {
-              role: {
-                select: {
-                  id: true,
-                  name: true,
-                  scope: true,
-                  permissions: {
-                    where: {
-                      permission: {
-                        is: {
-                          scope: AccessScope.ORGANIZATION,
-                          isActive: true,
-                        },
+          select: {
+            role: {
+              select: {
+                id: true,
+                name: true,
+                scope: true,
+                permissions: {
+                  where: {
+                    permission: {
+                      is: {
+                        scope: AccessScope.ORGANIZATION,
+                        isActive: true,
                       },
                     },
-                    select: {
-                      permission: {
-                        select: {
-                          code: true,
-                        },
+                  },
+                  select: {
+                    permission: {
+                      select: {
+                        code: true,
                       },
                     },
                   },
@@ -256,11 +212,10 @@ export class AccessControlService {
             },
           },
         },
-      }),
-    ]);
+      },
+    });
 
     const effectiveAccess = buildEffectiveAccess([
-      ...platformAssignments.map(({ role }) => role),
       ...(membership?.roles.map(({ role }) => role) ?? []),
     ]);
     const result: OrganizationAccess = {
