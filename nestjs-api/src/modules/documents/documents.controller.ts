@@ -730,6 +730,7 @@ export class OrganizationDocumentsController {
   async getDocumentVersionCitationPreview(
     @Param() params: DocumentVersionIdDto,
     @Query('highlights') highlights: string | undefined,
+    @Query('page') page: string | undefined,
     @CurrentUser() principal: AuthenticatedPrincipal,
     @Res() response: Response,
   ): Promise<void> {
@@ -741,9 +742,18 @@ export class OrganizationDocumentsController {
         params.versionId,
         principal,
         highlights,
+        this.parseCitationPageQuery(page),
       ),
       'inline',
     );
+  }
+
+  private parseCitationPageQuery(page?: string): number | undefined {
+    const pageNumber = Number(page);
+
+    return Number.isSafeInteger(pageNumber) && pageNumber > 0
+      ? pageNumber
+      : undefined;
   }
 
   @Post(':documentId/versions')

@@ -1972,6 +1972,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     versionId: string,
     principal: AuthenticatedPrincipal,
     highlightBoxesJson?: string,
+    fallbackPageNumber?: number,
   ): Promise<DocumentStreamResult> {
     await this.findReadableOrganizationDocument(
       organizationId,
@@ -2006,6 +2007,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
       buffer,
       version.extension,
       this.parseCitationHighlightBoxes(highlightBoxesJson),
+      fallbackPageNumber,
     );
 
     if (!citationPdf) {

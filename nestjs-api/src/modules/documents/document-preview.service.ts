@@ -336,6 +336,7 @@ export class DocumentPreviewService {
     buffer: Buffer,
     sourceExtension: string,
     highlightBoxes: CitationHighlightBox[] = [],
+    fallbackPageNumber?: number | null,
   ): Promise<Buffer | null> {
     const normalizedExtension = sourceExtension.toLowerCase().replace('.', '');
     let pdfBuffer: Buffer | null = null;
@@ -352,15 +353,21 @@ export class DocumentPreviewService {
       return pdfBuffer;
     }
 
-    return this.applyCitationHighlights(pdfBuffer, highlightBoxes);
+    return this.applyCitationHighlights(
+      pdfBuffer,
+      highlightBoxes,
+      fallbackPageNumber,
+    );
   }
 
   private async applyCitationHighlights(
     pdfBuffer: Buffer,
     highlightBoxes: CitationHighlightBox[],
+    fallbackPageNumber?: number | null,
   ): Promise<Buffer> {
     const pdf = await PDFDocument.load(pdfBuffer);
     const pages = pdf.getPages();
+    let drawnCount = 0;
 
     for (const box of highlightBoxes.slice(0, 12)) {
       const pageNumber = Number(box.page_number);
@@ -406,11 +413,32 @@ export class DocumentPreviewService {
         y: rectY,
         width: rectWidth,
         height: rectHeight,
-        color: rgb(1, 0.88, 0.2),
-        opacity: 0.35,
-        borderColor: rgb(0.98, 0.65, 0),
-        borderOpacity: 0.85,
-        borderWidth: 1,
+        color: rgb(1, 0.86, 0.05),
+        opacity: 0.48,
+        borderColor: rgb(0.98, 0.45, 0),
+        borderOpacity: 1,
+        borderWidth: 1.6,
+      });
+      drawnCount += 1;
+    }
+
+    const fallbackPage =
+      typeof fallbackPageNumber === 'number' &&
+      Number.isFinite(fallbackPageNumber) &&
+      fallbackPageNumber >= 1 &&
+      fallbackPageNumber <= pages.length
+        ? pages[fallbackPageNumber - 1]
+        : null;
+
+    if (drawnCount === 0 && fallbackPage) {
+      const { width, height } = fallbackPage.getSize();
+      fallbackPage.drawRectangle({
+        x: 0,
+        y: height - 22,
+        width,
+        height: 22,
+        color: rgb(1, 0.86, 0.05),
+        opacity: 0.55,
       });
     }
 
