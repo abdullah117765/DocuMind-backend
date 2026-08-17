@@ -35,6 +35,35 @@ class _HtmlTextExtractor(HTMLParser):
 class ExtractionService:
     max_text_chars = 500_000
 
+    def extract_text_with_locations(
+        self,
+        file_bytes: bytes,
+        extension: str,
+    ) -> tuple[str, list[dict[str, object]]]:
+        normalized = extension.lower().lstrip(".")
+
+        if normalized == "pdf":
+            return self._extract_pdf_with_locations(file_bytes)
+
+        if normalized in {"doc", "docx", "ppt", "pptx"}:
+            try:
+                pdf_bytes = self._convert_office_to_pdf(file_bytes, normalized)
+                text, locations = self._extract_pdf_with_locations(pdf_bytes)
+                return text, [
+                    {
+                        **location,
+                        "source_file_type": normalized,
+                        "preview_type": "pdf",
+                    }
+                    for location in locations
+                ]
+            except Exception:
+                # Fall back to the existing text-only extractors when LibreOffice
+                # is unavailable or the document cannot be converted cleanly.
+                return self.extract_text(file_bytes, normalized), []
+
+        return self.extract_text(file_bytes, normalized), []
+
     def extract_text(self, file_bytes: bytes, extension: str) -> str:
         normalized = extension.lower().lstrip(".")
         extractors = {
@@ -82,6 +111,79 @@ class ExtractionService:
             temp_file.write(file_bytes)
             temp_file.flush()
             return f"--- Page 1 ---\n{pymupdf4llm.to_markdown(temp_file.name)}"
+
+    def _extract_pdf_with_locations(
+        self,
+        file_bytes: bytes,
+    ) -> tuple[str, list[dict[str, object]]]:
+        import fitz
+
+        document = fitz.open(stream=file_bytes, filetype="pdf")
+        parts: list[str] = []
+        locations: list[dict[str, object]] = []
+        cursor = 0
+
+        for page_index, page in enumerate(document, start=1):
+            page_rect = page.rect
+            marker = f"--- Page {page_index} ---\n"
+            parts.append(marker)
+            cursor += len(marker)
+            page_has_text = False
+
+            for block in page.get_text("blocks"):
+                if len(block) < 5:
+                    continue
+
+                raw_text = str(block[4] or "").strip()
+                if not raw_text:
+                    continue
+
+                page_has_text = True
+                normalized_text = " ".join(raw_text.split())
+                text_start = cursor
+                text_end = text_start + len(normalized_text)
+                parts.append(normalized_text)
+                parts.append("\n")
+                cursor = text_end + 1
+                locations.append(
+                    {
+                        "char_start": text_start,
+                        "char_end": text_end,
+                        "page_number": page_index,
+                        "location_type": "page",
+                        "location_label": f"Page {page_index}",
+                        "preview_type": "pdf",
+                        "bbox": {
+                            "x0": float(block[0]),
+                            "y0": float(block[1]),
+                            "x1": float(block[2]),
+                            "y1": float(block[3]),
+                            "page_width": float(page_rect.width),
+                            "page_height": float(page_rect.height),
+                        },
+                    }
+                )
+
+            if page_has_text:
+                parts.append("\n")
+                cursor += 1
+            else:
+                # Keep the page marker even for pages without text so later
+                # chunks can still report the nearest page instead of only a
+                # generic passage number.
+                parts.append("\n")
+                cursor += 1
+
+        text = "".join(parts).strip()
+
+        if text and locations:
+            return text[: self.max_text_chars], [
+                location
+                for location in locations
+                if int(location["char_start"]) < self.max_text_chars
+            ]
+
+        return self._extract_pdf(file_bytes, "pdf")[: self.max_text_chars], []
 
     def _extract_docx(self, file_bytes: bytes, _: str = "docx") -> str:
         from docx import Document
@@ -283,5 +385,32 @@ class ExtractionService:
             converted_path = Path(temp_dir) / f"input.{target_extension}"
             if not converted_path.exists():
                 raise ValueError("LibreOffice did not produce a converted preview file.")
+
+            return converted_path.read_bytes()
+
+    def _convert_office_to_pdf(self, file_bytes: bytes, source_extension: str) -> bytes:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_path = Path(temp_dir) / f"input.{source_extension}"
+            source_path.write_bytes(file_bytes)
+
+            subprocess.run(
+                [
+                    "libreoffice",
+                    "--headless",
+                    "--convert-to",
+                    "pdf",
+                    "--outdir",
+                    temp_dir,
+                    str(source_path),
+                ],
+                check=True,
+                timeout=90,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
+            converted_path = Path(temp_dir) / "input.pdf"
+            if not converted_path.exists():
+                raise ValueError("LibreOffice did not produce a PDF preview file.")
 
             return converted_path.read_bytes()

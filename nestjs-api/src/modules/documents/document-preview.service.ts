@@ -10,6 +10,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { PDFDocument, rgb } from 'pdf-lib';
 import { Prisma } from '../../generated/prisma/client';
 import {
   DOCUMENT_RENDERABLE_EXTENSIONS,
@@ -26,6 +27,16 @@ export interface ExtractedDocumentPreview {
 interface TextPreview {
   content: string;
   truncated: boolean;
+}
+
+export interface CitationHighlightBox {
+  page_number?: number | null;
+  x0?: number | null;
+  y0?: number | null;
+  x1?: number | null;
+  y1?: number | null;
+  page_width?: number | null;
+  page_height?: number | null;
 }
 
 function decodeUtf8(buffer: Buffer): string {
@@ -210,6 +221,50 @@ function convertLegacyOfficeDocument(
   }
 }
 
+function convertOfficeDocumentToPdf(
+  buffer: Buffer,
+  sourceExtension: string,
+): Buffer | null {
+  const tempDir = mkdtempSync(join(tmpdir(), 'document-preview-pdf-'));
+  const sourcePath = join(tempDir, `input.${sourceExtension}`);
+  const convertedPath = join(tempDir, 'input.pdf');
+
+  try {
+    writeFileSync(sourcePath, buffer);
+
+    for (const binary of getLibreOfficeCandidates()) {
+      try {
+        execFileSync(
+          binary,
+          [
+            '--headless',
+            '--convert-to',
+            'pdf',
+            '--outdir',
+            tempDir,
+            sourcePath,
+          ],
+          {
+            stdio: 'pipe',
+            timeout: 90_000,
+            windowsHide: true,
+          },
+        );
+
+        if (existsSync(convertedPath)) {
+          return readFileSync(convertedPath);
+        }
+      } catch {
+        // Try the next common LibreOffice binary location.
+      }
+    }
+
+    return null;
+  } finally {
+    rmSync(tempDir, { force: true, recursive: true });
+  }
+}
+
 function parseSharedStrings(zip: AdmZip): string[] {
   const sharedStringsXml = readZipEntryText(zip, 'xl/sharedStrings.xml');
 
@@ -277,6 +332,91 @@ function getXlsxRows(buffer: Buffer): string[][] {
 
 @Injectable()
 export class DocumentPreviewService {
+  async convertToCitationPdf(
+    buffer: Buffer,
+    sourceExtension: string,
+    highlightBoxes: CitationHighlightBox[] = [],
+  ): Promise<Buffer | null> {
+    const normalizedExtension = sourceExtension.toLowerCase().replace('.', '');
+    let pdfBuffer: Buffer | null = null;
+
+    if (normalizedExtension === 'pdf') {
+      pdfBuffer = buffer;
+    } else if (['doc', 'docx', 'ppt', 'pptx'].includes(normalizedExtension)) {
+      pdfBuffer = convertOfficeDocumentToPdf(buffer, normalizedExtension);
+    } else {
+      return null;
+    }
+
+    if (!pdfBuffer || highlightBoxes.length === 0) {
+      return pdfBuffer;
+    }
+
+    return this.applyCitationHighlights(pdfBuffer, highlightBoxes);
+  }
+
+  private async applyCitationHighlights(
+    pdfBuffer: Buffer,
+    highlightBoxes: CitationHighlightBox[],
+  ): Promise<Buffer> {
+    const pdf = await PDFDocument.load(pdfBuffer);
+    const pages = pdf.getPages();
+
+    for (const box of highlightBoxes.slice(0, 12)) {
+      const pageNumber = Number(box.page_number);
+      const x0 = Number(box.x0);
+      const y0 = Number(box.y0);
+      const x1 = Number(box.x1);
+      const y1 = Number(box.y1);
+      const sourceWidth = Number(box.page_width);
+      const sourceHeight = Number(box.page_height);
+
+      if (
+        !Number.isFinite(pageNumber) ||
+        !Number.isFinite(x0) ||
+        !Number.isFinite(y0) ||
+        !Number.isFinite(x1) ||
+        !Number.isFinite(y1) ||
+        !Number.isFinite(sourceWidth) ||
+        !Number.isFinite(sourceHeight) ||
+        pageNumber < 1 ||
+        pageNumber > pages.length ||
+        sourceWidth <= 0 ||
+        sourceHeight <= 0 ||
+        x1 <= x0 ||
+        y1 <= y0
+      ) {
+        continue;
+      }
+
+      const page = pages[pageNumber - 1];
+      const { width: pageWidth, height: pageHeight } = page.getSize();
+      const scaleX = pageWidth / sourceWidth;
+      const scaleY = pageHeight / sourceHeight;
+      const padding = 2;
+      const rectX = Math.max(0, x0 * scaleX - padding);
+      const rectY = Math.max(0, pageHeight - y1 * scaleY - padding);
+      const rectWidth = Math.min(pageWidth - rectX, (x1 - x0) * scaleX + padding * 2);
+      const rectHeight = Math.min(pageHeight - rectY, (y1 - y0) * scaleY + padding * 2);
+
+      if (rectWidth <= 0 || rectHeight <= 0) continue;
+
+      page.drawRectangle({
+        x: rectX,
+        y: rectY,
+        width: rectWidth,
+        height: rectHeight,
+        color: rgb(1, 0.88, 0.2),
+        opacity: 0.35,
+        borderColor: rgb(0.98, 0.65, 0),
+        borderOpacity: 0.85,
+        borderWidth: 1,
+      });
+    }
+
+    return Buffer.from(await pdf.save());
+  }
+
   extractPreview(file: ValidatedDocumentBuffer): ExtractedDocumentPreview {
     const metadata = {
       originalFilename: file.originalFilename,

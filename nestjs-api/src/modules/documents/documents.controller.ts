@@ -44,6 +44,7 @@ import type { AuthenticatedPrincipal } from '../auth/interfaces/authenticated-pr
 import { DocumentAccessIdDto } from './dto/document-access-id.dto';
 import { CommitUploadSessionDto } from './dto/commit-upload-session.dto';
 import { DocumentIdDto } from './dto/document-id.dto';
+import { DocumentVersionIdDto } from './dto/document-version-id.dto';
 import { DocumentStagedFileIdDto } from './dto/document-staged-file-id.dto';
 import { DocumentUploadSessionIdDto } from './dto/document-upload-session-id.dto';
 import { GrantDocumentAccessDto } from './dto/grant-document-access.dto';
@@ -695,6 +696,54 @@ export class OrganizationDocumentsController {
         ),
       },
     };
+  }
+
+  @Get(':documentId/versions/:versionId/content')
+  @HttpCode(HttpStatus.OK)
+  @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.documentsRead)
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Stream document version content inline for preview' })
+  async getDocumentVersionContent(
+    @Param() params: DocumentVersionIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Res() response: Response,
+  ): Promise<void> {
+    streamFile(
+      response,
+      await this.documentsService.getDocumentVersionContent(
+        params.organizationId,
+        params.documentId,
+        params.versionId,
+        principal,
+      ),
+      'inline',
+    );
+  }
+
+  @Get(':documentId/versions/:versionId/citation-preview')
+  @HttpCode(HttpStatus.OK)
+  @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.documentsRead)
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({
+    summary: 'Stream a page-oriented citation preview for a document version',
+  })
+  async getDocumentVersionCitationPreview(
+    @Param() params: DocumentVersionIdDto,
+    @Query('highlights') highlights: string | undefined,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Res() response: Response,
+  ): Promise<void> {
+    streamFile(
+      response,
+      await this.documentsService.getDocumentVersionCitationPreviewContent(
+        params.organizationId,
+        params.documentId,
+        params.versionId,
+        principal,
+        highlights,
+      ),
+      'inline',
+    );
   }
 
   @Post(':documentId/versions')

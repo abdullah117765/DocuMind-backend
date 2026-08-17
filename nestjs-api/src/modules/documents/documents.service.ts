@@ -13,6 +13,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+import { Readable } from 'node:stream';
 import {
   catchError,
   defer,
@@ -53,7 +54,10 @@ import { KnowledgeBasesService } from '../knowledge-bases/knowledge-bases.servic
 import { PrismaService } from '../prisma/prisma.service';
 import type { ZipManifestView } from './document-archive.service';
 import { DocumentArchiveService } from './document-archive.service';
-import { DocumentPreviewService } from './document-preview.service';
+import {
+  CitationHighlightBox,
+  DocumentPreviewService,
+} from './document-preview.service';
 import {
   DocumentStorageService,
   StoredObjectReference,
@@ -1239,6 +1243,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
         organizationId,
         assignmentInput,
       );
+    const targetKnowledgeBaseId = assignment.knowledgeBaseIds[0];
 
     await reportProgress?.({
       status: 'PROCESSING',
@@ -1249,6 +1254,48 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     });
 
     try {
+      for (const stagedFile of readyFiles) {
+        const duplicateDocument = await this.prisma.document.findFirst({
+          where: {
+            organizationId,
+            checksumSha256: stagedFile.checksumSha256,
+            status: DocumentStatus.ACTIVE,
+            knowledgeBases: {
+              some: {},
+            },
+          },
+          select: {
+            id: true,
+            name: true,
+            originalFilename: true,
+            knowledgeBases: {
+              select: {
+                knowledgeBaseId: true,
+                knowledgeBase: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        if (duplicateDocument) {
+          const existingKnowledgeBase = duplicateDocument.knowledgeBases[0];
+          const existingKnowledgeBaseName =
+            existingKnowledgeBase?.knowledgeBase.name ?? 'another Knowledge Base';
+          const isSameTarget =
+            existingKnowledgeBase?.knowledgeBaseId === targetKnowledgeBaseId;
+
+          throw new ConflictException(
+            isSameTarget
+              ? `"${stagedFile.originalFilename}" already exists in the selected Knowledge Base.`
+              : `"${stagedFile.originalFilename}" already exists in ${existingKnowledgeBaseName}. Move the existing document instead of uploading a duplicate.`,
+          );
+        }
+      }
+
       for (const [index, stagedFile] of readyFiles.entries()) {
         await reportProgress?.({
           stage: 'copying',
@@ -1703,7 +1750,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     const byDocumentId = new Map(
       indexes.map((index) => [index.documentId, index]),
     );
-    const shouldForceSelectedDocuments = Boolean(dto.documentIds?.length);
+    const shouldForceDocuments = dto.force === true || Boolean(dto.documentIds?.length);
     const documentsToIndex = documents.filter((document) => {
       const index = byDocumentId.get(document.id);
 
@@ -1715,7 +1762,7 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
         return false;
       }
 
-      if (shouldForceSelectedDocuments) return true;
+      if (shouldForceDocuments) return true;
 
       return !this.isRagIndexCurrent(document, index);
     });
@@ -1875,6 +1922,158 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
     );
 
     return this.toStreamResult(document);
+  }
+
+  async getDocumentVersionContent(
+    organizationId: string,
+    documentId: string,
+    versionId: string,
+    principal: AuthenticatedPrincipal,
+  ): Promise<DocumentStreamResult> {
+    await this.findReadableOrganizationDocument(
+      organizationId,
+      documentId,
+      principal,
+    );
+
+    const version = await this.prisma.documentVersion.findFirst({
+      where: {
+        id: versionId,
+        documentId,
+        organizationId,
+      },
+      select: {
+        originalFilename: true,
+        mimeType: true,
+        sizeBytes: true,
+        storageBucket: true,
+        storageKey: true,
+      },
+    });
+
+    if (!version) {
+      throw new NotFoundException('Document version not found.');
+    }
+
+    return {
+      stream: await this.storageService.getObject(
+        version.storageBucket,
+        version.storageKey,
+      ),
+      filename: version.originalFilename,
+      mimeType: version.mimeType,
+      sizeBytes: version.sizeBytes,
+    };
+  }
+
+  async getDocumentVersionCitationPreviewContent(
+    organizationId: string,
+    documentId: string,
+    versionId: string,
+    principal: AuthenticatedPrincipal,
+    highlightBoxesJson?: string,
+  ): Promise<DocumentStreamResult> {
+    await this.findReadableOrganizationDocument(
+      organizationId,
+      documentId,
+      principal,
+    );
+
+    const version = await this.prisma.documentVersion.findFirst({
+      where: {
+        id: versionId,
+        documentId,
+        organizationId,
+      },
+      select: {
+        name: true,
+        originalFilename: true,
+        extension: true,
+        storageBucket: true,
+        storageKey: true,
+      },
+    });
+
+    if (!version) {
+      throw new NotFoundException('Document version not found.');
+    }
+
+    const buffer = await this.storageService.getObjectBuffer(
+      version.storageBucket,
+      version.storageKey,
+    );
+    const citationPdf = await this.previewService.convertToCitationPdf(
+      buffer,
+      version.extension,
+      this.parseCitationHighlightBoxes(highlightBoxesJson),
+    );
+
+    if (!citationPdf) {
+      throw new BadRequestException(
+        'A page preview is not available for this file type.',
+      );
+    }
+
+    return {
+      stream: Readable.from(citationPdf),
+      filename: `${documentNameFromFilename(version.originalFilename || version.name)}.pdf`,
+      mimeType: 'application/pdf',
+      sizeBytes: citationPdf.byteLength,
+    };
+  }
+
+  private parseCitationHighlightBoxes(
+    rawHighlights?: string,
+  ): CitationHighlightBox[] {
+    if (!rawHighlights || rawHighlights.length > 8000) return [];
+
+    try {
+      const parsed = JSON.parse(rawHighlights) as unknown;
+
+      if (!Array.isArray(parsed)) return [];
+
+      return parsed
+        .slice(0, 12)
+        .map((box): CitationHighlightBox | null => {
+          if (!box || typeof box !== 'object') return null;
+
+          return {
+                page_number: this.toFiniteCitationNumber(
+                  (box as Record<string, unknown>).page_number ??
+                    (box as Record<string, unknown>).pageNumber,
+                ),
+                x0: this.toFiniteCitationNumber(
+                  (box as Record<string, unknown>).x0,
+                ),
+                y0: this.toFiniteCitationNumber(
+                  (box as Record<string, unknown>).y0,
+                ),
+                x1: this.toFiniteCitationNumber(
+                  (box as Record<string, unknown>).x1,
+                ),
+                y1: this.toFiniteCitationNumber(
+                  (box as Record<string, unknown>).y1,
+                ),
+                page_width: this.toFiniteCitationNumber(
+                  (box as Record<string, unknown>).page_width ??
+                    (box as Record<string, unknown>).pageWidth,
+                ),
+                page_height: this.toFiniteCitationNumber(
+                  (box as Record<string, unknown>).page_height ??
+                    (box as Record<string, unknown>).pageHeight,
+                ),
+              };
+        })
+        .filter((box): box is CitationHighlightBox => Boolean(box));
+    } catch {
+      return [];
+    }
+  }
+
+  private toFiniteCitationNumber(value: unknown): number | null {
+    const number = Number(value);
+
+    return Number.isFinite(number) ? number : null;
   }
 
   private shouldRefreshPreview(
@@ -2542,6 +2741,14 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
             this.getRagSourceString(source.text, metadata, 'text', 1200) ??
             this.getRagSourceString(undefined, metadata, 'excerpt', 1200);
           const sourceMetadata: Record<string, unknown> = { ...metadata };
+          const versionId =
+            sourceMetadata.version_id ?? sourceMetadata.versionId ?? null;
+          const highlightBoxes =
+            sourceMetadata.highlight_boxes ??
+            sourceMetadata.highlightBoxes ??
+            [];
+          const previewType =
+            sourceMetadata.preview_type ?? sourceMetadata.previewType ?? null;
 
           if (sourceExcerpt) {
             sourceMetadata.excerpt = sourceExcerpt;
@@ -2553,6 +2760,13 @@ export class DocumentsService implements OnModuleInit, OnModuleDestroy {
 
           sourceMetadata.sourceNumber = index + 1;
           sourceMetadata.citationNumber = index + 1;
+          sourceMetadata.versionId = versionId;
+          sourceMetadata.version_id = versionId;
+          sourceMetadata.highlightBoxes = highlightBoxes;
+          sourceMetadata.highlight_boxes = highlightBoxes;
+          sourceMetadata.previewType = previewType;
+          sourceMetadata.preview_type = previewType;
+          sourceMetadata.openPage = pageNumber;
 
           return {
             messageId: assistantMessage.id,

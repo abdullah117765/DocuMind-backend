@@ -36,9 +36,14 @@ import {
   CreateKnowledgeBaseFolderDto,
   CreateKnowledgeBaseTagDto,
   ListKnowledgeBasesQueryDto,
+  MoveKnowledgeBaseDocumentDto,
+  UpdateCollectionDocumentsDto,
   UpdateKnowledgeBaseDto,
 } from './dto/knowledge-base.dto';
-import { OrganizationKnowledgeBaseIdDto } from './dto/knowledge-base-id.dto';
+import {
+  OrganizationKnowledgeBaseCollectionIdDto,
+  OrganizationKnowledgeBaseIdDto,
+} from './dto/knowledge-base-id.dto';
 import { KnowledgeBasesService } from './knowledge-bases.service';
 
 const CSRF_HEADER = {
@@ -261,6 +266,52 @@ export class KnowledgeBasesController {
     };
   }
 
+  @Post(':knowledgeBaseId/collections/:collectionId/documents')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
+  @RequireAnyOrganizationPermission(
+    ORGANIZATION_PERMISSIONS.documentsUpload,
+    ORGANIZATION_PERMISSIONS.documentsUpdate,
+  )
+  @ApiHeader(CSRF_HEADER)
+  @ApiOperation({ summary: 'Add documents to a Collection' })
+  async addDocumentsToCollection(
+    @Param() params: OrganizationKnowledgeBaseCollectionIdDto,
+    @Body() dto: UpdateCollectionDocumentsDto,
+  ) {
+    return {
+      data: await this.knowledgeBasesService.addDocumentsToCollection(
+        params.organizationId,
+        params.knowledgeBaseId,
+        params.collectionId,
+        dto,
+      ),
+    };
+  }
+
+  @Delete(':knowledgeBaseId/collections/:collectionId/documents/:documentId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
+  @RequireAnyOrganizationPermission(
+    ORGANIZATION_PERMISSIONS.documentsUpload,
+    ORGANIZATION_PERMISSIONS.documentsUpdate,
+  )
+  @ApiHeader(CSRF_HEADER)
+  @ApiOperation({ summary: 'Remove one document from a Collection' })
+  async removeDocumentFromCollection(
+    @Param() params: OrganizationKnowledgeBaseCollectionIdDto,
+    @Param('documentId') documentId: string,
+  ) {
+    return {
+      data: await this.knowledgeBasesService.removeDocumentFromCollection(
+        params.organizationId,
+        params.knowledgeBaseId,
+        params.collectionId,
+        documentId,
+      ),
+    };
+  }
+
   @Get(':knowledgeBaseId/folders')
   @HttpCode(HttpStatus.OK)
   @RequireOrganizationPermissions(ORGANIZATION_PERMISSIONS.documentsRead)
@@ -293,6 +344,32 @@ export class KnowledgeBasesController {
         principal,
         dto,
       ),
+    };
+  }
+
+  @Patch(':knowledgeBaseId/documents/:documentId/move')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(CsrfGuard)
+  @RequireAnyOrganizationPermission(
+    ORGANIZATION_PERMISSIONS.documentsUpload,
+    ORGANIZATION_PERMISSIONS.documentsUpdate,
+  )
+  @ApiHeader(CSRF_HEADER)
+  @ApiOperation({ summary: 'Move a document to another Knowledge Base' })
+  async moveDocumentToKnowledgeBase(
+    @Param() params: OrganizationKnowledgeBaseIdDto,
+    @Param('documentId') documentId: string,
+    @Body() dto: MoveKnowledgeBaseDocumentDto,
+  ) {
+    return {
+      data: {
+        movement: await this.knowledgeBasesService.moveDocumentToKnowledgeBase(
+          params.organizationId,
+          params.knowledgeBaseId,
+          documentId,
+          dto,
+        ),
+      },
     };
   }
 }

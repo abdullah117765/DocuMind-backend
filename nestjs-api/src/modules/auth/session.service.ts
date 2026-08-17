@@ -262,6 +262,46 @@ export class SessionService {
     });
   }
 
+  async revokeOtherUserSessions(
+    userId: string,
+    currentSessionId: string,
+    reason: SessionRevocationReason,
+    now = new Date(),
+  ): Promise<number> {
+    return this.prisma.$transaction(async (transaction) => {
+      const revokedSessions = await transaction.session.updateMany({
+        where: {
+          userId,
+          id: {
+            not: currentSessionId,
+          },
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: now,
+          revokeReason: reason,
+        },
+      });
+
+      await transaction.refreshToken.updateMany({
+        where: {
+          session: {
+            userId,
+            id: {
+              not: currentSessionId,
+            },
+          },
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: now,
+        },
+      });
+
+      return revokedSessions.count;
+    });
+  }
+
   async resetPasswordAndRevokeSessions(
     userId: string,
     passwordHash: string,

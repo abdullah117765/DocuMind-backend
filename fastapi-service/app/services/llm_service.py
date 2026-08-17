@@ -75,7 +75,7 @@ class LlmService:
                 )
 
                 return (
-                    response.text or "No answer was generated.",
+                    response.text or "Not available in the selected documents.",
                     settings.GEMINI_MODEL,
                     True,
                 )
@@ -224,7 +224,7 @@ class LlmService:
                 "- Do not mention chunk numbers. Use the source numbers and available page/slide/line locations.",
                 "- If excerpts disagree, explain the conflict and cite both sources.",
                 "- If the excerpts are weak or incomplete, say exactly what is missing.",
-                "- If the answer is not present in the excerpts, say: \"I could not find this in the selected documents.\"",
+                "- If the answer is not present in the excerpts, answer exactly: \"Not available in the selected documents.\"",
                 "- Do not use outside knowledge. Do not guess. Do not invent names, dates, policies, amounts, or steps.",
                 "- Keep the tone professional, clean, and easy for a business user to understand.",
                 "- Avoid filler phrases such as \"Based on the provided documents\" unless needed.",

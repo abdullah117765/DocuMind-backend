@@ -172,3 +172,17 @@ export class DocumentKnowledgeBaseAssignmentDto {
   @IsUUID('4', { each: true })
   tagIds?: string[];
 }
+
+export class MoveKnowledgeBaseDocumentDto {
+  @IsUUID('4', { message: 'Target Knowledge Base ID must be a valid UUID' })
+  targetKnowledgeBaseId!: string;
+}
+
+export class UpdateCollectionDocumentsDto {
+  @ApiPropertyOptional({ type: [String] })
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(50)
+  @IsUUID('4', { each: true })
+  documentIds!: string[];
+}
