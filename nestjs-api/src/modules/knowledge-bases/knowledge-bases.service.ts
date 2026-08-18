@@ -300,41 +300,82 @@ export class KnowledgeBasesService {
   async archiveKnowledgeBase(
     organizationId: string,
     knowledgeBaseId: string,
-  ): Promise<KnowledgeBaseView> {
-    const existing = await this.assertKnowledgeBaseExists(
+    principal: AuthenticatedPrincipal,
+  ): Promise<KnowledgeBaseView & {
+    deletedDocumentsCount: number;
+    deletedCollectionsCount: number;
+  }> {
+    await this.assertKnowledgeBaseExists(
       organizationId,
       knowledgeBaseId,
     );
-
-    if (existing.isDefault) {
-      throw new BadRequestException(
-        'The default Knowledge Base cannot be archived.',
-      );
-    }
-
-    const activeDocuments = await this.prisma.documentKnowledgeBase.count({
+    const existing = await this.prisma.knowledgeBase.findFirstOrThrow({
       where: {
-        knowledgeBaseId,
-        document: {
-          organizationId,
-          status: DocumentStatus.ACTIVE,
-        },
+        id: knowledgeBaseId,
+        organizationId,
+        status: KnowledgeBaseStatus.ACTIVE,
       },
-    });
-
-    if (activeDocuments > 0) {
-      throw new BadRequestException(
-        'Remove or move all documents before deleting this Knowledge Base.',
-      );
-    }
-
-    const record = await this.prisma.knowledgeBase.update({
-      where: { id: knowledgeBaseId },
-      data: { status: KnowledgeBaseStatus.ARCHIVED },
       select: knowledgeBaseSelect,
     });
+    const now = new Date();
 
-    return this.toKnowledgeBaseView(record);
+    const [documentLinks, deletedCollectionsCount] = await Promise.all([
+      this.prisma.documentKnowledgeBase.findMany({
+        where: {
+          knowledgeBaseId,
+          document: {
+            organizationId,
+            status: { not: DocumentStatus.PURGED },
+          },
+        },
+        select: { documentId: true },
+      }),
+      this.prisma.knowledgeBaseCollection.count({
+        where: { organizationId, knowledgeBaseId },
+      }),
+    ]);
+    const documentIds = documentLinks.map((link) => link.documentId);
+
+    const result = await this.prisma.$transaction(async (transaction) => {
+      const deletedDocuments = documentIds.length
+        ? await transaction.document.updateMany({
+            where: {
+              id: { in: documentIds },
+              organizationId,
+              status: { not: DocumentStatus.PURGED },
+            },
+            data: {
+              status: DocumentStatus.SOFT_DELETED_BY_ORG,
+              orgDeletedByUserId: principal.userId,
+              orgDeletedAt: now,
+              restoredByUserId: null,
+              restoredAt: null,
+            },
+          })
+        : { count: 0 };
+
+      await transaction.knowledgeBase.delete({
+        where: { id: knowledgeBaseId },
+      });
+
+      return {
+        deletedDocumentsCount: deletedDocuments.count,
+      };
+    });
+
+    return {
+      ...this.toKnowledgeBaseView({
+        ...existing,
+        status: KnowledgeBaseStatus.ARCHIVED,
+        _count: {
+          ...existing._count,
+          documents: result.deletedDocumentsCount,
+          collections: deletedCollectionsCount,
+        },
+      }),
+      deletedDocumentsCount: result.deletedDocumentsCount,
+      deletedCollectionsCount,
+    };
   }
 
   async ensureDefaultKnowledgeBase(

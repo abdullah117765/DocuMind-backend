@@ -198,7 +198,7 @@ class ChunkingService:
         overlapping: list[tuple[int, dict[str, object]]] = []
 
         for location in locations:
-            location_start = self._safe_int(location.get("char_start"))
+            location_start = self._safe_non_negative_int(location.get("char_start"))
             location_end = self._safe_int(location.get("char_end"))
 
             if location_start is None or location_end is None:
@@ -242,6 +242,14 @@ class ChunkingService:
             "highlight_boxes": highlight_boxes,
         }
 
+    def _safe_non_negative_int(self, value: object) -> int | None:
+        try:
+            number = int(value)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return None
+
+        return number if number >= 0 else None
+
     def _safe_int(self, value: object) -> int | None:
         try:
             number = int(value)  # type: ignore[arg-type]
@@ -249,3 +257,4 @@ class ChunkingService:
             return None
 
         return number if number > 0 else None
+

@@ -215,17 +215,21 @@ export class KnowledgeBasesController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(CsrfGuard)
   @RequireAnyOrganizationPermission(
-    ORGANIZATION_PERMISSIONS.documentsUpload,
     ORGANIZATION_PERMISSIONS.documentsUpdate,
+    ORGANIZATION_PERMISSIONS.documentsDelete,
   )
   @ApiHeader(CSRF_HEADER)
-  @ApiOperation({ summary: 'Archive an organization Knowledge Base' })
-  async archiveKnowledgeBase(@Param() params: OrganizationKnowledgeBaseIdDto) {
+  @ApiOperation({ summary: 'Delete an organization Knowledge Base and its contents' })
+  async archiveKnowledgeBase(
+    @Param() params: OrganizationKnowledgeBaseIdDto,
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ) {
     return {
       data: {
         knowledgeBase: await this.knowledgeBasesService.archiveKnowledgeBase(
           params.organizationId,
           params.knowledgeBaseId,
+          principal,
         ),
       },
     };
