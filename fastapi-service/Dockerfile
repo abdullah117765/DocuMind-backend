@@ -21,4 +21,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 
+RUN addgroup --system appgroup && \
+    adduser --system --ingroup appgroup appuser && \
+    mkdir -p /models/huggingface /models/sentence-transformers && \
+    chown -R appuser:appgroup /app /models
+
+USER appuser
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

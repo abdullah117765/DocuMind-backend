@@ -57,14 +57,25 @@ export default registerAs('storage', (): StorageConfiguration => {
     'DOCUMENT_MAX_FILE_SIZE_BYTES',
     10 * 1024 * 1024,
   );
+  const accessKey = getEnvironmentValue('MINIO_ACCESS_KEY', 'minioadmin');
+  const secretKey = getEnvironmentValue('MINIO_SECRET_KEY', 'minioadmin123');
+
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (accessKey === 'minioadmin' || secretKey === 'minioadmin123')
+  ) {
+    throw new Error(
+      'Production MinIO credentials must not use development defaults.',
+    );
+  }
 
   return {
     minio: {
       endPoint: getEnvironmentValue('MINIO_ENDPOINT', 'localhost'),
       port: getIntegerEnvironmentValue('MINIO_PORT', 9000),
       useSSL: getBooleanEnvironmentValue('MINIO_USE_SSL', false),
-      accessKey: getEnvironmentValue('MINIO_ACCESS_KEY', 'minioadmin'),
-      secretKey: getEnvironmentValue('MINIO_SECRET_KEY', 'minioadmin123'),
+      accessKey,
+      secretKey,
       bucket: getEnvironmentValue('MINIO_DOCUMENT_BUCKET', 'documents'),
     },
     documents: {

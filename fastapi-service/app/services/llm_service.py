@@ -116,7 +116,7 @@ class LlmService:
                     delay_ms,
                     self._safe_error_message(error),
                 )
-                time.sleep(delay_ms / 1000)
+                self._sleep_before_retry(delay_ms)
 
         if last_error:
             logger.warning(
@@ -137,6 +137,10 @@ class LlmService:
         maximum = max(int(getattr(settings, "GEMINI_RETRY_MAX_BACKOFF_MS")), initial)
 
         return min(initial * (2 ** (attempt - 1)), maximum)
+
+    def _sleep_before_retry(self, delay_ms: int) -> None:
+        """Small isolated hook so retry waiting never leaks into prompt logic."""
+        time.sleep(max(delay_ms, 0) / 1000)
 
     def _is_retryable_error(self, error: Exception) -> bool:
         status_code = self._status_code(error)
