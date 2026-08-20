@@ -75,7 +75,7 @@ class LlmService:
                 )
 
                 return (
-                    response.text or "No answer was generated.",
+                    response.text or "Not available in the selected documents.",
                     settings.GEMINI_MODEL,
                     True,
                 )
@@ -116,7 +116,7 @@ class LlmService:
                     delay_ms,
                     self._safe_error_message(error),
                 )
-                time.sleep(delay_ms / 1000)
+                self._sleep_before_retry(delay_ms)
 
         if last_error:
             logger.warning(
@@ -137,6 +137,10 @@ class LlmService:
         maximum = max(int(getattr(settings, "GEMINI_RETRY_MAX_BACKOFF_MS")), initial)
 
         return min(initial * (2 ** (attempt - 1)), maximum)
+
+    def _sleep_before_retry(self, delay_ms: int) -> None:
+        """Small isolated hook so retry waiting never leaks into prompt logic."""
+        time.sleep(max(delay_ms, 0) / 1000)
 
     def _is_retryable_error(self, error: Exception) -> bool:
         status_code = self._status_code(error)
@@ -224,7 +228,7 @@ class LlmService:
                 "- Do not mention chunk numbers. Use the source numbers and available page/slide/line locations.",
                 "- If excerpts disagree, explain the conflict and cite both sources.",
                 "- If the excerpts are weak or incomplete, say exactly what is missing.",
-                "- If the answer is not present in the excerpts, say: \"I could not find this in the selected documents.\"",
+                "- If the answer is not present in the excerpts, answer exactly: \"Not available in the selected documents.\"",
                 "- Do not use outside knowledge. Do not guess. Do not invent names, dates, policies, amounts, or steps.",
                 "- Keep the tone professional, clean, and easy for a business user to understand.",
                 "- Avoid filler phrases such as \"Based on the provided documents\" unless needed.",

@@ -84,6 +84,7 @@ services:
       - "127.0.0.1:${FASTAPI_PORT:-8000}:8000"
     volumes:
       - rag_model_cache:/models
+      - ./fastapi-service/app:/app/app
     depends_on:
       - minio
       - qdrant

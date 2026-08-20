@@ -133,7 +133,7 @@ def ask_documents(payload: RagQueryRequest, request: Request) -> RagAskResponse:
 
     if not search_response.results:
         return RagAskResponse(
-            answer="No relevant documents were found in the selected scope.",
+            answer="Not available in the selected documents.",
             sources=[],
             search_results=[],
             llm_model=None,

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  DocumentStatus,
   KnowledgeBaseStatus,
   Prisma,
 } from '../../generated/prisma/client';
@@ -18,6 +19,8 @@ import {
   CreateKnowledgeBaseTagDto,
   DocumentKnowledgeBaseAssignmentDto,
   ListKnowledgeBasesQueryDto,
+  MoveKnowledgeBaseDocumentDto,
+  UpdateCollectionDocumentsDto,
   UpdateKnowledgeBaseDto,
 } from './dto/knowledge-base.dto';
 
@@ -60,7 +63,13 @@ const knowledgeBaseSelect = {
   updatedAt: true,
   _count: {
     select: {
-      documents: true,
+      documents: {
+        where: {
+          document: {
+            status: DocumentStatus.ACTIVE,
+          },
+        },
+      },
       collections: true,
       folders: true,
     },
@@ -95,7 +104,13 @@ const knowledgeBaseDetailSelect = {
       updatedAt: true,
       _count: {
         select: {
-          documents: true,
+          documents: {
+            where: {
+              document: {
+                status: DocumentStatus.ACTIVE,
+              },
+            },
+          },
         },
       },
     },
@@ -285,25 +300,82 @@ export class KnowledgeBasesService {
   async archiveKnowledgeBase(
     organizationId: string,
     knowledgeBaseId: string,
-  ): Promise<KnowledgeBaseView> {
-    const existing = await this.assertKnowledgeBaseExists(
+    principal: AuthenticatedPrincipal,
+  ): Promise<KnowledgeBaseView & {
+    deletedDocumentsCount: number;
+    deletedCollectionsCount: number;
+  }> {
+    await this.assertKnowledgeBaseExists(
       organizationId,
       knowledgeBaseId,
     );
-
-    if (existing.isDefault) {
-      throw new BadRequestException(
-        'The default Knowledge Base cannot be archived.',
-      );
-    }
-
-    const record = await this.prisma.knowledgeBase.update({
-      where: { id: knowledgeBaseId },
-      data: { status: KnowledgeBaseStatus.ARCHIVED },
+    const existing = await this.prisma.knowledgeBase.findFirstOrThrow({
+      where: {
+        id: knowledgeBaseId,
+        organizationId,
+        status: KnowledgeBaseStatus.ACTIVE,
+      },
       select: knowledgeBaseSelect,
     });
+    const now = new Date();
 
-    return this.toKnowledgeBaseView(record);
+    const [documentLinks, deletedCollectionsCount] = await Promise.all([
+      this.prisma.documentKnowledgeBase.findMany({
+        where: {
+          knowledgeBaseId,
+          document: {
+            organizationId,
+            status: { not: DocumentStatus.PURGED },
+          },
+        },
+        select: { documentId: true },
+      }),
+      this.prisma.knowledgeBaseCollection.count({
+        where: { organizationId, knowledgeBaseId },
+      }),
+    ]);
+    const documentIds = documentLinks.map((link) => link.documentId);
+
+    const result = await this.prisma.$transaction(async (transaction) => {
+      const deletedDocuments = documentIds.length
+        ? await transaction.document.updateMany({
+            where: {
+              id: { in: documentIds },
+              organizationId,
+              status: { not: DocumentStatus.PURGED },
+            },
+            data: {
+              status: DocumentStatus.SOFT_DELETED_BY_ORG,
+              orgDeletedByUserId: principal.userId,
+              orgDeletedAt: now,
+              restoredByUserId: null,
+              restoredAt: null,
+            },
+          })
+        : { count: 0 };
+
+      await transaction.knowledgeBase.delete({
+        where: { id: knowledgeBaseId },
+      });
+
+      return {
+        deletedDocumentsCount: deletedDocuments.count,
+      };
+    });
+
+    return {
+      ...this.toKnowledgeBaseView({
+        ...existing,
+        status: KnowledgeBaseStatus.ARCHIVED,
+        _count: {
+          ...existing._count,
+          documents: result.deletedDocumentsCount,
+          collections: deletedCollectionsCount,
+        },
+      }),
+      deletedDocumentsCount: result.deletedDocumentsCount,
+      deletedCollectionsCount,
+    };
   }
 
   async ensureDefaultKnowledgeBase(
@@ -586,6 +658,244 @@ export class KnowledgeBasesService {
     }
   }
 
+  async addDocumentsToCollection(
+    organizationId: string,
+    knowledgeBaseId: string,
+    collectionId: string,
+    dto: UpdateCollectionDocumentsDto,
+  ): Promise<{ collectionId: string; added: number; skipped: number }> {
+    const documentIds = uniqueValues(dto.documentIds);
+
+    if (documentIds.length === 0) {
+      throw new BadRequestException('Select at least one document.');
+    }
+
+    await this.assertCollectionExists(
+      organizationId,
+      knowledgeBaseId,
+      collectionId,
+    );
+
+    const documents = await this.prisma.document.findMany({
+      where: {
+        id: { in: documentIds },
+        organizationId,
+        status: DocumentStatus.ACTIVE,
+        knowledgeBases: {
+          some: {
+            knowledgeBaseId,
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    if (documents.length !== documentIds.length) {
+      throw new NotFoundException(
+        'One or more selected documents are not available in this Knowledge Base.',
+      );
+    }
+
+    const existingLinks = await this.prisma.documentCollection.findMany({
+      where: {
+        collectionId,
+        documentId: { in: documentIds },
+      },
+      select: { documentId: true },
+    });
+    const existingDocumentIds = new Set(
+      existingLinks.map((link) => link.documentId),
+    );
+    const newDocumentIds = documentIds.filter(
+      (documentId) => !existingDocumentIds.has(documentId),
+    );
+
+    if (newDocumentIds.length > 0) {
+      await this.prisma.documentCollection.createMany({
+        data: newDocumentIds.map((documentId) => ({
+          documentId,
+          collectionId,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    return {
+      collectionId,
+      added: newDocumentIds.length,
+      skipped: existingDocumentIds.size,
+    };
+  }
+
+  async removeDocumentFromCollection(
+    organizationId: string,
+    knowledgeBaseId: string,
+    collectionId: string,
+    documentId: string,
+  ): Promise<{ collectionId: string; documentId: string; removed: boolean }> {
+    await this.assertCollectionExists(
+      organizationId,
+      knowledgeBaseId,
+      collectionId,
+    );
+
+    const document = await this.prisma.document.findFirst({
+      where: {
+        id: documentId,
+        organizationId,
+        status: DocumentStatus.ACTIVE,
+        knowledgeBases: {
+          some: {
+            knowledgeBaseId,
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    if (!document) {
+      throw new NotFoundException(
+        'Document not found in the selected Knowledge Base.',
+      );
+    }
+
+    const deleted = await this.prisma.documentCollection.deleteMany({
+      where: {
+        documentId,
+        collectionId,
+      },
+    });
+
+    if (deleted.count === 0) {
+      throw new NotFoundException('Document is not in this Collection.');
+    }
+
+    return {
+      collectionId,
+      documentId,
+      removed: true,
+    };
+  }
+
+  async moveDocumentToKnowledgeBase(
+    organizationId: string,
+    sourceKnowledgeBaseId: string,
+    documentId: string,
+    dto: MoveKnowledgeBaseDocumentDto,
+  ): Promise<{
+    documentId: string;
+    sourceKnowledgeBaseId: string;
+    targetKnowledgeBaseId: string;
+  }> {
+    if (sourceKnowledgeBaseId === dto.targetKnowledgeBaseId) {
+      throw new BadRequestException(
+        'Choose a different Knowledge Base to move this document.',
+      );
+    }
+
+    await this.assertKnowledgeBaseExists(organizationId, sourceKnowledgeBaseId);
+    await this.assertKnowledgeBaseExists(
+      organizationId,
+      dto.targetKnowledgeBaseId,
+    );
+
+    const document = await this.prisma.document.findFirst({
+      where: {
+        id: documentId,
+        organizationId,
+        status: 'ACTIVE',
+      },
+      select: {
+        id: true,
+        checksumSha256: true,
+        name: true,
+        knowledgeBases: {
+          where: { knowledgeBaseId: sourceKnowledgeBaseId },
+          select: { knowledgeBaseId: true },
+        },
+      },
+    });
+
+    if (!document || document.knowledgeBases.length === 0) {
+      throw new NotFoundException(
+        'Document not found in the selected Knowledge Base.',
+      );
+    }
+
+    const duplicateInTarget = await this.prisma.document.findFirst({
+      where: {
+        id: { not: documentId },
+        organizationId,
+        checksumSha256: document.checksumSha256,
+        status: 'ACTIVE',
+        knowledgeBases: {
+          some: {
+            knowledgeBaseId: dto.targetKnowledgeBaseId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    if (duplicateInTarget) {
+      throw new ConflictException(
+        `"${document.name}" already exists in the target Knowledge Base.`,
+      );
+    }
+
+    const existingTargetLink = await this.prisma.documentKnowledgeBase.findUnique(
+      {
+        where: {
+          documentId_knowledgeBaseId: {
+            documentId,
+            knowledgeBaseId: dto.targetKnowledgeBaseId,
+          },
+        },
+        select: { documentId: true },
+      },
+    );
+
+    if (existingTargetLink) {
+      throw new ConflictException(
+        'This document is already in the target Knowledge Base.',
+      );
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.documentCollection.deleteMany({
+        where: {
+          documentId,
+          collection: {
+            knowledgeBaseId: sourceKnowledgeBaseId,
+          },
+        },
+      }),
+      this.prisma.documentKnowledgeBase.delete({
+        where: {
+          documentId_knowledgeBaseId: {
+            documentId,
+            knowledgeBaseId: sourceKnowledgeBaseId,
+          },
+        },
+      }),
+      this.prisma.documentKnowledgeBase.create({
+        data: {
+          documentId,
+          knowledgeBaseId: dto.targetKnowledgeBaseId,
+        },
+      }),
+    ]);
+
+    return {
+      documentId,
+      sourceKnowledgeBaseId,
+      targetKnowledgeBaseId: dto.targetKnowledgeBaseId,
+    };
+  }
+
   async validateDocumentAssignment(
     organizationId: string,
     assignment?: Partial<DocumentKnowledgeBaseAssignmentDto>,
@@ -609,6 +919,12 @@ export class KnowledgeBasesService {
         categoryId: null,
         tagIds: [],
       };
+    }
+
+    if (knowledgeBaseIds.length > 1) {
+      throw new BadRequestException(
+        'Save each upload to one Knowledge Base. Move the document later if needed.',
+      );
     }
 
     const knowledgeBases = await this.prisma.knowledgeBase.findMany({
@@ -707,6 +1023,25 @@ export class KnowledgeBasesService {
     }
 
     return record;
+  }
+
+  private async assertCollectionExists(
+    organizationId: string,
+    knowledgeBaseId: string,
+    collectionId: string,
+  ): Promise<void> {
+    const collection = await this.prisma.knowledgeBaseCollection.findFirst({
+      where: {
+        id: collectionId,
+        organizationId,
+        knowledgeBaseId,
+      },
+      select: { id: true },
+    });
+
+    if (!collection) {
+      throw new NotFoundException('Collection not found.');
+    }
   }
 
   private toKnowledgeBaseView(record: KnowledgeBaseRecord): KnowledgeBaseView {

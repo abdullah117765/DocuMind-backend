@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Post,
   Param,
+  Patch,
   Req,
   Res,
   UseGuards,
@@ -43,17 +44,22 @@ import {
 } from './auth.exceptions';
 import { AuthService } from './auth.service';
 import type {
+  AccountSettingsResult,
   ActiveSessionsResult,
   AuthActionResult,
+  PasswordChangeResult,
   PasswordResetRequestResult,
   PasswordResetSessionResult,
+  ProfileUpdateResult,
 } from './auth.service';
 import { CsrfService } from './csrf.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResendVerificationEmailDto } from './dto/resend-verification-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SessionIdDto } from './dto/session-id.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { VerifyPasswordResetOtpDto } from './dto/verify-password-reset-otp.dto';
 import type { AuthenticatedPrincipal } from './interfaces/authenticated-principal.interface';
@@ -481,6 +487,86 @@ export class AuthController {
         },
       },
     };
+  }
+
+  @Get('account-settings')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiCookieAuth('access-cookie')
+  @ApiOperation({
+    summary: 'Get current account settings and editable capabilities',
+  })
+  @ApiOkResponse({
+    description: 'Current profile settings with backend-managed capabilities',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token is missing, invalid, or expired',
+  })
+  getAccountSettings(
+    @CurrentUser() principal: AuthenticatedPrincipal,
+  ): Promise<AccountSettingsResult> {
+    return this.authService.getAccountSettings(principal.userId);
+  }
+
+  @Patch('profile')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
+  @ApiBearerAuth('access-token')
+  @ApiCookieAuth('access-cookie')
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
+  })
+  @ApiOperation({ summary: 'Update the current user profile' })
+  @ApiBody({ type: UpdateProfileDto })
+  @ApiOkResponse({
+    description: 'Profile updated successfully',
+  })
+  @ApiBadRequestResponse({
+    description: 'Profile validation failed or profile is externally managed',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token is missing, invalid, or expired',
+  })
+  updateProfile(
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Body() dto: UpdateProfileDto,
+  ): Promise<ProfileUpdateResult> {
+    return this.authService.updateProfile(principal.userId, dto);
+  }
+
+  @Patch('password')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, CsrfGuard)
+  @ApiBearerAuth('access-token')
+  @ApiCookieAuth('access-cookie')
+  @ApiHeader({
+    name: 'x-csrf-token',
+    required: true,
+    description: 'Token returned by GET /auth/csrf',
+  })
+  @ApiOperation({ summary: 'Change the current user password' })
+  @ApiBody({ type: ChangePasswordDto })
+  @ApiOkResponse({
+    description: 'Password updated and other device sessions signed out',
+  })
+  @ApiBadRequestResponse({
+    description: 'Password validation failed or password is externally managed',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Current password is incorrect or access token is invalid',
+  })
+  changePassword(
+    @CurrentUser() principal: AuthenticatedPrincipal,
+    @Body() dto: ChangePasswordDto,
+  ): Promise<PasswordChangeResult> {
+    return this.authService.changePassword(
+      principal.userId,
+      principal.sessionId,
+      dto,
+    );
   }
 
   @Get('sessions')

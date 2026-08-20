@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -52,6 +53,19 @@ class Settings(BaseSettings):
     GEMINI_MAX_RETRIES: int = 2
     GEMINI_RETRY_INITIAL_BACKOFF_MS: int = 1_000
     GEMINI_RETRY_MAX_BACKOFF_MS: int = 2_000
+
+    @model_validator(mode="after")
+    def reject_unsafe_production_defaults(self) -> "Settings":
+        if self.APP_ENV.lower() not in {"production", "prod"}:
+            return self
+
+        if self.MINIO_ACCESS_KEY == "minioadmin" or self.MINIO_SECRET_KEY == "minioadmin123":
+            raise ValueError("Production MinIO credentials must not use development defaults.")
+
+        if len(self.HMAC_SECRET.strip()) < 32 or "replace-with" in self.HMAC_SECRET:
+            raise ValueError("Production HMAC_SECRET must be a strong shared secret.")
+
+        return self
 
 
 @lru_cache

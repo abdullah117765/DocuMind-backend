@@ -4,6 +4,7 @@ import {
   ArrayMaxSize,
   ArrayUnique,
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsOptional,
@@ -131,6 +132,15 @@ export class RagReindexDto {
   @ArrayMaxSize(100)
   @IsUUID('4', { each: true })
   documentIds?: string[];
+
+  @ApiPropertyOptional({
+    default: false,
+    description:
+      'When true, refresh matching ready documents instead of skipping documents that are already current.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  force?: boolean;
 }
 
 export class RagChatSessionIdDto {

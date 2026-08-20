@@ -30,6 +30,8 @@ class QdrantService:
             ),
         )
         self._create_payload_index(name, "document_id", models.PayloadSchemaType.KEYWORD)
+        self._create_payload_index(name, "version_id", models.PayloadSchemaType.KEYWORD)
+        self._create_payload_index(name, "version_number", models.PayloadSchemaType.INTEGER)
         self._create_payload_index(name, "status", models.PayloadSchemaType.KEYWORD)
         self._create_payload_index(name, "file_type", models.PayloadSchemaType.KEYWORD)
         self._create_payload_index(name, "text", models.TextIndexParams(type="text"))
@@ -53,6 +55,47 @@ class QdrantService:
             ),
         )
 
+    def delete_document_version(
+        self,
+        organization_id: str,
+        document_id: str,
+        version_id: str | None,
+        version_number: int | None,
+    ) -> None:
+        name = collection_name(organization_id)
+        if not self.client.collection_exists(name):
+            return
+
+        must = [
+            models.FieldCondition(
+                key="document_id",
+                match=models.MatchValue(value=document_id),
+            )
+        ]
+
+        if version_id:
+            must.append(
+                models.FieldCondition(
+                    key="version_id",
+                    match=models.MatchValue(value=version_id),
+                )
+            )
+        elif version_number:
+            must.append(
+                models.FieldCondition(
+                    key="version_number",
+                    match=models.MatchValue(value=version_number),
+                )
+            )
+        else:
+            self.delete_document(organization_id, document_id)
+            return
+
+        self.client.delete(
+            collection_name=name,
+            points_selector=models.FilterSelector(filter=models.Filter(must=must)),
+        )
+
     def delete_organization(self, organization_id: str) -> None:
         name = collection_name(organization_id)
         if self.client.collection_exists(name):
@@ -61,11 +104,16 @@ class QdrantService:
     def upsert_chunks(
         self,
         request: IngestDocumentRequest,
-        chunks: list[dict[str, int | str]],
+        chunks: list[dict[str, object]],
         embeddings: list[list[float]],
     ) -> None:
         self.ensure_collection(request.organization_id)
-        self.delete_document(request.organization_id, request.document_id)
+        self.delete_document_version(
+            request.organization_id,
+            request.document_id,
+            request.version_id,
+            request.version_number,
+        )
         total = len(chunks)
         points = []
 
@@ -95,6 +143,9 @@ class QdrantService:
                         "line_start": chunk.get("line_start"),
                         "line_end": chunk.get("line_end"),
                         "section_title": chunk.get("section_title"),
+                        "preview_type": chunk.get("preview_type"),
+                        "source_file_type": chunk.get("source_file_type"),
+                        "highlight_boxes": chunk.get("highlight_boxes"),
                         "text": chunk["text"],
                         "uploaded_by_id": request.uploaded_by_id,
                         "status": "ACTIVE",

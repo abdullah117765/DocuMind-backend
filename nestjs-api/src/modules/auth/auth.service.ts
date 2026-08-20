@@ -21,9 +21,11 @@ import {
   InvalidRefreshTokenException,
 } from './auth.exceptions';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { VerifyPasswordResetOtpDto } from './dto/verify-password-reset-otp.dto';
 import { ResendVerificationEmailDto } from './dto/resend-verification-email.dto';
 import {
@@ -101,6 +103,47 @@ export interface ActiveSessionsResult {
       expiresAt: Date;
       isCurrent: boolean;
     }>;
+  };
+}
+
+export interface AccountSettingsResult {
+  data: {
+    profile: {
+      name: string | null;
+      email: string;
+      isSuperAdmin: boolean;
+    };
+    capabilities: {
+      canUpdateName: boolean;
+      canChangePassword: boolean;
+    };
+    passwordPolicy: {
+      minLength: number;
+      maxLength: number;
+      requiresUppercase: boolean;
+      requiresLowercase: boolean;
+      requiresNumber: boolean;
+      allowedSpecialCharacters: string;
+    };
+    notes: string[];
+  };
+}
+
+export interface ProfileUpdateResult extends AuthActionResult {
+  data: {
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      isVerified: boolean;
+      isSuperAdmin?: boolean;
+    };
+  };
+}
+
+export interface PasswordChangeResult extends AuthActionResult {
+  data: {
+    signedOutOtherDevices: number;
   };
 }
 
@@ -432,6 +475,133 @@ export class AuthService {
           .sort(
             (left, right) => Number(right.isCurrent) - Number(left.isCurrent),
           ),
+      },
+    };
+  }
+
+  async getAccountSettings(userId: string): Promise<AccountSettingsResult> {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    const isEnvSuperAdmin = this.envSuperAdminService.isConfiguredUser(user);
+
+    return {
+      data: {
+        profile: {
+          name: isEnvSuperAdmin
+            ? this.envSuperAdminService.getDisplayName()
+            : user.name,
+          email: user.email,
+          isSuperAdmin: isEnvSuperAdmin,
+        },
+        capabilities: {
+          canUpdateName: !isEnvSuperAdmin,
+          canChangePassword: !isEnvSuperAdmin,
+        },
+        passwordPolicy: {
+          minLength: 8,
+          maxLength: 64,
+          requiresUppercase: true,
+          requiresLowercase: true,
+          requiresNumber: true,
+          allowedSpecialCharacters: '@ # $ % ^ & * !',
+        },
+        notes: isEnvSuperAdmin
+          ? [
+              'Super Admin profile and password are managed through environment variables.',
+            ]
+          : [],
+      },
+    };
+  }
+
+  async updateProfile(
+    userId: string,
+    dto: UpdateProfileDto,
+  ): Promise<ProfileUpdateResult> {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    if (this.envSuperAdminService.isConfiguredUser(user)) {
+      throw new BadRequestException(
+        'Super Admin profile is managed through environment variables.',
+      );
+    }
+
+    if ((user.name ?? '').trim() === dto.name) {
+      throw new BadRequestException('Enter a different name before saving.');
+    }
+
+    const updatedUser = await this.usersService.updateProfileName(
+      userId,
+      dto.name,
+    );
+
+    return {
+      message: 'Profile updated successfully.',
+      data: {
+        user: {
+          id: updatedUser.id,
+          name: updatedUser.name ?? dto.name,
+          email: updatedUser.email,
+          isVerified: updatedUser.isVerified,
+        },
+      },
+    };
+  }
+
+  async changePassword(
+    userId: string,
+    currentSessionId: string,
+    dto: ChangePasswordDto,
+  ): Promise<PasswordChangeResult> {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    if (this.envSuperAdminService.isConfiguredUser(user)) {
+      throw new BadRequestException(
+        'Super Admin password is managed through environment variables. Update SUPER_ADMIN_PASSWORD and restart the API.',
+      );
+    }
+
+    const currentPasswordMatches = await compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
+
+    if (!currentPasswordMatches) {
+      throw new UnauthorizedException('Current password is incorrect.');
+    }
+
+    if (await compare(dto.newPassword, user.passwordHash)) {
+      throw new BadRequestException({
+        message: 'Choose a password you have not already been using.',
+        details: { reason: AUTH_ERROR_REASONS.passwordUnchanged },
+      });
+    }
+
+    const passwordHash = await hash(dto.newPassword, PASSWORD_HASH_ROUNDS);
+    await this.usersService.updatePasswordHash(userId, passwordHash);
+    const signedOutOtherDevices =
+      await this.sessionService.revokeOtherUserSessions(
+        userId,
+        currentSessionId,
+        SESSION_REVOCATION_REASONS.passwordReset,
+      );
+
+    return {
+      message: 'Password updated successfully.',
+      data: {
+        signedOutOtherDevices,
       },
     };
   }

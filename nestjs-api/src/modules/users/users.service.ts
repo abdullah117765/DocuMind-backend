@@ -51,4 +51,26 @@ export class UsersService {
       },
     });
   }
+
+  updateProfileName(id: string, name: string): Promise<User> {
+    return this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        name,
+      },
+    });
+  }
+
+  updatePasswordHash(id: string, passwordHash: string): Promise<User> {
+    return this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        passwordHash,
+      },
+    });
+  }
 }

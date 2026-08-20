@@ -45,15 +45,19 @@ class IngestionService:
                 int((time.perf_counter() - stage_started) * 1000),
             )
             stage_started = time.perf_counter()
-            text = self.extraction.extract_text(file_bytes, request.file_type)
+            text, locations = self.extraction.extract_text_with_locations(
+                file_bytes,
+                request.file_type,
+            )
             logger.info(
-                "RAG ingest text extracted document_id=%s chars=%s elapsed_ms=%s",
+                "RAG ingest text extracted document_id=%s chars=%s locations=%s elapsed_ms=%s",
                 request.document_id,
                 len(text),
+                len(locations),
                 int((time.perf_counter() - stage_started) * 1000),
             )
             stage_started = time.perf_counter()
-            chunks = self.chunking.chunk(text, request.file_type)
+            chunks = self.chunking.chunk(text, request.file_type, locations=locations)
             logger.info(
                 "RAG ingest chunked document_id=%s chunks=%s elapsed_ms=%s",
                 request.document_id,
@@ -62,7 +66,12 @@ class IngestionService:
             )
 
             if not chunks:
-                self.qdrant.delete_document(request.organization_id, request.document_id)
+                self.qdrant.delete_document_version(
+                    request.organization_id,
+                    request.document_id,
+                    request.version_id,
+                    request.version_number,
+                )
                 logger.info(
                     "RAG ingest completed with no content document_id=%s elapsed_ms=%s",
                     request.document_id,

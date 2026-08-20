@@ -21,7 +21,12 @@ class ChunkingService:
             length_function=len,
         )
 
-    def chunk(self, text: str, file_type: str | None = None) -> list[dict[str, object]]:
+    def chunk(
+        self,
+        text: str,
+        file_type: str | None = None,
+        locations: list[dict[str, object]] | None = None,
+    ) -> list[dict[str, object]]:
         if not text.strip():
             return []
 
@@ -42,7 +47,13 @@ class ChunkingService:
                     "index": index,
                     "char_start": start,
                     "char_end": end,
-                    **self._location_for_range(text, start, end, file_type),
+                    **self._location_for_range(
+                        text,
+                        start,
+                        end,
+                        file_type,
+                        locations=locations,
+                    ),
                 }
             )
 
@@ -54,6 +65,7 @@ class ChunkingService:
         start: int,
         end: int,
         file_type: str | None,
+        locations: list[dict[str, object]] | None = None,
     ) -> dict[str, object]:
         line_start = text.count("\n", 0, max(start, 0)) + 1
         line_end = text.count("\n", 0, max(end, start)) + 1
@@ -63,6 +75,11 @@ class ChunkingService:
             "line_start": line_start,
             "line_end": line_end,
         }
+        exact_location = self._location_from_overlapping_blocks(locations, start, end)
+
+        if exact_location:
+            location.update(exact_location)
+            return location
 
         page_number = self._last_int_marker(PAGE_MARKER, prefix)
         if page_number is not None:
@@ -168,3 +185,76 @@ class ChunkingService:
         value = matches[-1].group(1).strip()
 
         return value or None
+
+    def _location_from_overlapping_blocks(
+        self,
+        locations: list[dict[str, object]] | None,
+        start: int,
+        end: int,
+    ) -> dict[str, object] | None:
+        if not locations:
+            return None
+
+        overlapping: list[tuple[int, dict[str, object]]] = []
+
+        for location in locations:
+            location_start = self._safe_non_negative_int(location.get("char_start"))
+            location_end = self._safe_int(location.get("char_end"))
+
+            if location_start is None or location_end is None:
+                continue
+
+            overlap = max(0, min(end, location_end) - max(start, location_start))
+            if overlap > 0:
+                overlapping.append((overlap, location))
+
+        if not overlapping:
+            return None
+
+        overlapping.sort(key=lambda item: item[0], reverse=True)
+        primary = overlapping[0][1]
+        highlight_boxes = []
+
+        for _, location in overlapping[:8]:
+            bbox = location.get("bbox")
+            if isinstance(bbox, dict):
+                highlight_boxes.append(
+                    {
+                        "page_number": location.get("page_number"),
+                        "x0": bbox.get("x0"),
+                        "y0": bbox.get("y0"),
+                        "x1": bbox.get("x1"),
+                        "y1": bbox.get("y1"),
+                        "page_width": bbox.get("page_width"),
+                        "page_height": bbox.get("page_height"),
+                    }
+                )
+
+        page_number = self._safe_int(primary.get("page_number"))
+        location_label = primary.get("location_label")
+
+        return {
+            "location_type": primary.get("location_type") or "page",
+            "location_label": location_label or (f"Page {page_number}" if page_number else "Document location"),
+            "page_number": page_number,
+            "preview_type": primary.get("preview_type") or "pdf",
+            "source_file_type": primary.get("source_file_type"),
+            "highlight_boxes": highlight_boxes,
+        }
+
+    def _safe_non_negative_int(self, value: object) -> int | None:
+        try:
+            number = int(value)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return None
+
+        return number if number >= 0 else None
+
+    def _safe_int(self, value: object) -> int | None:
+        try:
+            number = int(value)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return None
+
+        return number if number > 0 else None
+

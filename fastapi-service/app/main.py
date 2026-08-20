@@ -152,6 +152,5 @@ def readiness_check(response: Response) -> dict[str, object]:
             "service": "fastapi-service",
             "ready": ready,
             "warmingUp": warming_up,
-            "startupError": getattr(app.state, "rag_startup_error", None),
         },
     }
